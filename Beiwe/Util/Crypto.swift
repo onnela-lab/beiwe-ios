@@ -46,7 +46,17 @@ class Crypto {
 
     func newAesKey(_ keyLength: Int = 128) -> Data? {
         let length = (keyLength+7) / 8;
-        return randomBytes(length);
+        let randoBytes = randomBytes(length);
+        print(randoBytes!);
+        print(randoBytes![0]);
+        print(randoBytes!.base64EncodedString())
+        if (randoBytes?[0] == 0) {
+            print("First byte was zero.");
+        }
+        let zeroRepresentation: UInt8 = 0;
+        print(zeroRepresentation);
+        print("\n\n")
+        return randoBytes;
     }
 
 
