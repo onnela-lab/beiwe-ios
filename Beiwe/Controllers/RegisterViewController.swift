@@ -85,14 +85,14 @@ class RegisterViewController: FormViewController {
             <<< SVSimplePhoneRow("clinicianPhone") {
                 $0.title = NSLocalizedString("phone_number_entry_your_clinician_label", comment: "")
                 $0.placeholder = NSLocalizedString("phone_number_entry_your_clinician_hint", comment: "")
-                $0.customRules = [RequiredRule(), PhoneNumberRule()]
+                $0.customRules = [RequiredRule(), MinLengthRule(length: 8), MaxLengthRule(length: 15), FloatRule()]
                 $0.autoValidation = autoValidation
 
             }
             <<< SVSimplePhoneRow("raPhone") {
                 $0.title = NSLocalizedString("phone_number_entry_research_assistant_label", comment: "")
                 $0.placeholder = NSLocalizedString("phone_number_entry_research_assistant_hint", comment: "")
-                $0.customRules = [RequiredRule(), PhoneNumberRule()]
+                $0.customRules = [RequiredRule(), MinLengthRule(length: 8), MaxLengthRule(length: 15), FloatRule()]
                 $0.autoValidation = autoValidation
 
             }
