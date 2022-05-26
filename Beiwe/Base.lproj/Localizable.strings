@@ -20,9 +20,9 @@
 "registration_confirm_new_password_label" = "Confirm Password:";
 "registration_confirm_new_password_hint" = "Confirm Password";
 "phone_number_entry_your_clinician_label" = "Primary Researcher Phone:";
-"phone_number_entry_your_clinician_hint" = "10 digit number";
+"phone_number_entry_your_clinician_hint" = "8-15 digits";
 "phone_number_entry_research_assistant_label" = "Research Asst. Phone:";
-"phone_number_entry_research_assistant_hint" = "10 digit number";
+"phone_number_entry_research_assistant_hint" = "8-15 digits";
 "registration_submit" = "Register";
 "http_message_server_not_found" = "The server you are trying to register with is currently unavailable, or you have entered an incorrect server address.  Please verify the server address.";
 "couldnt_register" = "Registration failed";
