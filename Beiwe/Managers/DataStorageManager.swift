@@ -303,7 +303,7 @@ class DataStorage {
             if (self.sanitize) {
                 sanitizedData = [];
                 for str in data {
-                    sanitizedData.append(str.replacingOccurrences(of: ",", with: ";").replacingOccurrences(of: "[\t\n\r]", with: " ", options: .regularExpression))
+                    sanitizedData.append(str.replacingOccurrences(of: ",", with: ".").replacingOccurrences(of: "[\t\n\r]", with: " ", options: .regularExpression))
                 }
             } else {
                 sanitizedData = data;
