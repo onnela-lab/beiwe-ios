@@ -1,11 +1,12 @@
 import Eureka
 import ObjectMapper
 import Alamofire
-import Firebase
 import PKHUD
 import Sentry
 import SwiftValidator
 import UIKit
+import FirebaseCore
+import FirebaseMessaging
 
 
 class RegisterViewController: FormViewController {
@@ -203,7 +204,7 @@ class RegisterViewController: FormViewController {
                 let registerStudyRequest = RegisterStudyRequest(patientId: patientId, phoneNumber: phoneNumber, newPassword: newPassword)
                 
                 // sets tags for Sentry
-                Client.shared?.tags = ["user_id": patientId, "server_url": server]
+//                Client.shared?.tags = ["user_id": patientId, "server_url": server]
                 ApiManager.sharedInstance.password = tempPassword ?? ""
                 ApiManager.sharedInstance.patientId = patientId
                 ApiManager.sharedInstance.customApiUrl = server

@@ -1,7 +1,7 @@
-import Firebase
 import PKHUD
 import ResearchKit
 import UIKit
+import FirebaseMessaging
 
 class LoginViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var callClinicianButton: UIButton!

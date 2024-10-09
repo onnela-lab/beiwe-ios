@@ -115,34 +115,34 @@ public func print(_ items: Any..., separator: String = " ", terminator: String =
 }
 
 func sentry_warning(_ title: String, _ extra1: String? = nil, _ extra2: String? = nil, _ extra3: String? = nil, crash: Bool) {
-    if let sentry_client = Client.shared {
-        sentry_client.snapshotStacktrace {
-            let event = Event(level: .warning)
-            event.message = title
-            event.environment = Constants.APP_INFO_TAG
-            
-            // todo does this always exist?
-            if event.extra == nil {
-                event.extra = [:]
-            }
-            if var extras = event.extra {
-                if let extra = extra1 {
-                    extras["extra1"] = extra
-                }
-                if let extra = extra2 {
-                    extras["extra2"] = extra
-                }
-                if let extra = extra3 {
-                    extras["extra3"] = extra
-                }
-                if let patient_id = StudyManager.sharedInstance.currentStudy?.patientId {
-                    extras["user_id"] = StudyManager.sharedInstance.currentStudy?.patientId
-                }
-            }
-            sentry_client.appendStacktrace(to: event)
-            sentry_client.send(event: event)
-        }
-    }
+//    if let sentry_client = Client.shared {
+//        sentry_client.snapshotStacktrace {
+//            let event = Event(level: .warning)
+//            event.message = title
+//            event.environment = Constants.APP_INFO_TAG
+//            
+//            // todo does this always exist?
+//            if event.extra == nil {
+//                event.extra = [:]
+//            }
+//            if var extras = event.extra {
+//                if let extra = extra1 {
+//                    extras["extra1"] = extra
+//                }
+//                if let extra = extra2 {
+//                    extras["extra2"] = extra
+//                }
+//                if let extra = extra3 {
+//                    extras["extra3"] = extra
+//                }
+//                if let patient_id = StudyManager.sharedInstance.currentStudy?.patientId {
+//                    extras["user_id"] = StudyManager.sharedInstance.currentStudy?.patientId
+//                }
+//            }
+//            sentry_client.appendStacktrace(to: event)
+//            sentry_client.send(event: event)
+//        }
+//    }
 }
 
 

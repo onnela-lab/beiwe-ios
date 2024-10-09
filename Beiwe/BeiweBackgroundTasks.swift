@@ -12,15 +12,15 @@ func scheduleRefreshHeartbeat() {
         try BGTaskScheduler.shared.submit(request)
     } catch {
         // capture and report this error to sentry.
-        if let sentry_client = Client.shared {
-            sentry_client.snapshotStacktrace {
-                let event = Event(level: .error)
-                event.message = "not a crash - scheduling refresh heartbeat: \(error)"
-                event.environment = Constants.APP_INFO_TAG
-                sentry_client.appendStacktrace(to: event)
-                sentry_client.send(event: event)
-            }
-        }
+//        if let sentry_client = Client.shared {
+//            sentry_client.snapshotStacktrace {
+//                let event = Event(level: .error)
+//                event.message = "not a crash - scheduling refresh heartbeat: \(error)"
+//                event.environment = Constants.APP_INFO_TAG
+//                sentry_client.appendStacktrace(to: event)
+//                sentry_client.send(event: event)
+//            }
+//        }
     }
 }
 
@@ -34,15 +34,15 @@ func scheduleProcessingHeartbeat() {
         try BGTaskScheduler.shared.submit(request)
     } catch {
         // capture and report this error to sentry.
-        if let sentry_client = Client.shared {
-            sentry_client.snapshotStacktrace {
-                let event = Event(level: .error)
-                event.message = "not a crash - scheduling processing heartbeat: \(error)"
-                event.environment = Constants.APP_INFO_TAG
-                sentry_client.appendStacktrace(to: event)
-                sentry_client.send(event: event)
-            }
-        }
+//        if let sentry_client = Client.shared {
+//            sentry_client.snapshotStacktrace {
+//                let event = Event(level: .error)
+//                event.message = "not a crash - scheduling processing heartbeat: \(error)"
+//                event.environment = Constants.APP_INFO_TAG
+//                sentry_client.appendStacktrace(to: event)
+//                sentry_client.send(event: event)
+//            }
+//        }
     }
 }
 
@@ -58,15 +58,15 @@ func scheduleHealthHeartbeat() {
         try BGTaskScheduler.shared.submit(request)
     } catch {
         // capture and report this error to sentry.
-        if let sentry_client = Client.shared {
-            sentry_client.snapshotStacktrace {
-                let event = Event(level: .error)
-                event.message = "not a crash - scheduling health heartbeat: \(error)"
-                event.environment = Constants.APP_INFO_TAG
-                sentry_client.appendStacktrace(to: event)
-                sentry_client.send(event: event)
-            }
-        }
+//        if let sentry_client = Client.shared {
+//            sentry_client.snapshotStacktrace {
+//                let event = Event(level: .error)
+//                event.message = "not a crash - scheduling health heartbeat: \(error)"
+//                event.environment = Constants.APP_INFO_TAG
+//                sentry_client.appendStacktrace(to: event)
+//                sentry_client.send(event: event)
+//            }
+//        }
     }
 }
 

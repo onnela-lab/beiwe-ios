@@ -320,27 +320,27 @@ class DataStorageManager {
             log.error("Error moving(1) \(src) to \(dst)")
             print("\(error)")
             
-            if let sentry_client = Client.shared {
-                sentry_client.snapshotStacktrace {
-                    let event = Event(level: .error)
-                    event.message = "not a crash - Error moving file 1"
-                    event.environment = Constants.APP_INFO_TAG
-                    
-                    if event.extra == nil {
-                        event.extra = [:]
-                    }
-                    if var extras = event.extra {
-                        extras["from"] = shortenPath(src)
-                        extras["to"] = shortenPath(dst)
-                        extras["error"] = "\(error)"
-                        if let patient_id = StudyManager.sharedInstance.currentStudy?.patientId {
-                            extras["user_id"] = StudyManager.sharedInstance.currentStudy?.patientId
-                        }
-                    }
-                    sentry_client.appendStacktrace(to: event)
-                    sentry_client.send(event: event)
-                }
-            }
+//            if let sentry_client = Client.shared {
+//                sentry_client.snapshotStacktrace {
+//                    let event = Event(level: .error)
+//                    event.message = "not a crash - Error moving file 1"
+//                    event.environment = Constants.APP_INFO_TAG
+//                    
+//                    if event.extra == nil {
+//                        event.extra = [:]
+//                    }
+//                    if var extras = event.extra {
+//                        extras["from"] = shortenPath(src)
+//                        extras["to"] = shortenPath(dst)
+//                        extras["error"] = "\(error)"
+//                        if let patient_id = StudyManager.sharedInstance.currentStudy?.patientId {
+//                            extras["user_id"] = StudyManager.sharedInstance.currentStudy?.patientId
+//                        }
+//                    }
+//                    sentry_client.appendStacktrace(to: event)
+//                    sentry_client.send(event: event)
+//                }
+//            }
         }
     }
     
@@ -606,38 +606,38 @@ class DataStorage {
             print("more: \(more)")
         }
         
-        if let sentry_client = Client.shared {
-            sentry_client.snapshotStacktrace {
-                let event = Event(level: .error)
-                // this is actually really important for error triage
-                if crash {
-                    event.message = message
-                } else {
-                    event.message = "not a crash - " + message
-                }
-                event.environment = Constants.APP_INFO_TAG
-            
-                //setup
-                if event.extra == nil {
-                    event.extra = [:]
-                }
-                // basics
-                if var extras = event.extra {
-                    extras["filename"] = shortenPath(self.filename)
-                    extras["user_id"] = self.patientId
-                    if let error = error {
-                        extras["error"] = "\(error)"
-                    }
-                }
-                // any extras
-                for (key, value) in more ?? [:] {
-                    event.extra?[key] = value
-                }
-                
-                sentry_client.appendStacktrace(to: event)
-                sentry_client.send(event: event)
-            }
-        }
+//        if let sentry_client = Client.shared {
+//            sentry_client.snapshotStacktrace {
+//                let event = Event(level: .error)
+//                // this is actually really important for error triage
+//                if crash {
+//                    event.message = message
+//                } else {
+//                    event.message = "not a crash - " + message
+//                }
+//                event.environment = Constants.APP_INFO_TAG
+//            
+//                //setup
+//                if event.extra == nil {
+//                    event.extra = [:]
+//                }
+//                // basics
+//                if var extras = event.extra {
+//                    extras["filename"] = shortenPath(self.filename)
+//                    extras["user_id"] = self.patientId
+//                    if let error = error {
+//                        extras["error"] = "\(error)"
+//                    }
+//                }
+//                // any extras
+//                for (key, value) in more ?? [:] {
+//                    event.extra?[key] = value
+//                }
+//                
+//                sentry_client.appendStacktrace(to: event)
+//                sentry_client.send(event: event)
+//            }
+//        }
     }
     
     ///////////////////////////////////////// Actual write logic ///////////////////////////////////////////

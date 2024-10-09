@@ -466,7 +466,6 @@
 				83F98C341C923C3600E0B64B /* Resources */,
 				83E3DE861CA3A41E00EB5349 /* ShellScript */,
 				83F98C511C925F6F00E0B64B /* Run Script */,
-				83F98C4F1C9250A600E0B64B /* Run Script */,
 				C7A5541B51E06493BA1A7A86 /* [CP] Embed Pods Frameworks */,
 				AAEA006C2B714C71008DDDC7 /* Run Script */,
 			);
@@ -553,20 +552,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "echo \"Bundle ID: \" ${PRODUCT_BUNDLE_IDENTIFIER}\necho \"Product name: \" ${PRODUCT_NAME}\necho \"Copy Configuration files: ${TARGET_NAME_SUFFIX}\"\nCONFIG_NAME=${TARGET_NAME_SUFFIX}\nif [ \"$CONFIG_NAME\" == \"\" ]; then\n    CONFIG_NAME=\"Prod\"\nfi\necho $CONFIG_NAME\ncp \"${SRCROOT}/Beiwe/Configuration/Config-Default.plist\" \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app\"\ncp \"${SRCROOT}/Beiwe/Configuration/Config-${CONFIG_NAME}.plist\" \"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/Config.plist\"\n";
-		};
-		83F98C4F1C9250A600E0B64B /* Run Script */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Run Script";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Fabric/run\" e39144f1f340beaea740ae45276af72b2f8d2708 61ae03d66f3516dcaa9f0ffaf3c9db9dc49037fdc0e38105a7f5a48ac0f466a1\n";
 		};
 		83F98C511C925F6F00E0B64B /* Run Script */ = {
 			isa = PBXShellScriptBuildPhase;
