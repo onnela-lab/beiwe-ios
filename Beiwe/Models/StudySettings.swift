@@ -52,10 +52,6 @@ struct StudySettings: Mappable {
     init?(map: Map) {}
 
     // Disabled non-ios keys (data streams) htat we don't need to import
-    // var bluetooth = false
-    // var bluetoothOnDurationSeconds = 0
-    // var bluetoothTotalDurationSeconds = 0
-    // var bluetoothGlobalOffsetSeconds = 0
     // var calls = false
     // var texts = false
 
@@ -114,6 +110,12 @@ struct StudySettings: Mappable {
     var motionOnDurationSeconds = 0
     // Reachability
     var reachability = false
+    // Bluetooth
+    var bluetooth = false
+    var bluetoothOffDurationSeconds = 300
+    var bluetoothOnDurationSeconds = 60
+    var bluetoothTotalDurationSeconds = 300
+    var bluetoothGlobalOffsetSeconds = 0
 
     // firebase/gcm stuff (most of this is junk we don't use)
     var gcmSenderID = ""
@@ -141,10 +143,10 @@ struct StudySettings: Mappable {
         self.accelerometerOffDurationSeconds     <- map["device_settings.accelerometer_off_duration_seconds"]
         self.accelerometerOnDurationSeconds      <- map["device_settings.accelerometer_on_duration_seconds"]
         self.accelerometerFrequency              <- map["device_settings.accelerometer_frequency"]
-        // self.bluetooth                           <- map["device_settings.bluetooth"]
-        // self.bluetoothGlobalOffsetSeconds        <- map["device_settings.bluetooth_global_offset_seconds"]
-        // self.bluetoothOnDurationSeconds          <- map["device_settings.bluetooth_on_duration_seconds"]
-        // self.bluetoothTotalDurationSeconds       <- map["device_settings.bluetooth_total_duration_seconds"]
+        self.bluetooth                           <- map["device_settings.bluetooth"]
+        self.bluetoothGlobalOffsetSeconds        <- map["device_settings.bluetooth_global_offset_seconds"]
+        self.bluetoothOnDurationSeconds          <- map["device_settings.bluetooth_on_duration_seconds"]
+        self.bluetoothTotalDurationSeconds       <- map["device_settings.bluetooth_total_duration_seconds"]
         self.callClinicianText                   <- map["device_settings.call_clinician_button_text"]
         // self.calls                               <- map["device_settings.calls"]
         self.checkForNewSurveysFreqSeconds       <- map["device_settings.check_for_new_surveys_frequency_seconds"]
@@ -254,6 +256,12 @@ struct JustStudySettings: Mappable {
     var motionOnDurationSeconds = 0
     // Reachability
     var reachability = false
+    // Bluetooth
+    var bluetooth = false
+    var bluetoothOffDurationSeconds = 300
+    var bluetoothOnDurationSeconds = 60
+    var bluetoothTotalDurationSeconds = 300
+    var bluetoothGlobalOffsetSeconds = 0
 
     // Mappable
     mutating func mapping(map: Map) {
@@ -262,10 +270,10 @@ struct JustStudySettings: Mappable {
         self.accelerometerOffDurationSeconds     <- map["accelerometer_off_duration_seconds"]
         self.accelerometerOnDurationSeconds      <- map["accelerometer_on_duration_seconds"]
         self.accelerometerFrequency              <- map["accelerometer_frequency"]
-        // self.bluetooth                           <- map["bluetooth"]
-        // self.bluetoothGlobalOffsetSeconds        <- map["bluetooth_global_offset_seconds"]
-        // self.bluetoothOnDurationSeconds          <- map["bluetooth_on_duration_seconds"]
-        // self.bluetoothTotalDurationSeconds       <- map["bluetooth_total_duration_seconds"]
+        self.bluetooth                           <- map["bluetooth"]
+        self.bluetoothGlobalOffsetSeconds        <- map["bluetooth_global_offset_seconds"]
+        self.bluetoothOnDurationSeconds          <- map["bluetooth_on_duration_seconds"]
+        self.bluetoothTotalDurationSeconds       <- map["bluetooth_total_duration_seconds"]
         self.callClinicianText                   <- map["call_clinician_button_text"]
         // self.calls                               <- map["calls"]
         self.checkForNewSurveysFreqSeconds       <- map["check_for_new_surveys_frequency_seconds"]
