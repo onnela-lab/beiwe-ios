@@ -25,15 +25,19 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, DataServiceProtocol 
     private let storeType = "bluetoothLog"
     private var dataStorage: DataStorage?
     private var datapoints = [BluetoothDataPoint]()
-    private var offsetSince1970: Double = 0
     private var currentCBState: CBManagerState?
     private let cacheLock = NSLock()
+    private var collecting = false
     
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         self.currentCBState = central.state
     }
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
+        guard self.collecting else {
+            return
+        }
+        
         let data = BluetoothDataPoint(
             timestamp: Date().timeIntervalSince1970 * 1000,
             hashedMAC: peripheral.identifier.uuidString,
@@ -51,7 +55,6 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, DataServiceProtocol 
     func initCollecting() -> Bool {
         self.dataStorage = DataStorageManager.sharedInstance.createStore(self.storeType, headers: bluetooth_headers)
         self.bluetoothManager = CBCentralManager.init(delegate: self, queue: nil)
-        self.offsetSince1970 = Date().timeIntervalSince1970 - ProcessInfo.processInfo.systemUptime
         return true
     }
     
@@ -61,7 +64,8 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, DataServiceProtocol 
             return
         }
         
-        bluetoothManager?.scanForPeripherals(withServices: nil, options: ["CBCentralManagerScanOptionAllowDuplicatesKey": false])
+        self.bluetoothManager?.scanForPeripherals(withServices: nil, options: ["CBCentralManagerScanOptionAllowDuplicatesKey": false])
+        self.collecting = true
         AppEventManager.sharedInstance.logAppEvent(event: "bt_on", msg: "Bluetooth scanning on")
     }
     
@@ -71,7 +75,8 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, DataServiceProtocol 
             return
         }
         
-        bluetoothManager?.stopScan()
+        self.bluetoothManager?.stopScan()
+        self.collecting = false
         AppEventManager.sharedInstance.logAppEvent(event: "bt_off", msg: "Bluetooth scanning off")
     }
     
