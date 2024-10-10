@@ -274,7 +274,7 @@ class StudyManager {
         }
         print("remove_deleted_surveys")
         var surveyDataModified = false
-        let allSurveyIds = self.getAllSurveyIds()  // from the database
+        let allSurveyIds = self.getAllSurveyIds() // from the database
         for (surveyId, activeSurvey) in study.activeSurveys {
             // if the survey no longer exists in the database, remove it
             if !allSurveyIds.contains(surveyId) {
@@ -357,7 +357,7 @@ class StudyManager {
         // If a survey does not have a surveyId... skip? buh? it's stupid that its optional
         for target_possibly_updated_survey in study.surveys {
             if let survey_id = target_possibly_updated_survey.surveyId {
-                if (study.activeSurveys[survey_id] == nil) {
+                if study.activeSurveys[survey_id] == nil {
                     continue // survey not an active survey
                 }
                 
@@ -368,7 +368,7 @@ class StudyManager {
                 // Special case of triggerOnFirstDownload surveys - these are retained in the
                 // active survey list (like an always-available survey) but instead of getting
                 // automatically reset is just... stays there forever. We don't want to update
-                // that survey because that will cause it to become visible again. 
+                // that survey because that will cause it to become visible again.
                 // We just skip it here. This works because the only way for a completed trigger
                 // survey to be reloaded is for it to be activated via push notification
                 // in activate_surveys, which will reload it from scratch.
@@ -397,7 +397,7 @@ class StudyManager {
             return false
         }
         if surveyIds.count == 0 {
-            return false  // if there are no surveys don't do anything
+            return false // if there are no surveys don't do anything
         }
         
         // check every survey we have stored in the database against the passed in surveyIds
@@ -408,7 +408,7 @@ class StudyManager {
         for survey in study.surveys {
             if surveyIds.contains(survey.surveyId!) {
                 let activeSurvey = ActiveSurvey(survey: survey)
-                activeSurvey.received = sentTime  // used to sort surveys on the main screen.
+                activeSurvey.received = sentTime // used to sort surveys on the main screen.
                 // this action clears out the prior state of the survey.
                 study.activeSurveys[survey.surveyId!] = activeSurvey
                 updated_survey_state = true
@@ -1028,25 +1028,14 @@ class StudyManager {
                 // report this error to Sentry (but only once per app launch, by checking/appending
                 // file name to a list)
                 if !self.files_with_encoding_errors.contains(filename) {
-//                    if let sentry_client = Client.shared {
-//                        sentry_client.snapshotStacktrace {
-//                            let event = Sentry.Event(level: .error)
-//                            event.message = "Encountered encoding error while uploading file"
-//                            event.environment = Constants.APP_INFO_TAG
-//                            
-//                            // todo does this always exist?
-//                            if event.extra == nil {
-//                                event.extra = [:]
-//                            }
-//                            if var extras = event.extra {
-//                                extras["error"] = "\(error)"
-//                                extras["filename"] = filename
-//                                extras["user_id"] = self.currentStudy!.patientId
-//                            }
-//                            sentry_client.appendStacktrace(to: event)
-//                            sentry_client.send(event: event)
-//                        }
-//                    }
+                    SentrySDK.capture(message: "Encountered encoding error while uploading file") { (scope: Scope) in
+                        // grab the snapshot of the stack trace, add the extras, send
+                        scope.setExtras([
+                                "\(error)": "error",
+                                filename: "filename",
+                                self.currentStudy!.patientId!: "user_id"
+                        ])
+                    }
                     self.files_with_encoding_errors.append(filename)
                 }
             }
