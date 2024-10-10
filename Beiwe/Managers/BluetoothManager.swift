@@ -22,7 +22,7 @@ struct BluetoothDataPoint {
 
 class BluetoothManager: NSObject, CBCentralManagerDelegate, DataServiceProtocol {
     var bluetoothManager: CBCentralManager?
-    let storeType = "bt"
+    let storeType = "bluetoothLog"
     var dataStorage: DataStorage?
     var datapoints = [BluetoothDataPoint]()
     var offsetSince1970: Double = 0
@@ -63,6 +63,7 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, DataServiceProtocol 
         
         bluetoothManager?.scanForPeripherals(withServices: nil, options: ["CBCentralManagerScanOptionAllowDuplicatesKey": false])
         AppEventManager.sharedInstance.logAppEvent(event: "bt_on", msg: "Bluetooth scanning on")
+        print("start collecting bluetooth")
     }
     
     func pauseCollecting() {
@@ -73,6 +74,7 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, DataServiceProtocol 
         
         bluetoothManager?.stopScan()
         AppEventManager.sharedInstance.logAppEvent(event: "bt_off", msg: "Bluetooth scanning off")
+        print("pause collecting bluetooth")
     }
     
     func finishCollecting() {
@@ -91,6 +93,7 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, DataServiceProtocol 
         self.datapoints = []
         self.cacheLock.unlock()
         for data in data_to_write {
+            print("writing \(data)")
             self.dataStorage?.store([
                 String(Int64(data.timestamp)),
                 data.hashedMAC,
