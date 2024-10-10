@@ -8,3 +8,5 @@ Private/*
 
 # Firebase Cloud Messaging credentials & configuration file
 GoogleService-Info.plist
+
+.sentryclirc

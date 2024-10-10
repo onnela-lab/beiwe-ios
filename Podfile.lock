@@ -3,11 +3,8 @@ PODS:
   - couchbase-lite-ios (1.4.4):
     - couchbase-lite-ios/SQLite (= 1.4.4)
   - couchbase-lite-ios/SQLite (1.4.4)
-  - Crashlytics (3.14.0):
-    - Fabric (~> 1.10.2)
   - EmitterKit (5.2.2)
-  - Eureka (5.3.6)
-  - Fabric (1.10.2)
+  - Eureka (5.5.0)
   - Firebase/Analytics (6.34.0):
     - Firebase/Core
   - Firebase/Core (6.34.0):
@@ -89,23 +86,15 @@ PODS:
     - nanopb/encode (= 1.30906.0)
   - nanopb/decode (1.30906.0)
   - nanopb/encode (1.30906.0)
-  - ObjcExceptionBridging (1.0.1):
-    - ObjcExceptionBridging/ObjcExceptionBridging (= 1.0.1)
-  - ObjcExceptionBridging/ObjcExceptionBridging (1.0.1)
   - ObjectMapper (4.2.0)
   - PKHUD (4.2.3)
   - PromisesObjC (1.2.12)
-  - Protobuf (3.21.1)
-  - ReachabilitySwift (3)
+  - Protobuf (3.28.2)
   - ResearchKit (2.1.0-beta)
-  - Sentry (4.5.0):
-    - Sentry/Core (= 4.5.0)
-  - Sentry/Core (4.5.0)
+  - Sentry (8.37.0):
+    - Sentry/Core (= 8.37.0)
+  - Sentry/Core (8.37.0)
   - SwiftValidator (4.0.0)
-  - XCGLogger (7.0.1):
-    - XCGLogger/Core (= 7.0.1)
-  - XCGLogger/Core (7.0.1):
-    - ObjcExceptionBridging
   - XLActionController (5.0.2):
     - XLActionController/Core (= 5.0.2)
   - XLActionController/Core (5.0.2)
@@ -113,7 +102,6 @@ PODS:
 DEPENDENCIES:
   - Alamofire (~> 4.5)
   - couchbase-lite-ios
-  - Crashlytics (~> 3.4)
   - EmitterKit (~> 5.1)
   - Eureka
   - Firebase/Analytics
@@ -121,23 +109,19 @@ DEPENDENCIES:
   - Hakuba (from `https://github.com/eskizyen/Hakuba.git`, branch `Swift3`)
   - IDZSwiftCommonCrypto (~> 0.13.0)
   - KeychainSwift (~> 8.0)
-  - ObjectMapper (from `https://github.com/Hearst-DD/ObjectMapper.git`, branch `master`)
+  - ObjectMapper (from `https://github.com/Hearst-DD/ObjectMapper.git`, commit `0b96a734de3ea1c87374ae677064f86adb0716ec`)
   - PKHUD (from `https://github.com/pkluz/PKHUD.git`, branch `release/swift4`)
-  - ReachabilitySwift (~> 3)
   - ResearchKit (from `https://github.com/ResearchKit/ResearchKit.git`, commit `b50e1d7`)
-  - Sentry (from `https://github.com/getsentry/sentry-cocoa.git`, tag `4.5.0`)
+  - Sentry (~> 8.37.0)
   - SwiftValidator (from `https://github.com/jpotts18/SwiftValidator.git`, branch `master`)
-  - XCGLogger (~> 7.0.0)
   - XLActionController (~> 5.0.1)
 
 SPEC REPOS:
   trunk:
     - Alamofire
     - couchbase-lite-ios
-    - Crashlytics
     - EmitterKit
     - Eureka
-    - Fabric
     - Firebase
     - FirebaseAnalytics
     - FirebaseCore
@@ -151,11 +135,9 @@ SPEC REPOS:
     - IDZSwiftCommonCrypto
     - KeychainSwift
     - nanopb
-    - ObjcExceptionBridging
     - PromisesObjC
     - Protobuf
-    - ReachabilitySwift
-    - XCGLogger
+    - Sentry
     - XLActionController
 
 EXTERNAL SOURCES:
@@ -163,7 +145,7 @@ EXTERNAL SOURCES:
     :branch: Swift3
     :git: https://github.com/eskizyen/Hakuba.git
   ObjectMapper:
-    :branch: master
+    :commit: 0b96a734de3ea1c87374ae677064f86adb0716ec
     :git: https://github.com/Hearst-DD/ObjectMapper.git
   PKHUD:
     :branch: release/swift4
@@ -171,9 +153,6 @@ EXTERNAL SOURCES:
   ResearchKit:
     :commit: b50e1d7
     :git: https://github.com/ResearchKit/ResearchKit.git
-  Sentry:
-    :git: https://github.com/getsentry/sentry-cocoa.git
-    :tag: 4.5.0
   SwiftValidator:
     :branch: master
     :git: https://github.com/jpotts18/SwiftValidator.git
@@ -183,7 +162,7 @@ CHECKOUT OPTIONS:
     :commit: 9d748747369671e162b4f088402eacbfa997121a
     :git: https://github.com/eskizyen/Hakuba.git
   ObjectMapper:
-    :commit: a593b4d647a970b3d184d046f8f52b945083ccf9
+    :commit: 0b96a734de3ea1c87374ae677064f86adb0716ec
     :git: https://github.com/Hearst-DD/ObjectMapper.git
   PKHUD:
     :commit: 4d8fbf70ae912dd72280cde0a5c1440ada9a7306
@@ -191,9 +170,6 @@ CHECKOUT OPTIONS:
   ResearchKit:
     :commit: b50e1d7
     :git: https://github.com/ResearchKit/ResearchKit.git
-  Sentry:
-    :git: https://github.com/getsentry/sentry-cocoa.git
-    :tag: 4.5.0
   SwiftValidator:
     :commit: d370353b7a0ce758a53b189c81e485dcd53c99a4
     :git: https://github.com/jpotts18/SwiftValidator.git
@@ -201,10 +177,8 @@ CHECKOUT OPTIONS:
 SPEC CHECKSUMS:
   Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
   couchbase-lite-ios: 3ba7973e9af22e38aaa8dd5869b64c13e0b55dd4
-  Crashlytics: 9220f5bc89e7a618df411b4f639389dbfb0e03d2
   EmitterKit: e7a27b37118823d8ad413b8396f75e40d59f8cba
-  Eureka: 28ad9dec6286cd7cd601fdf8e8df39bb7356a8f4
-  Fabric: ea977e3cd9c20425516d3dafd3bf8c941c51223f
+  Eureka: 1c18c7fcd8f772cc2ca42d6be36292dffa77eecb
   Firebase: c23a36d9e4cdf7877dfcba8dd0c58add66358999
   FirebaseAnalytics: 3bb096873ee0d7fa4b6c70f5e9166b6da413cc7f
   FirebaseCore: d3a978a3cfa3240bf7e4ba7d137fdf5b22b628ec
@@ -219,18 +193,15 @@ SPEC CHECKSUMS:
   IDZSwiftCommonCrypto: 00dd37cdfbd149312a7e5a582cf9909f8b129f44
   KeychainSwift: be9554c0e5f4b1686c775930dc5c6bd9396992ed
   nanopb: 59317e09cf1f1a0af72f12af412d54edf52603fc
-  ObjcExceptionBridging: c30e00eb3700467e695faeea30e26e18bd445001
-  ObjectMapper: 5a6c9f063ef67e7fc0d7eb8958919e3121396a96
+  ObjectMapper: 1eb41f610210777375fa806bf161dc39fb832b81
   PKHUD: 351011b853e6b942e7ee8ad335864cc84c787241
   PromisesObjC: 3113f7f76903778cf4a0586bd1ab89329a0b7b97
-  Protobuf: 9e88c1e667d75aa2491d211f26ccddde4e8ad4cf
-  ReachabilitySwift: f5b9bb30a0777fac8f09ce8b067e32faeb29bb64
-  ResearchKit: b948fcbadd4454d6b835d2b64471980a467a96a7
-  Sentry: ab6c209f23700d1460691dbc90e19ed0a05d496b
+  Protobuf: 28c89b24435762f60244e691544ed80f50d82701
+  ResearchKit: 454bd5d013f5d6817b1c893ebe471a082061ceee
+  Sentry: ee060c09b2f7ec1240e95c766ab44c04c7bdb052
   SwiftValidator: 249b6b3ae3b294266c5b9de134d94f18f2d5aa47
-  XCGLogger: 1943831ef907df55108b0b18657953f868de973b
   XLActionController: f1f2226d2c6629db197d4a41f2da907085a4cb9d
 
-PODFILE CHECKSUM: 12f51d4f1d92e3158a6c76f68753f812051beee8
+PODFILE CHECKSUM: 4b47eb650d0a114497ab44cfd314b76b30da45b0
 
 COCOAPODS: 1.15.2

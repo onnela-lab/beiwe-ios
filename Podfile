@@ -2,22 +2,23 @@ platform :ios, '12.0'
 
 target 'Beiwe' do
   use_frameworks!
-  pod 'Crashlytics', '~> 3.4'
+  # pod 'Crashlytics', '~> 3.4'
   pod 'KeychainSwift', '~> 8.0'
   pod 'Alamofire', '~> 4.5'
-  pod 'ObjectMapper', :git => 'https://github.com/Hearst-DD/ObjectMapper.git', :branch => 'master'
+  pod 'ObjectMapper', :git => 'https://github.com/Hearst-DD/ObjectMapper.git', :commit => '0b96a734de3ea1c87374ae677064f86adb0716ec'
   pod 'Eureka'
+  pod 'Sentry', '~> 8.37.0'
+
   pod 'SwiftValidator', :git => 'https://github.com/jpotts18/SwiftValidator.git', :branch => 'master'
   pod 'PKHUD', :git => 'https://github.com/pkluz/PKHUD.git', :branch => 'release/swift4'
   pod 'IDZSwiftCommonCrypto', '~> 0.13.0'
   pod 'couchbase-lite-ios'
   pod 'ResearchKit', :git => 'https://github.com/ResearchKit/ResearchKit.git', :commit => 'b50e1d7'
-  pod 'ReachabilitySwift', '~>3'
+  # pod 'ReachabilitySwift', '~>3'
   pod 'EmitterKit', '~> 5.1'
   pod 'Hakuba', :git => 'https://github.com/eskizyen/Hakuba.git', :branch => 'Swift3'
   pod 'XLActionController', '~>5.0.1'
-  pod 'XCGLogger', '~> 7.0.0'
-  pod 'Sentry', :git => 'https://github.com/getsentry/sentry-cocoa.git', :tag => '4.5.0'
+  # pod 'XCGLogger', '~> 7.0.0'
   pod 'Firebase/Analytics'
   pod 'Firebase/Messaging', '~>6'
 

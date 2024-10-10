@@ -1,9 +1,7 @@
 import Alamofire
 import BackgroundTasks
 import CoreMotion
-import Crashlytics
 import EmitterKit
-import Fabric
 import Firebase
 import Foundation
 import ObjectMapper
@@ -11,9 +9,7 @@ import ReachabilitySwift
 import ResearchKit
 import Sentry
 import UIKit
-import XCGLogger
 
-let log = XCGLogger(identifier: "advancedLogger", includeDefaultDestinations: false)
 
 extension String: LocalizedError {
     public var errorDescription: String? { return self }
@@ -111,20 +107,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     //     completionHandler(.newData)
     // }
     
-    func setupLogging() {
-        // Create a destination for the system console log (via NSLog), add the destination to the logger
-        let systemLogDestination = AppleSystemLogDestination(owner: log, identifier: "advancedLogger.systemLogDestination")
-        systemLogDestination.outputLevel = self.debugEnabled ? .debug : .warning
-        systemLogDestination.showLogIdentifier = true
-        systemLogDestination.showFunctionName = true
-        systemLogDestination.showThreadName = true
-        systemLogDestination.showLevel = true
-        systemLogDestination.showFileName = true
-        systemLogDestination.showLineNumber = true
-        systemLogDestination.showDate = true
-        log.add(destination: systemLogDestination)
-    }
-
     // BY THE WAY background app refresh health tasts simply aren't functional as far as it is possible to tell, so we are just rawdogging at and logging everything
     // up to the server inside the requests to the backend because the app isn't stable enough to be a reliable source of truth.
     func setupBackgroundAppRefresh() {
@@ -172,7 +154,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     func initialSetup() {
         // initialize Sentry IMMEDIATELY
         self.setupSentry()
-        self.setupLogging()
         // setupCrashLytics()  // not currently using crashlytics
         // appStartLog()  // this is too verbose and usually unnecessary, uncomment if you want but don't commit.
         self.initializeUI()
@@ -762,20 +743,30 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     ////////////////////////////////////////////////////////////////////////////////////////////////
     
     func setupSentry() {
+        
+        
         // loads sentry key, prints an error if it doesn't work.
         do {
-            let dsn = SentryConfiguration.sharedInstance.settings["sentry-dsn"] as? String ?? "dev"
-            if dsn == "release" {
-                Client.shared = try Client(dsn: SentryKeys.release_dsn)
-            } else if dsn == "dev" {
-                Client.shared = try Client(dsn: SentryKeys.development_dsn)
-            } else {
-                throw "Invalid Sentry configuration"
+            let dsn_name = SentryConfiguration.sharedInstance.settings["sentry-dsn"] as? String ?? "dev"
+            let dsn: String
+            if dsn_name == "release" {
+                dsn = SentryKeys.release_dsn
+            } else if dsn_name == "dev" {
+                dsn = SentryKeys.development_dsn
+            } else { throw "Invalid Sentry configuration" }
+            
+            SentrySDK.start { options in
+                options.dsn = dsn
+                options.debug = true // Enabled debug when first installing is always helpful
+                
+                // Uncomment the following lines to add more data to your events
+                // options.attachScreenshot = true // This adds a screenshot to the error events
+                options.attachViewHierarchy = true // This adds the view hierarchy to the error events
             }
-            try Client.shared?.startCrashHandler()
         } catch let error {
-            print("\(error)")
+            print("Error loading Sentry DSN: \(error)\nSentry will not be enabled.")
         }
+        SentrySDK.capture(message: "This is a new Sentry version check")
     }
 }
 
@@ -832,7 +823,7 @@ extension AppDelegate: MessagingDelegate {
     // To enable direct data messages, you can set Messaging.messaging().shouldEstablishDirectChannel to true.
     func messaging(_ messaging: Messaging, didReceive remoteMessage: MessagingRemoteMessage) {
         // FIXME: what even is this function
-        log.error("Received data message: \(remoteMessage.appData)")
+        print("Received data message: \(remoteMessage.appData)")
         // remoteMessage.messageID
     }
 }
