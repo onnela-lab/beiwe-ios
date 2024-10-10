@@ -10,14 +10,36 @@ import CoreBluetooth
 
 private let omniring_headers = [
     "timestamp",
-    "hashed MAC",
-    "RSSI",
+    "PPG_red",
+    "PPG_IR",
+    "PPG_Green",
+    "IMU_Accel_x",
+    "IMU_Accel_y",
+    "IMU_Accel_z",
+    "IMU_Gyro_x",
+    "IMU_Gyro_y",
+    "IMU_Gyro_z",
+    "IMU_Mag_x",
+    "IMU_Mag_y",
+    "IMU_Mag_z",
+    "timestamp"
 ]
 
 private struct OmniringDataPoint {
-    var timestamp: TimeInterval
-    var hashedMAC: String
-    var RSSI: String
+    var timestamp: String
+    var ppgRed: String
+    var ppgIR: String
+    var ppgGreen: String
+    var imuAccelX: String
+    var imuAccelY: String
+    var imuAccelZ: String
+    var imuGyroX: String
+    var imuGyroY: String
+    var imuGyroZ: String
+    var imuMagX: String
+    var imuMagY: String
+    var imuMagZ: String
+    var ringTimestamp: String
 }
 
 class OmniringManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, DataServiceProtocol {
@@ -40,6 +62,60 @@ class OmniringManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate,
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: (any Error)?) {
         self.omniringPeripheral = nil
         self.omniringDataCharacteristic = nil
+    }
+
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: (any Error)?) {
+        if characteristic.uuid.uuidString.lowercased() == self.omniringDataCharacteristicUUID && self.collecting {
+            self.captureData(raw: characteristic.value)
+        }
+    }
+    
+    func captureData(raw: Data?) {
+        let generated = decodeByteData(raw)
+        let data = OmniringDataPoint(
+            timestamp: String(Int64(Date().timeIntervalSince1970 * 1000)),
+            ppgRed: String(generated[0]),
+            ppgIR: String(generated[1]),
+            ppgGreen: String(generated[2]),
+            imuAccelX: String(generated[3]),
+            imuAccelY: String(generated[4]),
+            imuAccelZ: String(generated[5]),
+            imuGyroX: String(generated[6]),
+            imuGyroY: String(generated[7]),
+            imuGyroZ: String(generated[8]),
+            imuMagX: String(generated[9]),
+            imuMagY: String(generated[10]),
+            imuMagZ: String(generated[11]),
+            ringTimestamp: String(Int64(generated[12]))
+        )
+        self.cacheLock.lock()
+        self.datapoints.append(data)
+        self.cacheLock.unlock()
+        
+        if self.datapoints.count > BLUETOOTH_CACHE_SIZE {
+            self.flush()
+        }
+    }
+    
+    func unpackFloatFromByteArray(_ byteArray: [UInt8]) -> Float {
+        let data = Data(byteArray)
+        return data.withUnsafeBytes { $0.load(as: Float.self) }
+    }
+    
+    func decodeByteData(_ byteData: Data?) -> [Float] {
+        if byteData == nil {
+            return []
+        }
+        
+        var floatArray: [Float] = []
+        
+        for i in stride(from: 0, to: byteData!.count, by: 4) {
+            let byteSlice = Array(byteData![i..<i+4])
+            let tmpFloat = unpackFloatFromByteArray(byteSlice)
+            floatArray.append(tmpFloat)
+        }
+        
+        return floatArray
     }
     
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: (any Error)?) {
@@ -139,9 +215,20 @@ class OmniringManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate,
         self.cacheLock.unlock()
         for data in data_to_write {
             self.dataStorage?.store([
-                String(Int64(data.timestamp)),
-                data.hashedMAC,
-                data.RSSI
+                data.timestamp,
+                data.ppgRed,
+                data.ppgIR,
+                data.ppgGreen,
+                data.imuAccelX,
+                data.imuAccelY,
+                data.imuAccelZ,
+                data.imuGyroX,
+                data.imuGyroY,
+                data.imuGyroZ,
+                data.imuMagX,
+                data.imuMagY,
+                data.imuMagZ,
+                data.ringTimestamp
             ])
         }
     }
