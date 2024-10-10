@@ -8,26 +8,26 @@
 
 import CoreBluetooth
 
-let bluetooth_headers = [
+private let bluetooth_headers = [
     "timestamp",
     "hashed MAC",
     "RSSI",
 ]
 
-struct BluetoothDataPoint {
+private struct BluetoothDataPoint {
     var timestamp: TimeInterval
     var hashedMAC: String
     var RSSI: String
 }
 
 class BluetoothManager: NSObject, CBCentralManagerDelegate, DataServiceProtocol {
-    var bluetoothManager: CBCentralManager?
-    let storeType = "bluetoothLog"
-    var dataStorage: DataStorage?
-    var datapoints = [BluetoothDataPoint]()
-    var offsetSince1970: Double = 0
-    var currentCBState: CBManagerState?
-    let cacheLock = NSLock()
+    private var bluetoothManager: CBCentralManager?
+    private let storeType = "bluetoothLog"
+    private var dataStorage: DataStorage?
+    private var datapoints = [BluetoothDataPoint]()
+    private var offsetSince1970: Double = 0
+    private var currentCBState: CBManagerState?
+    private let cacheLock = NSLock()
     
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         self.currentCBState = central.state
