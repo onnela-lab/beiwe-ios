@@ -99,10 +99,16 @@ class OmniringManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate,
         }
         
         self.collecting = true
+        if self.omniringPeripheral == nil {
+            self.bluetoothManager?.scanForPeripherals(withServices: nil)
+        }
         if self.omniringDataCharacteristic != nil {
             self.omniringPeripheral?.setNotifyValue(self.collecting, for: self.omniringDataCharacteristic!)
+            AppEventManager.sharedInstance.logAppEvent(event: "omniring_on", msg: "Omniring collection on")
+        } else {
+            print("omniring characteristic not found, pausing data collection..")
+            self.pauseCollecting()
         }
-        AppEventManager.sharedInstance.logAppEvent(event: "omniring_on", msg: "Omniring collection on")
     }
     
     func pauseCollecting() {

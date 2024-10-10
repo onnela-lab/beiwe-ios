@@ -31,6 +31,9 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, DataServiceProtocol 
     
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         self.currentCBState = central.state
+        if self.collecting {
+            self.bluetoothManager?.scanForPeripherals(withServices: nil, options: ["CBCentralManagerScanOptionAllowDuplicatesKey": false])
+        }
     }
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
