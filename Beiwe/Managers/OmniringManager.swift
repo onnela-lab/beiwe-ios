@@ -29,10 +29,43 @@ class OmniringManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate,
     private let cacheLock = NSLock()
     private var collecting = false
     private var omniringPeripheral: CBPeripheral?
+    private let omniringDataCharacteristicUUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"
+    private var omniringDataCharacteristic: CBCharacteristic?
     
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         self.currentCBState = central.state
         self.bluetoothManager?.scanForPeripherals(withServices: nil, options: ["CBCentralManagerScanOptionAllowDuplicatesKey": false])
+    }
+    
+    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: (any Error)?) {
+        self.omniringPeripheral = nil
+        self.omniringDataCharacteristic = nil
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: (any Error)?) {
+        guard let characteristics = service.characteristics else {
+            return
+        }
+        
+        for char in characteristics {
+            print("characteristic \(char) found")
+            if char.uuid.uuidString.lowercased() == self.omniringDataCharacteristicUUID {
+                self.omniringDataCharacteristic = char
+                self.omniringPeripheral?.setNotifyValue(self.collecting, for: self.omniringDataCharacteristic!)
+            }
+        }
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: (any Error)?) {
+        guard let services = peripheral.services else {
+            return
+        }
+        
+        for service in services {
+            print("service \(service) found")
+            print("discovering characteristics for service..")
+            peripheral.discoverCharacteristics(nil, for: service)
+        }
     }
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
@@ -60,23 +93,31 @@ class OmniringManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate,
     }
     
     func startCollecting() {
+        guard let state = self.currentCBState, state == CBManagerState.poweredOn else {
+            self.bluetoothManager = CBCentralManager.init(delegate: self, queue: nil)
+            return
+        }
+        
         self.collecting = true
+        if self.omniringDataCharacteristic != nil {
+            self.omniringPeripheral?.setNotifyValue(self.collecting, for: self.omniringDataCharacteristic!)
+        }
         AppEventManager.sharedInstance.logAppEvent(event: "omniring_on", msg: "Omniring collection on")
     }
     
     func pauseCollecting() {
-        guard let state = self.currentCBState, state == CBManagerState.poweredOn else {
-            // do something about turning on bluetooth?
-            return
-        }
-        
-        self.bluetoothManager?.stopScan()
         self.collecting = false
+        if self.omniringDataCharacteristic != nil {
+            self.omniringPeripheral?.setNotifyValue(self.collecting, for: self.omniringDataCharacteristic!)
+        }
         AppEventManager.sharedInstance.logAppEvent(event: "omniring_off", msg: "Omniring collection off")
     }
     
     func finishCollecting() {
         self.pauseCollecting()
+        if self.omniringPeripheral != nil {
+            self.bluetoothManager?.cancelPeripheralConnection(self.omniringPeripheral!)
+        }
         self.createNewFile()
     }
     
@@ -98,6 +139,4 @@ class OmniringManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate,
             ])
         }
     }
-    
-    
 }
