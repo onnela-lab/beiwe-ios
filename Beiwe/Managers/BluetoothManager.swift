@@ -60,7 +60,7 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, DataServiceProtocol 
     
     func startCollecting() {
         guard let state = self.currentCBState, state == CBManagerState.poweredOn else {
-            // do something about turning on bluetooth?
+            self.bluetoothManager = CBCentralManager.init(delegate: self, queue: nil)
             return
         }
         
@@ -70,11 +70,6 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, DataServiceProtocol 
     }
     
     func pauseCollecting() {
-        guard let state = self.currentCBState, state == CBManagerState.poweredOn else {
-            // do something about turning on bluetooth?
-            return
-        }
-        
         self.bluetoothManager?.stopScan()
         self.collecting = false
         AppEventManager.sharedInstance.logAppEvent(event: "bt_off", msg: "Bluetooth scanning off")
