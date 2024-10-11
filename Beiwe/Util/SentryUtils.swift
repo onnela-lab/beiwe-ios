@@ -1,8 +1,7 @@
 import Foundation
 
-// I cannot even.
-// This was originally named just "Configuration" in a file named "Configuration.swift".
-// What the hell. It loads A File. That's it. It didn't Do Anything.
+// loads the sentry configuration from Config.plist or Config-Default.plist?
+// This appears to correctly determine whether the app is a development build or a release build.
 class SentryConfiguration {
     static let sharedInstance = SentryConfiguration();
     var settings: Dictionary<String, AnyObject> = [:];
