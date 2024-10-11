@@ -1,3 +1,6 @@
+**NOTE:**
+In order to build the app you have to comment out lines 41 and 47 of `PKHUDAssents.swift`. (Located at `pods/PKHUD/PKHUDAssents.swift`) For some reason `IS_FRAMEWORK_TARGET` is not getting set to true at build time.
+
 ### Building the Beiwe iOS app
 1. Install Xcode
     1. If you're on a Mac with an M1 processor, **open Xcode using Rosetta**.  Locate Xcode in Finder, right-click and choose "Get Info", and check the box that says "Open using Rosetta".
