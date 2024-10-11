@@ -92,8 +92,8 @@ class OmniringManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate,
         self.datapoints.append(data)
         self.cacheLock.unlock()
         
-        if self.datapoints.count > BLUETOOTH_CACHE_SIZE {
-            self.flush()
+        if self.datapoints.count > OMNIRING_CACHE_SIZE {
+            self.createNewFile()
         }
     }
     
@@ -163,6 +163,7 @@ class OmniringManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate,
     }
     
     func initCollecting() -> Bool {
+        print("init omniring")
         self.dataStorage = DataStorageManager.sharedInstance.createStore(self.storeType, headers: omniring_headers)
         self.bluetoothManager = CBCentralManager.init(delegate: self, queue: nil)
         return true
@@ -174,11 +175,13 @@ class OmniringManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate,
             return
         }
         
-        self.collecting = true
         if self.omniringPeripheral == nil {
             self.bluetoothManager?.scanForPeripherals(withServices: nil)
         }
+        
         if self.omniringDataCharacteristic != nil {
+            print("start omniring")
+            self.collecting = true
             self.omniringPeripheral?.setNotifyValue(self.collecting, for: self.omniringDataCharacteristic!)
             AppEventManager.sharedInstance.logAppEvent(event: "omniring_on", msg: "Omniring collection on")
         } else {
@@ -188,6 +191,7 @@ class OmniringManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate,
     }
     
     func pauseCollecting() {
+        print("pause omniring")
         self.collecting = false
         if self.omniringDataCharacteristic != nil {
             self.omniringPeripheral?.setNotifyValue(self.collecting, for: self.omniringDataCharacteristic!)
@@ -196,6 +200,7 @@ class OmniringManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate,
     }
     
     func finishCollecting() {
+        print("finish omniring")
         self.pauseCollecting()
         if self.omniringPeripheral != nil {
             self.bluetoothManager?.cancelPeripheralConnection(self.omniringPeripheral!)

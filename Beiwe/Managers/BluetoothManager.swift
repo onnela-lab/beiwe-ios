@@ -56,12 +56,14 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, DataServiceProtocol 
     }
     
     func initCollecting() -> Bool {
+        print("init bluetooth")
         self.dataStorage = DataStorageManager.sharedInstance.createStore(self.storeType, headers: bluetooth_headers)
         self.bluetoothManager = CBCentralManager.init(delegate: self, queue: nil)
         return true
     }
     
     func startCollecting() {
+        print("start bluetooth")
         guard let state = self.currentCBState, state == CBManagerState.poweredOn else {
             self.bluetoothManager = CBCentralManager.init(delegate: self, queue: nil)
             return
@@ -73,12 +75,14 @@ class BluetoothManager: NSObject, CBCentralManagerDelegate, DataServiceProtocol 
     }
     
     func pauseCollecting() {
+        print("pause bluetooth")
         self.bluetoothManager?.stopScan()
         self.collecting = false
         AppEventManager.sharedInstance.logAppEvent(event: "bt_off", msg: "Bluetooth scanning off")
     }
     
     func finishCollecting() {
+        print("finish bluetooth")
         self.pauseCollecting()
         self.createNewFile()
     }
