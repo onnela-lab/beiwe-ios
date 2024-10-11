@@ -101,6 +101,9 @@ PODS:
     - nanopb/encode (= 2.30910.0)
   - nanopb/decode (2.30910.0)
   - nanopb/encode (2.30910.0)
+  - ObjcExceptionBridging (7.1.5):
+    - ObjcExceptionBridging/ObjcExceptionBridging (= 7.1.5)
+  - ObjcExceptionBridging/ObjcExceptionBridging (7.1.5)
   - ObjectMapper (4.2.0)
   - PKHUD (5.4.0)
   - PromisesObjC (2.4.0)
@@ -110,6 +113,10 @@ PODS:
     - Sentry/Core (= 8.37.0)
   - Sentry/Core (8.37.0)
   - SwiftValidator (4.0.0)
+  - XCGLogger (7.0.1):
+    - XCGLogger/Core (= 7.0.1)
+  - XCGLogger/Core (7.0.1):
+    - ObjcExceptionBridging
   - XLActionController (5.0.2):
     - XLActionController/Core (= 5.0.2)
   - XLActionController/Core (5.0.2)
@@ -127,9 +134,10 @@ DEPENDENCIES:
   - ObjectMapper (from `https://github.com/Hearst-DD/ObjectMapper.git`, commit `0b96a734de3ea1c87374ae677064f86adb0716ec`)
   - PKHUD (from `https://github.com/pkluz/PKHUD.git`, tag `5.4.0`)
   - ReachabilitySwift (= 5.2.3)
-  - ResearchKit (from `https://github.com/ResearchKit/ResearchKit.git`, commit `b50e1d7`)
+  - ResearchKit (from `https://github.com/ResearchKit/ResearchKit.git`, tag `2.1.0`)
   - Sentry (~> 8.37.0)
   - SwiftValidator (from `https://github.com/SwiftValidatorCommunity/SwiftValidator.git`, branch `master`)
+  - XCGLogger (~> 7.0.0)
   - XLActionController (~> 5.0.1)
 
 SPEC REPOS:
@@ -149,9 +157,11 @@ SPEC REPOS:
     - IDZSwiftCommonCrypto
     - KeychainSwift
     - nanopb
+    - ObjcExceptionBridging
     - PromisesObjC
     - ReachabilitySwift
     - Sentry
+    - XCGLogger
     - XLActionController
 
 EXTERNAL SOURCES:
@@ -165,8 +175,8 @@ EXTERNAL SOURCES:
     :git: https://github.com/pkluz/PKHUD.git
     :tag: 5.4.0
   ResearchKit:
-    :commit: b50e1d7
     :git: https://github.com/ResearchKit/ResearchKit.git
+    :tag: 2.1.0
   SwiftValidator:
     :branch: master
     :git: https://github.com/SwiftValidatorCommunity/SwiftValidator.git
@@ -182,8 +192,8 @@ CHECKOUT OPTIONS:
     :git: https://github.com/pkluz/PKHUD.git
     :tag: 5.4.0
   ResearchKit:
-    :commit: b50e1d7
     :git: https://github.com/ResearchKit/ResearchKit.git
+    :tag: 2.1.0
   SwiftValidator:
     :commit: d370353b7a0ce758a53b189c81e485dcd53c99a4
     :git: https://github.com/SwiftValidatorCommunity/SwiftValidator.git
@@ -205,15 +215,17 @@ SPEC CHECKSUMS:
   IDZSwiftCommonCrypto: aefd3487b88dc3d7a1de2553188c720ac3194940
   KeychainSwift: be9554c0e5f4b1686c775930dc5c6bd9396992ed
   nanopb: 438bc412db1928dac798aa6fd75726007be04262
+  ObjcExceptionBridging: d3d37d62981bb7f252ecb31b62d7e23a96bbfb8a
   ObjectMapper: 1eb41f610210777375fa806bf161dc39fb832b81
   PKHUD: 026ee10894f7d983cdb585138523a2ae098e4424
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   ReachabilitySwift: 7f151ff156cea1481a8411701195ac6a984f4979
-  ResearchKit: 454bd5d013f5d6817b1c893ebe471a082061ceee
+  ResearchKit: 145c6c2a272d313a53ab1dc49d84b0d20dde003a
   Sentry: ee060c09b2f7ec1240e95c766ab44c04c7bdb052
   SwiftValidator: 249b6b3ae3b294266c5b9de134d94f18f2d5aa47
+  XCGLogger: 1943831ef907df55108b0b18657953f868de973b
   XLActionController: f1f2226d2c6629db197d4a41f2da907085a4cb9d
 
-PODFILE CHECKSUM: bf23b9b6026ee4c0814c5ab70cb0c07b5859ac40
+PODFILE CHECKSUM: 26ae469152245038a6e4564ddcf65c51471dff27
 
 COCOAPODS: 1.15.2

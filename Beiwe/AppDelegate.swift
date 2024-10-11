@@ -11,6 +11,8 @@ import Sentry
 import UIKit
 import XCGLogger
 
+let log = XCGLogger(identifier: "advancedLogger", includeDefaultDestinations: false)
+
 extension String: LocalizedError {
     public var errorDescription: String? { return self }
 }
@@ -138,6 +140,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         print("platform: \(platform())")
     }
     
+    func setupLogging() {
+        // Create a destination for the system console log (via NSLog), add the destination to the logger
+        let systemLogDestination = AppleSystemLogDestination(owner: log, identifier: "advancedLogger.systemLogDestination")
+        systemLogDestination.outputLevel = self.debugEnabled ? .debug : .warning
+        systemLogDestination.showLogIdentifier = true
+        systemLogDestination.showFunctionName = true
+        systemLogDestination.showThreadName = true
+        systemLogDestination.showLevel = true
+        systemLogDestination.showFileName = true
+        systemLogDestination.showLineNumber = true
+        systemLogDestination.showDate = true
+        log.add(destination: systemLogDestination)
+    }
+    
     func printLoadedStudyInfo() {
         print("\n\n\n")
         print("patient id: '\(String(describing: ApiManager.sharedInstance.patientId))'")
@@ -154,6 +170,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     func initialSetup() {
         // initialize Sentry IMMEDIATELY
         self.setupSentry()
+        self.setupLogging()
         // setupCrashLytics()  // not currently using crashlytics
         // appStartLog()  // this is too verbose and usually unnecessary, uncomment if you want but don't commit.
         self.initializeUI()
@@ -167,7 +184,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         StudyManager.sharedInstance.loadDefaultStudy()
         Recline.shared.compact()
     }
-    
+        
     func setupThatDependsOnDatabase(_ launchOptions: [UIApplication.LaunchOptionsKey: Any]?) {
         // IF A NOTIFICATION WAS RECEIVED while app was in killed state there will be launch options!
         if launchOptions != nil {

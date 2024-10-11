@@ -586,14 +586,13 @@ class DataStorage {
     
     // reports an io error to sentry, prints the error too.
     private func io_error_report(_ message: String, error: Error? = nil, more: [String: String]? = nil, crash: Bool) {
+        var message = message
+        var extras = ["filename": shortenPath(self.filename), "user_id": self.patientId]
         
         if !crash {
             message = "not a crash - " + message
         }
         
-        var extras = ["filename": shortenPath(self.filename), "user_id": self.patientId]
-        
-        // canditional setup...
         if let error = error {
             print("io error: \(message) - error: \(error)")
             extras["error"] = "\(error)"
@@ -603,7 +602,7 @@ class DataStorage {
         if let more = more {
             print("more: \(more)")
             for (key, value) in more {
-                event.extra?[key] = value
+                extras[key] = value
             }
         }
         

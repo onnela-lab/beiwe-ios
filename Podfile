@@ -21,6 +21,9 @@ target 'Beiwe' do
     # I think this is ui?
     pod 'XLActionController', '~>5.0.1'
 
+    # logging
+    pod 'XCGLogger', '~> 7.0.0'
+
     # ui
     pod 'Eureka'
     # validates the inputs at registration
@@ -28,7 +31,7 @@ target 'Beiwe' do
     # pops up a heads-up-display on certain pages.
     pod 'PKHUD', :git => 'https://github.com/pkluz/PKHUD.git', :tag => '5.4.0'  # old: :branch => 'release/swift4'
     # the surveys
-    pod 'ResearchKit', :git => 'https://github.com/ResearchKit/ResearchKit.git', :commit => 'b50e1d7'
+    pod 'ResearchKit', :git => 'https://github.com/ResearchKit/ResearchKit.git', :tag => '2.1.0'  #:commit => 'b50e1d7'
     # no clue
     pod 'Hakuba', :git => 'https://github.com/eskizyen/Hakuba.git', :branch => 'Swift3'
 

@@ -115,7 +115,7 @@ public func print(_ items: Any..., separator: String = " ", terminator: String =
 }
 
 func sentry_warning(_ title: String, _ extra1: String? = nil, _ extra2: String? = nil, _ extra3: String? = nil, crash: Bool) {
-    var extras  = [String: String]
+    var extras = [String: Any]()
     if let extra = extra1 {
         extras["extra1"] = extra
     }
