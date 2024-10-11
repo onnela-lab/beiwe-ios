@@ -589,8 +589,8 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
-				"$BUILT_PRODUCTS_DIR/$INFOPLIST_PATH",
-				"$TARGET_BUILD_DIR/$INFOPLIST_PATH",
+				$BUILT_PRODUCTS_DIR/$INFOPLIST_PATH,
+				$TARGET_BUILD_DIR/$INFOPLIST_PATH,
 			);
 			name = "Run Script";
 			outputFileListPaths = (
@@ -903,7 +903,7 @@
 				INFOPLIST_PREPROCESS = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 2.5.1.1;
+				MARKETING_VERSION = 2.5.2;
 				PRODUCT_BUNDLE_IDENTIFIER = harvard.lab.onnela.beiwe.ios;
 				PRODUCT_NAME = Beiwe2;
 				PROVISIONING_PROFILE = "";
@@ -1005,7 +1005,7 @@
 				INFOPLIST_PREPROCESS = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 2.5.1.1;
+				MARKETING_VERSION = 2.5.2;
 				PRODUCT_BUNDLE_IDENTIFIER = harvard.lab.onnela.beiwe.ios;
 				PRODUCT_NAME = Beiwe2;
 				PROVISIONING_PROFILE = "";
@@ -1176,7 +1176,7 @@
 				INFOPLIST_PREPROCESS = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 2.5.1.1;
+				MARKETING_VERSION = 2.5.2;
 				PRODUCT_BUNDLE_IDENTIFIER = lab.onnela.beiwe.ios;
 				PRODUCT_NAME = Beiwe;
 				PROVISIONING_PROFILE = "";
@@ -1215,7 +1215,7 @@
 				INFOPLIST_PREPROCESS = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 2.5.1.1;
+				MARKETING_VERSION = 2.5.2;
 				PRODUCT_BUNDLE_IDENTIFIER = lab.onnela.beiwe.ios;
 				PRODUCT_NAME = Beiwe;
 				PROVISIONING_PROFILE = "";
