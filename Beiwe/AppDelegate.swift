@@ -503,59 +503,88 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         print(messageInfo)
     }
 
-    /// alternate type that handles some casting, it works.
+    /// Alternate type that handles some casting, it works.
     func printMessageInfo(_ notificationRequest: UNNotificationRequest) {
         let messageInfoDict: [AnyHashable: Any] = notificationRequest.content.userInfo
         self.printMessageInfo(messageInfoDict)
     }
     
-    /// the userNotificationCenter functions receive a UNNotification that has to be cast to a UNNotificationRequest and then a dict
+    /// The userNotificationCenter functions receive a UNNotification that has to be cast to a UNNotificationRequest and then a dict
     func handleSurveyNotification(_ notificationRequest: UNNotificationRequest) {
         let messageInfo: [AnyHashable: Any] = notificationRequest.content.userInfo
         self.handleSurveyNotification(messageInfo)
     }
     
-    /// code to run when receiving a push notification with surveys in it. Called from an AppDelegate extension.
+    /// Code to run when receiving a push notification with surveys in it. Called from an AppDelegate extension.
     /// Checks for any new surveys on the server and pops any survey notifications indicated in the push notificattion
     func handleSurveyNotification(_ messageInfo: Dictionary<AnyHashable, Any>) {
-        // return if nothing found
-        guard let surveyIdsString = messageInfo["survey_ids"] else {
-            print("no surveyIds found, checking for new surveys anyway.")
-            StudyManager.sharedInstance.checkForNewSurveys(surveyIds: [])
-            return
+        let surveyIdsString: Any? = messageInfo["survey_ids"]
+        let notificationUUIDsJSONString: Any? = messageInfo["json_uuids"]
+        
+        // uuids present - feature developed october 2021
+        if let notificationUUIDsJSONString = notificationUUIDsJSONString {
+            print("notificationUUIDsJSONString:", notificationUUIDsJSONString)
+            updateRecievedNotificationUUIDs(notificationUUIDsJSONString as! String)
         }
         
-        // extract survey ids to force-display
-        AppEventManager.sharedInstance.logAppEvent(event: "push_notification", msg: "Received notification while app was killed")
-        let surveyIds: [String] = self.jsonToSurveyIdArray(json: surveyIdsString as! String)
-        
-        // downloadSurveys calls setActiveSurveys, even if it errors/fails. We always want to download the most recent survey information.
-        // (old versions of the backend don't supply the sent_time key)
-        if let sentTimeString = messageInfo["sent_time"] as! String? {
-            StudyManager.sharedInstance.checkForNewSurveys(surveyIds: surveyIds, sentTime: isoStringToTimeInterval(timeString: sentTimeString))
+        // survey ids present
+        if let surveyIdsString = surveyIdsString {
+            // extract survey ids to force-display
+            AppEventManager.sharedInstance.logAppEvent(event: "push_notification", msg: "Received notification while app was killed")
+            let surveyIds: [String] = self.jsonToSurveyIdArray(surveyIdsString as! String)
+            
+            // downloadSurveys calls setActiveSurveys, even if it errors/fails. We always want
+            // to (try) download the most recent survey information.
+            if let sentTimeString = messageInfo["sent_time"] as! String? {
+                StudyManager.sharedInstance.checkForNewSurveys(surveyIds: surveyIds, sentTime: isoStringToTimeInterval(timeString: sentTimeString))
+            } else {
+                // (even older versions of the backend don't supply the sent_time key)
+                StudyManager.sharedInstance.checkForNewSurveys(surveyIds: surveyIds)
+            }
         } else {
-            StudyManager.sharedInstance.checkForNewSurveys(surveyIds: surveyIds)
+            // we just always always hit the backend for new surveys
+            StudyManager.sharedInstance.checkForNewSurveys(surveyIds: [])
         }
     }
     
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////// MISC BEIWE STUFF ///////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // converts json string to an array of strings
-    func jsonToSurveyIdArray(json: String) -> [String] {
-        let surveyIds = try! JSONDecoder().decode([String].self, from: Data(json.utf8))
+    
+    /// Just json string to array of strings with debug print statements.
+    func jsonToSurveyIdArray(_ json_string: String) -> [String] {
+        let surveyIds = try! JSONDecoder().decode([String].self, from: Data(json_string.utf8))
+        //
         for surveyId in surveyIds {
             if !(self.currentStudy?.surveyExists(surveyId: surveyId) ?? false) {
                 print("Received notification for a NEW survey \(surveyId)")
-                AppEventManager.sharedInstance.logAppEvent(event: "push_notification", msg: "Received notification for new survey \(surveyId)")
+                AppEventManager.sharedInstance.logAppEvent(
+                    event: "push_notification", msg: "Received notification for new survey \(surveyId)"
+                )
             } else {
                 print("Received notification for survey \(surveyId)")
-                AppEventManager.sharedInstance.logAppEvent(event: "push_notification", msg: "Received notification for survey \(surveyId)")
+                AppEventManager.sharedInstance.logAppEvent(
+                    event: "push_notification", msg: "Received notification for survey \(surveyId)"
+                )
             }
         }
         return surveyIds
     }
+    
+    func updateRecievedNotificationUUIDs(_ notificationIdsJsonListString: String) {
+        let d = Date()
+        let now: String = dateFormatLocalMs(d)
+        // print("updateRecievedSurveyUUIDs", now, notificationIdsJsonListString)
+        
+        // unpack the list of uuids in the json
+        let notification_uuids: [String] = try! JSONDecoder().decode(
+            [String].self, from: Data(notificationIdsJsonListString.utf8)
+        )
+        
+        if self.currentStudy!.surveyPushNotificationUUIDs == nil {
+            self.currentStudy!.surveyPushNotificationUUIDs = [String]()
+        }
+        self.currentStudy!.surveyPushNotificationUUIDs!.append(now)
+        self.currentStudy!.surveyPushNotificationUUIDs!.append(contentsOf: notification_uuids)
+    }
+    
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////// Firebase Stuff ////////////////////////////////////
@@ -772,7 +801,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
             
             SentrySDK.start { options in
                 options.dsn = dsn
-                options.debug = true // Enabled debug when first installing is always helpful
+                options.debug = false // Enabled debug when first installing is always helpful
                 
                 // Uncomment the following lines to add more data to your events
                 // options.attachScreenshot = true // This adds a screenshot to the error events
@@ -781,7 +810,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         } catch let error {
             print("Error loading Sentry DSN: \(error)\nSentry will not be enabled.")
         }
-        SentrySDK.capture(message: "This is a new Sentry version check")
     }
 }
 

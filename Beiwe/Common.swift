@@ -33,6 +33,14 @@ func dateFormatLocal(_ date: Date) -> String {
     return dateFormatter.string(from: date) + "(ET)"
 }
 
+func dateFormatLocalMs(_ date: Date) -> String {
+    let dateFormatter = DateFormatter()
+    dateFormatter.timeZone = TimeZone(identifier: DEV_TIMEZONE)
+    dateFormatter.dateFormat = "y-MM-dd HH:mm:ss.ms"
+    return dateFormatter.string(from: date) + "(ET)"
+}
+
+
 func timeFormat(_ date: Date) -> String {
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "HH:mm:ss"

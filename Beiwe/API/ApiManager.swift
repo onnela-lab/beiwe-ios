@@ -72,29 +72,16 @@ class ApiManager {
         // basic device info, will be displayed on the participant page
         parameters["version_code"] = Constants.APP_VERSION
         parameters["version_name"] = Constants.APP_BUILD
-        
         parameters["os_version"] = UIDevice.current.systemVersion
         parameters["timezone"] = TimeZone.current.identifier
         
         // various device metrics to be improved on over time, meant for developer use to debug issues.
         var device_status_report = [String: String]()
-        
         device_status_report["app_commit"] = Constants.APP_COMMIT
         device_status_report["timestamp"] = timestampString() + " " + TimeZone.current.identifier
         device_status_report["transition_count"] = Ephemerals.transition_count.description
         
-        if let study = StudyManager.sharedInstance.currentStudy {
-            device_status_report["last_application_will_terminate"] = study.lastApplicationWillTerminate
-            device_status_report["last_application_did_become_active"] = Ephemerals.lastApplicationDidBecomeActive
-            device_status_report["last_application_did_enter_background"] = Ephemerals.lastApplicationDidEnterBackground
-            device_status_report["last_application_did_receive_memory_warning"] = Ephemerals.lastApplicationDidReceiveMemoryWarning
-            device_status_report["last_app_start"] = Ephemerals.lastAppStart
-            device_status_report["last_successful_login"] = Ephemerals.lastSuccessfulLogin
-            device_status_report["last_background_push_notification_received"] = study.lastBackgroundPushNotificationReceived
-            device_status_report["last_foreground_push_notification_received"] = study.lastForegroundPushNotificationReceived
-        }
-        
-        // UIDevice... Stuff?
+        // UIDevice provides some helpful details
         device_status_report["battery_level"] = String(UIDevice.current.batteryLevel)
         device_status_report["battery_state"] = String(UIDevice.current.batteryState.rawValue)
         device_status_report["device_model"] = UIDevice.current.model
@@ -113,19 +100,46 @@ class ApiManager {
         @unknown default: "unknown: '\(CLLocationManager.authorizationStatus().rawValue)'"
         }
         
+        // Ephemerals are items that for one reason or another are stored on and not perisistent.
+        
         // notification permissions, can be one of not_determined, denied, authorized, provisional, or ephemeral.
         device_status_report["notification_permission"] = Ephemerals.notification_permission
-        
         // background refresh
         device_status_report["background_refresh_status"] = Ephemerals.backgroundRefreshStatus
-        
         // uploads info
         device_status_report["last_upload_start"] = Ephemerals.start_last_upload
         device_status_report["last_upload_end"] = Ephemerals.end_last_upload
-        // is there a possible threading error here on accessing files_in_flight?
+        
+        // is there a possible database threading error here on accessing files_in_flight?
         device_status_report["number_uploads_queued"] = String(StudyManager.sharedInstance.files_in_flight.count)
         
-        // object cannot fail to be serialized, data types are valid.
+        // app state that can't exist until you register for a study
+        if let study = StudyManager.sharedInstance.currentStudy {
+            device_status_report["last_application_will_terminate"] = study.lastApplicationWillTerminate
+            device_status_report["last_application_did_become_active"] = Ephemerals.lastApplicationDidBecomeActive
+            device_status_report["last_application_did_enter_background"] = Ephemerals.lastApplicationDidEnterBackground
+            device_status_report["last_application_did_receive_memory_warning"] = Ephemerals.lastApplicationDidReceiveMemoryWarning
+            device_status_report["last_app_start"] = Ephemerals.lastAppStart
+            device_status_report["last_successful_login"] = Ephemerals.lastSuccessfulLogin
+            device_status_report["last_background_push_notification_received"] = study.lastBackgroundPushNotificationReceived
+            device_status_report["last_foreground_push_notification_received"] = study.lastForegroundPushNotificationReceived
+            
+            // neither of these can fail
+            if let surveyPushNotificationUUIDs = study.surveyPushNotificationUUIDs {
+                // print("pushing this list of uuids:", surveyPushNotificationUUIDs)
+                parameters["notification_uuids"] = String(
+                    data: try! JSONEncoder().encode(surveyPushNotificationUUIDs), encoding: .utf8
+                )
+            } else {
+                parameters["notification_uuids"] = "[]"
+            }
+            
+            parameters["active_survey_ids"] = String(
+                data: try! JSONEncoder().encode(StudyManager.sharedInstance.getActiveSurveyIds()), encoding: .utf8
+            )
+        }
+        
+        // object cannot fail to be serialized, data types are valid....
         // stupid. We need to convert a [String:String] to a json object, which is a Data (bytes) and then we need to convert THAT to a string.
         let statusAsJsonDictData = try! JSONSerialization.data(withJSONObject: device_status_report, options: [])
         parameters["device_status_report"] = String(data: statusAsJsonDictData, encoding: .utf8)!

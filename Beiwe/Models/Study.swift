@@ -24,7 +24,8 @@ class Study: ReclineObject {
     var lastBadgeCnt = 0
     var submittedAudioSurveys: Int = 0 // TODO: what is this and is it breaking uploads
     var submittedTrackingSurveys: Int = 0 // TODO: what is this and is it breaking uploads
-
+    var surveyPushNotificationUUIDs: [String]?
+    
     // app state tracking - default value is "never_populated"
     var lastBackgroundPushNotificationReceived = Constants.DEFAULT_UNPOPULATED_APPINFO
     var lastForegroundPushNotificationReceived = Constants.DEFAULT_UNPOPULATED_APPINFO
@@ -74,6 +75,7 @@ class Study: ReclineObject {
         self.lastBackgroundPushNotificationReceived <- map["lastBackgroundPushNotificationReceived"]
         self.lastForegroundPushNotificationReceived <- map["lastForegroundPushNotificationReceived"]
         self.lastApplicationWillTerminate <- map["lastApplicationWillTerminate"]
+        self.surveyPushNotificationUUIDs <- map["lastApplicationWillTerminate"]
     }
 
     func surveyExists(surveyId: String?) -> Bool {
