@@ -70,13 +70,17 @@ class DataStorageManager {
             if let patientId = study.patientId {
                 if let studySettings = study.studySettings {
                     if let publicKey = studySettings.clientPublicKey {
-                        return DataStorage(
-                            type: type, // the file name needs the data type
-                            headers: headers, // the csv headers
-                            patientId: patientId,
-                            publicKey: publicKey,
-                            keyRef: self.secKeyRef
-                        )
+                        if let secKeyRef = self.secKeyRef {
+                            return DataStorage(
+                                type: type, // the file name needs the data type
+                                headers: headers, // the csv headers
+                                patientId: patientId,
+                                publicKey: publicKey,
+                                keyRef: secKeyRef
+                            )
+                        } else {
+                            fatalError("(createStore) No secKeyRef object found? buh?")
+                        }
                     } else {
                         fatalError("(createStore) No public key found!")
                     }
@@ -369,7 +373,7 @@ class DataStorage {
     // participant info (to be factored out)
     var patientId: String // TODO: factor out
     var publicKey: String // string of the public key for local access. TODO: factor out
-    var secKeyRef: SecKey? // TODO: make non-optional
+    var secKeyRef: SecKey
     
     // file settings
     var headers: [String] // csv file header line
@@ -388,7 +392,7 @@ class DataStorage {
     var file_exists = false
     var file_handle: FileHandle
     
-    init(type: String, headers: [String], patientId: String, publicKey: String, keyRef: SecKey?) {
+    init(type: String, headers: [String], patientId: String, publicKey: String, keyRef: SecKey) {
         self.type = type // the type of data stream
         self.patientId = patientId
         self.publicKey = publicKey
@@ -414,21 +418,25 @@ class DataStorage {
     private func get_rsa_line() -> Data {
         // TODO: why are these two functions are not identical, the call to encryptString
         //   have different args, publicKey vs publicKeyId. And self.secKeyRef is sometimes not present?
-        if let keyRef = self.secKeyRef {
+        // if let keyRef = self.secKeyRef {
             return try! Crypto.sharedInstance.base64ToBase64URL(
                 (SwiftyRSA.encryptString(
-                    Crypto.sharedInstance.base64ToBase64URL(self.aesKey.base64EncodedString()),
-                    publicKey: keyRef,
+                    get_that_aeskey(),
+                    publicKey: self.secKeyRef,
                     padding: []
                 )) + "\n").data(using: String.Encoding.utf8)!
-        } else {
-            return try! Crypto.sharedInstance.base64ToBase64URL(
-                (SwiftyRSA.encryptString(
-                    Crypto.sharedInstance.base64ToBase64URL(self.aesKey.base64EncodedString()),
-                    publicKeyId: PersistentPasswordManager.sharedInstance.publicKeyName(self.patientId),
-                    padding: []
-                )) + "\n").data(using: String.Encoding.utf8)!
-        }
+        // } else {
+        //     return try! Crypto.sharedInstance.base64ToBase64URL(
+        //         (SwiftyRSA.encryptString(
+        //             Crypto.sharedInstance.base64ToBase64URL(self.aesKey.base64EncodedString()),
+        //             publicKeyId: PersistentPasswordManager.sharedInstance.publicKeyName(self.patientId),
+        //             padding: []
+        //         )) + "\n").data(using: String.Encoding.utf8)!
+        // }
+    }
+    
+    func get_that_aeskey() -> String {
+        return Crypto.sharedInstance.base64ToBase64URL(self.aesKey.base64EncodedString())
     }
     
     /// Unless self's "type" (data stream) is the ios log, write a message to the ios log.

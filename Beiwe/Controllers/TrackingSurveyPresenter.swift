@@ -402,7 +402,7 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
             headers: TrackingSurveyPresenter.headers,
             patientId: patientId,
             publicKey: publicKey,
-            keyRef: StudyManager.sharedInstance.keyRef
+            keyRef: StudyManager.sharedInstance.getSecKey()
         )
         dataFile.sanitize = true
         

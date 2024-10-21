@@ -11,8 +11,8 @@ import Reachability
 /// Contains all sorts of miiscellaneous study related functionality - this is badly factored and should be refactored into classes that contain their own well-defirned things
 class StudyManager {
     static let sharedInstance = StudyManager() // singleton reference
-    
     // General code assets
+    
     let appDelegate = UIApplication.shared.delegate as! AppDelegate
     let calendar = Calendar.current
     
@@ -20,7 +20,7 @@ class StudyManager {
     var currentStudy: Study?
     var timerManager: TimerManager = TimerManager()
     var gpsManager: GPSManager? // gps manager is slightly special because we use it to keep the app open in the background
-    var keyRef: SecKey? // the study's security key
+    private var keyRef: SecKey? // the study's security key
     
     // State tracking variables
     var sensorsStartedEver = false
@@ -32,6 +32,18 @@ class StudyManager {
     }
     
     // Common getters
+    
+    /// The only reason that this object is optional is because we need to instantiate
+    /// a study and study manager before the participant hits the accept button to the
+    /// terms of the study / so that we don't ever write data outside of the participant
+    /// completing registration for a study.
+    func getSecKey() -> SecKey {
+        if let keyRef = self.keyRef {
+            return keyRef
+        } else {
+            fatalError("studymanager.keyRef was nil.")
+        }
+    }
     
     /// getters, mutators all the ids of active surveys - not used (anymore?
     func getActiveSurveyIds() -> [String] {
