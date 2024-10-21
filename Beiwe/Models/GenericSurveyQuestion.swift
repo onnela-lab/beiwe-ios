@@ -85,16 +85,10 @@ struct GenericSurveyQuestion: Mappable, Equatable {
 /// The next two functions appear to be sufficient for handling comparison of two [String: AnyObject]?
 /// objects in the context of comparing logic on whether a question should be displayed.
 func compare_dict_of_string_to_anyobject(lhs: [String: AnyObject]?, rhs: [String: AnyObject]?) -> Bool {
-    // print("starting compare of two string:anyobject dicts")
-    // defer {
-    //     print("done compare of two string:anyobject dicts")
-    // }
     if lhs == nil && rhs == nil {
-        // print("both were nil")
         return true
     }
     if lhs == nil || rhs == nil {
-        // print("one was nil")
         return false
     }
     return _compare_dict_of_string_to_anyobject(lhs: lhs!, rhs: rhs!)
@@ -144,6 +138,15 @@ func _compare_dict_of_string_to_anyobject(lhs: [String: AnyObject], rhs: [String
         if lhsValue is NSArray && rhsValue is NSArray {
             if lhsValue as! NSArray != rhsValue as! NSArray {
                 // print("arrays were different - '\(lhsValue)' != '\(rhsValue)'")
+                return false
+            }
+            continue
+        }
+        
+        if lhsValue is NSDictionary && rhsValue is NSDictionary {
+            if !_compare_dict_of_string_to_anyobject(
+                lhs: lhsValue as! [String: AnyObject], rhs: rhsValue as! [String: AnyObject]) {
+                // print("recursive dictionary - they compared and returned false.")
                 return false
             }
             continue
