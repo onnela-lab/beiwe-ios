@@ -27,6 +27,7 @@ struct Constants {
     }
     
     static let APP_INFO_TAG = "iOS Version: \(Constants.APP_VERSION) Build: \(Constants.APP_BUILD) Commit: \(Constants.APP_COMMIT)"
+    static let APP_INFO_SHORT = "\(Constants.APP_VERSION) \(Constants.APP_BUILD) (\(Constants.APP_COMMIT))"
 }
 
 let DEV_TIMEZONE = "America/New_York"

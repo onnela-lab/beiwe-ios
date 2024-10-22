@@ -802,7 +802,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
             SentrySDK.start { options in
                 options.dsn = dsn
                 options.debug = false // Enabled debug when first installing is always helpful
-                
+                options.releaseName = Constants.APP_INFO_SHORT
                 // Uncomment the following lines to add more data to your events
                 // options.attachScreenshot = true // This adds a screenshot to the error events
                 options.attachViewHierarchy = true // This adds the view hierarchy to the error events
