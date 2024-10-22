@@ -35,9 +35,16 @@ class RegisterViewController: FormViewController {
         cell.validationLabel.font = self.small_font // the red validation text one
         cell.errorColor = self.legible_red // (also works with row.errorColor)
         
+        cell.textField.autocapitalizationType = UITextAutocapitalizationType.none
+        cell.textField.autocorrectionType = UITextAutocorrectionType.no
+        cell.textField.spellCheckingType = UITextSpellCheckingType.no
+        cell.textField.smartQuotesType = UITextSmartQuotesType.no
+        cell.textField.smartDashesType = UITextSmartDashesType.no
+        
         // these don't work. It appears to be impossible to set this element's color.
         // cell.titleLabel?.textColor = UIColor.white
         // cell.accessibilityIgnoresInvertColors = true
+        // todo - this stuff is probably because we need to hit the cell.textField.etc
     }
     
     override func viewDidLoad() {
