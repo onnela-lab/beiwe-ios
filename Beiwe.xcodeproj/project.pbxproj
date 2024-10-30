@@ -39,7 +39,6 @@
 		83AF04131CAADE6200A37225 /* StudyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83AF04121CAADE6200A37225 /* StudyManager.swift */; };
 		83AF04151CAB556800A37225 /* GPSManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83AF04141CAB556800A37225 /* GPSManager.swift */; };
 		83AF04171CAB777200A37225 /* DataStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83AF04161CAB777200A37225 /* DataStorageManager.swift */; };
-		83AF04191CAB843D00A37225 /* SwiftyRSA.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83AF04181CAB843D00A37225 /* SwiftyRSA.swift */; };
 		83AF041F1CACBCC600A37225 /* ParamUploadRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83AF041E1CACBCC600A37225 /* ParamUploadRequest.swift */; };
 		83AF04211CACC1C900A37225 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83AF04201CACC1C900A37225 /* MainViewController.swift */; };
 		83AF04271CADA02A00A37225 /* AccelerometerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83AF04261CADA02A00A37225 /* AccelerometerManager.swift */; };
@@ -135,7 +134,6 @@
 		83AF04121CAADE6200A37225 /* StudyManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StudyManager.swift; sourceTree = "<group>"; };
 		83AF04141CAB556800A37225 /* GPSManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSManager.swift; sourceTree = "<group>"; };
 		83AF04161CAB777200A37225 /* DataStorageManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataStorageManager.swift; sourceTree = "<group>"; };
-		83AF04181CAB843D00A37225 /* SwiftyRSA.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftyRSA.swift; sourceTree = "<group>"; };
 		83AF041E1CACBCC600A37225 /* ParamUploadRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParamUploadRequest.swift; sourceTree = "<group>"; };
 		83AF04201CACC1C900A37225 /* MainViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		83AF04261CADA02A00A37225 /* AccelerometerManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccelerometerManager.swift; sourceTree = "<group>"; };
@@ -349,7 +347,6 @@
 				83E3DE721CA37F7600EB5349 /* MiscHelpers.swift */,
 				AA1FCADD2B854A31004BE0AF /* SentryUtils.swift */,
 				8379B45B1CA4F02C00D4C605 /* Crypto.swift */,
-				83AF04181CAB843D00A37225 /* SwiftyRSA.swift */,
 				832FFC231CC863F400F2E1EF /* AppColors.swift */,
 			);
 			path = Util;
@@ -628,6 +625,7 @@
 				"${BUILT_PRODUCTS_DIR}/ResearchKit/ResearchKit.framework",
 				"${BUILT_PRODUCTS_DIR}/Sentry/Sentry.framework",
 				"${BUILT_PRODUCTS_DIR}/SwiftValidator/SwiftValidator.framework",
+				"${BUILT_PRODUCTS_DIR}/SwiftyRSA/SwiftyRSA.framework",
 				"${BUILT_PRODUCTS_DIR}/XCGLogger/XCGLogger.framework",
 				"${BUILT_PRODUCTS_DIR}/XLActionController/XLActionController.framework",
 				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
@@ -655,6 +653,7 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ResearchKit.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Sentry.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftValidator.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftyRSA.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/XCGLogger.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/XLActionController.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
@@ -736,7 +735,6 @@
 				8337656C1DED27B200E1B883 /* BWNavigatableTask.swift in Sources */,
 				83AF043B1CB3451A00A37225 /* OnboardingManager.swift in Sources */,
 				83AF043D1CB35D2000A37225 /* LoginViewController.swift in Sources */,
-				83AF04191CAB843D00A37225 /* SwiftyRSA.swift in Sources */,
 				83FDCFDA1CBCB6D300AFF716 /* ChangePasswordViewController.swift in Sources */,
 				8340ABF51CC7115400D0382F /* ChangePasswordRequest.swift in Sources */,
 				832FFC221CC85A7C00F2E1EF /* BWButton.swift in Sources */,
@@ -893,7 +891,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2024.31;
+				CURRENT_PROJECT_VERSION = 2024.42;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 6M52R5C7FT;
 				ENABLE_BITCODE = NO;
@@ -995,7 +993,7 @@
 				CODE_SIGN_ENTITLEMENTS = Beiwe/Beiwe2Release2.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2024.31;
+				CURRENT_PROJECT_VERSION = 2024.42;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 6M52R5C7FT;
 				ENABLE_BITCODE = NO;
@@ -1166,7 +1164,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2024.31;
+				CURRENT_PROJECT_VERSION = 2024.42;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 6M52R5C7FT;
 				ENABLE_BITCODE = NO;
@@ -1205,7 +1203,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Onnela Lab LLC (6M52R5C7FT)";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 2024.31;
+				CURRENT_PROJECT_VERSION = 2024.42;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 6M52R5C7FT;
 				ENABLE_BITCODE = NO;

@@ -40,17 +40,20 @@ enum DataStorageError: Error {
 var LEFT_BEHIND_FILES = [String]()
 let LEFT_BEHIND_FILES_LOCK = NSLock()
 
+//////////////////////////////////////// DataStorage Manager ///////////////////////////////////////
+//////////////////////////////////////// DataStorage Manager ///////////////////////////////////////
+//////////////////////////////////////// DataStorage Manager ///////////////////////////////////////
 
-//////////////////////////////////////// DataStorage Manager ///////////////////////////////////////
-//////////////////////////////////////// DataStorage Manager ///////////////////////////////////////
-//////////////////////////////////////// DataStorage Manager ///////////////////////////////////////
 class DataStorageManager {
     static let sharedInstance = DataStorageManager()
     static let dataFileSuffix = ".csv"
 
-    var secKeyRef: SecKey?
     var initted = false
-
+    
+    // The app must call dataStorageManagerInit in order to allow createStore to work
+    init() { self.initted = false }
+    func dataStorageManagerInit() { self.initted = true }
+    
     ////////////////////////////////////////// Setup ///////////////////////////////////////////////
     
     /// instantiates your DataStorage object - called in every manager
@@ -68,50 +71,17 @@ class DataStorageManager {
         
         if let study = StudyManager.sharedInstance.currentStudy {
             if let patientId = study.patientId {
-                if let studySettings = study.studySettings {
-                    if let publicKey = studySettings.clientPublicKey {
-                        if let secKeyRef = self.secKeyRef {
-                            return DataStorage(
-                                type: type, // the file name needs the data type
-                                headers: headers, // the csv headers
-                                patientId: patientId,
-                                publicKey: publicKey,
-                                keyRef: secKeyRef
-                            )
-                        } else {
-                            fatalError("(createStore) No secKeyRef object found? buh?")
-                        }
-                    } else {
-                        fatalError("(createStore) No public key found!")
-                    }
-                } else {
-                    fatalError("(createStore) No study settings found!")
-                }
+                return DataStorage(
+                    type: type, // the file name needs the data type
+                    headers: headers, // the csv headers
+                    patientId: patientId
+                )
             } else {
                 fatalError("(createStore) No patient id found!")
             }
         } else {
             fatalError("(createStore) No study found!")
         }
-    }
-
-    func dataStorageManagerInit(_ study: Study, secKeyRef: SecKey?) {
-        self.initted = true
-        self.secKeyRef = secKeyRef
-        // this function used to be called in setCurrentStudy, but there was a looked-like-a-race-condition
-        // in stashing these variables early on during app start, and then trying to access them later.
-        // Fully removing the stashing of `self.secKeyRef` resulted in
-        //   StudyManager().currentStudy?.keyRef
-        // causing a null access (wrapped in an if-let statement so we know it was exactly .keyRef, not something else)
-        // to occur.
-        // Maybe the call to dataStorageManagerInit and passing the non-nullable study forces the compiler to block
-        // until keyRef exists on StudyManager.currentStudy. Or somehow its the (optional tho?) secKeyRef that's passed in.
-        
-        // OLD CODE:
-        // self.study = study
-        // if let publicKey = study.studySettings?.clientPublicKey {
-        //     self.publicKey = publicKey
-        // }
     }
 
     /// see comment about race condition in createStore. We are using the same pattern here because we discovered a race condition
@@ -124,21 +94,11 @@ class DataStorageManager {
         
         if let study = StudyManager.sharedInstance.currentStudy {
             if let patientId = study.patientId {
-                if let studySettings = study.studySettings {
-                    if let publicKey = studySettings.clientPublicKey {
-                        return EncryptedStorage(
-                            data_stream_type: type,
-                            suffix: suffix,
-                            patientId: patientId,
-                            publicKey: PersistentPasswordManager.sharedInstance.publicKeyName(patientId),
-                            keyRef: self.secKeyRef
-                        )
-                    } else {
-                        fatalError("(createEncryptedFile) No public key found!")
-                    }
-                } else {
-                    fatalError("(createEncryptedFile) No study settings found!")
-                }
+                return EncryptedStorage(
+                    data_stream_type: type,
+                    suffix: suffix,
+                    patientId: patientId
+                )
             } else {
                 fatalError("(createEncryptedFile) No patient id found!")
             }
@@ -201,7 +161,6 @@ class DataStorageManager {
     
     ///////////////////////////////////////////////// Upload ///////////////////////////////////////
     
-    
     /// Moves any left behinde files in the data directory. Called just before upload.
     func moveLeftBehindFilesToUpload() {
         // safely get reference so that it can't be cleared or updated out from under us
@@ -226,7 +185,6 @@ class DataStorageManager {
             print("Moved left behind file \(shortenPath(filename)) to upload directory.")
         }
     }
-    
     
     /// called at app start, moves any uploadable files that were never moved to upload to upload folder
     func moveUnknownJunkToUpload() {
@@ -301,13 +259,13 @@ class DataStorageManager {
             try FileManager.default.moveItem(at: src, to: dst)
         } catch CocoaError.fileNoSuchFile {
             print("File not found (for moving)? \(shortenPath(src))")
-            sentry_warning("File not found (for moving).", shortenPath(src), crash:false)
+            sentry_warning("File not found (for moving).", shortenPath(src), crash: false)
         } catch CocoaError.fileWriteFileExists {
             // print("File already exists (for moving) \(shortenPath(dst)), giving up for now because that's crazy?")
             // we are getting a huge number of these reported, so throttle by 10x?
             FILE_WRITE_FILE_EXISTS_COUNTER += 1
             if FILE_WRITE_FILE_EXISTS_COUNTER % 10 == 0 {
-                sentry_warning("File already exists (for moving).", shortenPath(dst), crash:false)
+                sentry_warning("File already exists (for moving).", shortenPath(dst), crash: false)
             }
         } catch CocoaError.fileWriteOutOfSpace {
             // print("Out of space (for moving) \(shortenPath(dst))")
@@ -322,9 +280,7 @@ class DataStorageManager {
                 return self.moveFile(src, dst: dst, recur: recur - 1)
             }
             
-            log.error("Error moving(1) \(src) to \(dst)")
-            print("\(error)")
-            
+            log.error("Error moving(1) \(src) to \(dst), \(error)")
             SentrySDK.capture(message: "not a crash - Error moving file 1") { (scope: Scope) in
                 scope.setEnvironment(Constants.APP_INFO_TAG)
                 scope.setExtras([
@@ -372,8 +328,6 @@ class DataStorageManager {
 class DataStorage {
     // participant info (to be factored out)
     var patientId: String // TODO: factor out
-    var publicKey: String // string of the public key for local access. TODO: factor out
-    var secKeyRef: SecKey
     
     // file settings
     var headers: [String] // csv file header line
@@ -392,12 +346,11 @@ class DataStorage {
     var file_exists = false
     var file_handle: FileHandle
     
-    init(type: String, headers: [String], patientId: String, publicKey: String, keyRef: SecKey) {
+    init(type: String, headers: [String], patientId: String) {
         self.type = type // the type of data stream
         self.patientId = patientId
-        self.publicKey = publicKey
         self.headers = headers // the headers for the csv file
-        self.secKeyRef = keyRef
+        
         self.sanitize = false
         self.op_queue = DispatchQueue(label: "org.beiwe.\(self.type).write.queue")
         
@@ -416,23 +369,14 @@ class DataStorage {
     
     /// Returns the entire raw string of the first line of a file containing an RSA-encoded decryption key.
     private func get_rsa_line() -> Data {
-        // TODO: why are these two functions are not identical, the call to encryptString
-        //   have different args, publicKey vs publicKeyId. And self.secKeyRef is sometimes not present?
-        // if let keyRef = self.secKeyRef {
-            return try! Crypto.sharedInstance.base64ToBase64URL(
-                (SwiftyRSA.encryptString(
-                    get_that_aeskey(),
-                    publicKey: self.secKeyRef,
-                    padding: []
-                )) + "\n").data(using: String.Encoding.utf8)!
-        // } else {
-        //     return try! Crypto.sharedInstance.base64ToBase64URL(
-        //         (SwiftyRSA.encryptString(
-        //             Crypto.sharedInstance.base64ToBase64URL(self.aesKey.base64EncodedString()),
-        //             publicKeyId: PersistentPasswordManager.sharedInstance.publicKeyName(self.patientId),
-        //             padding: []
-        //         )) + "\n").data(using: String.Encoding.utf8)!
-        // }
+        // for dumb Python 2 legacy reasons we needed to  base64-encode the aes key, and
+        // only then encrypt it... and then base64 encode that again.
+        let encryption_key_line_as_string = Crypto.sharedInstance.rsaEncryptToBase64URL(
+            self.get_that_aeskey(),
+            publicKey: StudyManager.sharedInstance.getSecKey()
+        ) + "\n"
+        
+        return encryption_key_line_as_string.data(using: String.Encoding.utf8)!
     }
     
     func get_that_aeskey() -> String {
@@ -615,7 +559,7 @@ class DataStorage {
         }
         
         SentrySDK.capture(message: message) { (scope: Scope) in
-            scope.setEnvironment(Constants.APP_INFO_TAG)  // important for error triage
+            scope.setEnvironment(Constants.APP_INFO_TAG) // important for error triage
             scope.setExtras(extras)
             scope.setLevel(.error)
         }
@@ -668,14 +612,6 @@ class DataStorage {
 /////////////////////////////////////////////////////// EncryptedStorage /////////////////////////////////////////////////////
 /////////////////////////////////////////////////////// EncryptedStorage /////////////////////////////////////////////////////
 
-// EncryptedStorage Originally included a buffered write pattern in AudioQuestionViewController.
-// orig comment: only write multiples of 3, since we are base64 encoding and would otherwise end up with padding
-//    if (isFlush) // don't know what this variable is anymore....
-//        evenLength = self.currentData.length
-//    else
-//        evenLength = (self.currentData.length / 3) * 3
-//    self._write(new_data, len: new_data.length)
-//    self.currentData.replaceBytes(in: NSRange(0..<self.currentData.length), withBytes: nil, length: 0)
 class EncryptedStorage {
     // (Binary, mostly for audio files) Encrypted Storage
     // files
@@ -684,16 +620,16 @@ class EncryptedStorage {
     var debug_shortname: String
     let fileManager = FileManager.default
     var file_handle: FileHandle?
+    
     // encryption
-    var publicKey: String
     var aesKey: Data
     var iv: Data
-    var secKeyRef: SecKey
+    
     // machinery
     let encryption_queue: DispatchQueue
     var stream_cryptor: StreamCryptor
 
-    init(data_stream_type: String, suffix: String, patientId: String, publicKey: String, keyRef: SecKey?) {
+    init(data_stream_type: String, suffix: String, patientId: String) {
         // queue name
         self.encryption_queue = DispatchQueue(label: "beiwe.dataqueue." + data_stream_type, qos: .userInteractive, attributes: [])
         // file names
@@ -704,8 +640,7 @@ class EncryptedStorage {
         // encryption setup
         self.aesKey = Crypto.sharedInstance.newAesKey(Constants.KEYLENGTH)
         self.iv = Crypto.sharedInstance.randomBytes(16)
-        self.publicKey = publicKey
-        self.secKeyRef = keyRef!
+        
         let data_for_key = (aesKey as NSData).bytes.bindMemory(to: UInt8.self, capacity: self.aesKey.count)
         let data_for_iv = (iv as NSData).bytes.bindMemory(to: UInt8.self, capacity: self.iv.count)
         self.stream_cryptor = StreamCryptor(
@@ -732,7 +667,7 @@ class EncryptedStorage {
     func write(_ data: NSData?, writeLen: Int) {
         // This is called directly in audio file code
         // log.info("write called on \(self.debug_shortname)...")
-        self.encryption_queue.sync {
+        _ = self.encryption_queue.sync {
             self.write_actual(data, writeLen: writeLen)
         }
     }
@@ -752,20 +687,24 @@ class EncryptedStorage {
             fatalError("could not create file?")
         }
         self.file_handle = try! FileHandle(forWritingTo: self.filename)
-
-        // write the rsa line and iv immediately
-        let rsaLine: String = try! Crypto.sharedInstance.base64ToBase64URL(
-            SwiftyRSA.encryptString(
-                Crypto.sharedInstance.base64ToBase64URL(self.aesKey.base64EncodedString()),
-                publicKey: self.secKeyRef,
-                padding: []
-            )
+        
+        // for dumb Python 2 legacy reasons we needed to  base64-encode the aes key, and
+        // only then encrypt it... and then base64 encode that again.
+        let encryption_key_line_as_string = Crypto.sharedInstance.rsaEncryptToBase64URL(
+            self.get_that_aeskey(),
+            publicKey: StudyManager.sharedInstance.getSecKey()
         ) + "\n"
+        
+        // write the rsa line and iv immediately
         let ivHeader = Crypto.sharedInstance.base64ToBase64URL(self.iv.base64EncodedString()) + ":"
-        self.file_handle?.write(rsaLine.data(using: String.Encoding.utf8)!)
+        self.file_handle?.write(encryption_key_line_as_string.data(using: String.Encoding.utf8)!)
         self.file_handle?.write(ivHeader.data(using: String.Encoding.utf8)!)
     }
 
+    private func get_that_aeskey() -> String {
+        return Crypto.sharedInstance.base64ToBase64URL(self.aesKey.base64EncodedString())
+    }
+    
     private func close_actual() {
         self.file_handle?.closeFile()
         self.file_handle = nil

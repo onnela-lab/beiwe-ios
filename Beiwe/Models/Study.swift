@@ -6,7 +6,6 @@ class Study: ReclineObject {
     var studySettings: StudySettings?
     
     // constants (these should not change after registration)
-    var studyId = Constants.defaultStudyId  // except for this one? I don't even know.
     var participantConsented: Bool = false
     var patientId: String?
     var patientPhoneNumber: String = "" // uh, I don't think this is used?
@@ -35,11 +34,10 @@ class Study: ReclineObject {
     var surveys: [Survey] = []
     var activeSurveys: [String: ActiveSurvey] = [:]
 
-    init(patientPhone: String, patientId: String, studySettings: StudySettings, apiUrl: String?, studyId: String = Constants.defaultStudyId) {
+    init(patientPhone: String, patientId: String, studySettings: StudySettings, apiUrl: String?) {
         super.init()
         self.patientPhoneNumber = patientPhone
         self.studySettings = studySettings
-        self.studyId = studyId
         self.patientId = patientId
         self.registerDate = Int64(Date().timeIntervalSince1970)
         self.customApiUrl = apiUrl
@@ -54,7 +52,6 @@ class Study: ReclineObject {
         super.mapping(map: map)
         self.patientPhoneNumber <- map["phoneNumber"]
         self.studySettings <- map["studySettings"]
-        self.studyId <- map["studyId"]
         self.patientId <- map["patientId"]
         self.participantConsented <- map["participantConsented"]
         self.clinicianPhoneNumber <- map["clinicianPhoneNumber"]

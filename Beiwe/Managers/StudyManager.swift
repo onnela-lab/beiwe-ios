@@ -1,12 +1,13 @@
 import Alamofire
 import EmitterKit
+import FirebaseCore
+import FirebaseInstallations
+import FirebaseMessaging
 import Foundation
 import ObjectMapper
-import Sentry
-import FirebaseCore
-import FirebaseMessaging
-import FirebaseInstallations
 import Reachability
+import Sentry
+import SwiftyRSA
 
 /// Contains all sorts of miiscellaneous study related functionality - this is badly factored and should be refactored into classes that contain their own well-defirned things
 class StudyManager {
@@ -20,7 +21,11 @@ class StudyManager {
     var currentStudy: Study?
     var timerManager: TimerManager = TimerManager()
     var gpsManager: GPSManager? // gps manager is slightly special because we use it to keep the app open in the background
-    private var keyRef: SecKey? // the study's security key
+    
+    // the participant's RSA key
+    // TODO: refactor keyRef to be the PublicKey object, we are reinstantiating it in Crppto
+    private var publicKey: PublicKey?
+    private var keyRef: SecKey?
     
     // State tracking variables
     var sensorsStartedEver = false
@@ -102,7 +107,7 @@ class StudyManager {
             return
         }
         self.setApiCredentials()
-        DataStorageManager.sharedInstance.dataStorageManagerInit(self.currentStudy!, secKeyRef: self.keyRef)
+        DataStorageManager.sharedInstance.dataStorageManagerInit()
         self.prepareDataServices() // prepareDataServices was 90% of the function body
         NotificationCenter.default.addObserver(self, selector: #selector(self.reachabilityChanged), name: .reachabilityChanged, object: nil)
         
@@ -969,18 +974,24 @@ class StudyManager {
     /// business logic of the upload.
     /// processOnly means don't upload (it's based on reachability)
     func upload() {
-        print("Checking for uploads...")
-
         Ephemerals.start_last_upload = dateFormat(Date())
         DataStorageManager.sharedInstance.moveLeftBehindFilesToUpload()
         
         // if we can't enumerate files, that's insane, crash.
-        let fileEnumerator: FileManager.DirectoryEnumerator =
+        var fileEnumerator: FileManager.DirectoryEnumerator =
             FileManager.default.enumerator(atPath: DataStorageManager.uploadDataDirectory().path)!
+        
+        var message = "all files:"
+        fileEnumerator.allObjects.forEach { message += " \($0)" }
+        print("Checking for uploads ", Date(), " ...", message)
+        
+        // (we exhausted the iterator)
+        fileEnumerator = FileManager.default.enumerator(atPath: DataStorageManager.uploadDataDirectory().path)!
         var filesToProcess: [String] = []
         
         // loop over all and check if each file can be uploaded, assemble the list.
         while let filename = fileEnumerator.nextObject() as? String {
+            // print("uploading:", filename)
             if DataStorageManager.sharedInstance.isUploadFile(filename) {
                 // don't actually know if this can cause a thread confict, don't care, wrapping.
                 self.files_in_flight_lock.lock()
@@ -1043,9 +1054,9 @@ class StudyManager {
                     SentrySDK.capture(message: "Encountered encoding error while uploading file") { (scope: Scope) in
                         // grab the snapshot of the stack trace, add the extras, send
                         scope.setExtras([
-                                "\(error)": "error",
-                                filename: "filename",
-                                self.currentStudy!.patientId!: "user_id"
+                            "\(error)": "error",
+                            filename: "filename",
+                            self.currentStudy!.patientId!: "user_id",
                         ])
                     }
                     self.files_with_encoding_errors.append(filename)
@@ -1068,6 +1079,8 @@ class StudyManager {
         guard let study = currentStudy, let studySettings = study.studySettings else {
             return
         }
+        // finalize setting up sentry
+        AppDelegate.sharedInstance().setupSentryTags()
         // api setup
         self.setApiCredentials()
         let currentTime: Int64 = Int64(Date().timeIntervalSince1970)
@@ -1077,14 +1090,13 @@ class StudyManager {
         // set consented to true (checked over in AppDelegate)
         study.participantConsented = true
         // some io stuff
-        DataStorageManager.sharedInstance.dataStorageManagerInit(study, secKeyRef: self.keyRef)
+        DataStorageManager.sharedInstance.dataStorageManagerInit()
         DataStorageManager.sharedInstance.ensureDirectoriesExist()
         // update study stuff?
         Recline.shared.save(study)
         self.checkForNewSurveys()
     }
     
-    // FIXME: This function has 4 unacceptable failure modes -- called only from setConsented (study registration) and startStudyDataServices
     /// Sets up the password (api) credential for backend calls
     func setApiCredentials() {
         // if there is no study.... don't do this.
@@ -1095,17 +1107,15 @@ class StudyManager {
         // Why is this EVER allowed to be the empty string? that's silent failure FOREVER
         ApiManager.sharedInstance.password = PersistentPasswordManager.sharedInstance.passwordForStudy() ?? ""
         ApiManager.sharedInstance.customApiUrl = currentStudy.customApiUrl
-        if let patientId = currentStudy.patientId { // again WHY is this even allowed to happen on a null participant id
+    
+        // why is this allowed to have a null participant id...
+        // set the api participant id (why is that there?) and the RSA encryption key.
+        if let patientId = currentStudy.patientId {
             ApiManager.sharedInstance.patientId = patientId
             if let clientPublicKey = currentStudy.studySettings?.clientPublicKey {
-                do {
-                    // failure means a null key
-                    self.keyRef = try PersistentPasswordManager.sharedInstance.storePublicKeyForStudy(clientPublicKey, patientId: patientId)
-                } catch {
-                    log.error("Failed to store RSA key in keychain.") // why are we not crashing...
-                }
-            } else {
-                log.error("No public key found.  Can't store") // why are we not crashing...
+                let publicKey = try! PublicKey(base64Encoded: clientPublicKey)
+                self.keyRef = publicKey.reference
+                self.publicKey = publicKey
             }
         }
     }

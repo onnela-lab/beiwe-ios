@@ -2,6 +2,7 @@ platform :ios, '12.0'
 
 target 'Beiwe' do
     use_frameworks!
+    workspace 'Beiwe.xcworkspace'
 
     # firebase (push notifications)      
     #pod 'FirebaseCrashlytics'  # old: pod 'Crashlytics', '~> 3.4'
@@ -14,7 +15,6 @@ target 'Beiwe' do
     # pod 'Sentry', :git => 'https://github.com/getsentry/sentry-cocoa.git', :tag => '8.36.0'
     
     # one-off libraries
-    pod 'KeychainSwift', '~> 8.0'
     pod 'EmitterKit', '~> 5.2.2'  # old: '~> 5.1'
     # pod 'XCGLogger', '~> 7.0.0'
     
@@ -28,6 +28,7 @@ target 'Beiwe' do
     pod 'Eureka'
     # validates the inputs at registration
     pod 'SwiftValidator', :git => 'https://github.com/SwiftValidatorCommunity/SwiftValidator.git', :branch => 'master'
+    
     # pops up a heads-up-display on certain pages.
     pod 'PKHUD', :git => 'https://github.com/pkluz/PKHUD.git', :tag => '5.4.0'  # old: :branch => 'release/swift4'
     # the surveys
@@ -50,8 +51,11 @@ target 'Beiwe' do
     # Http requests
     pod 'Alamofire', '~> 4.5'
 
-    # Encryption
+    # Encryption / Security
+    pod 'KeychainSwift', '~> 24.0'
     pod 'IDZSwiftCommonCrypto', '~> 0.16.1'  # old: '~> 0.13.0'
+    # SwiftyRSA 1.8.0 was not updated on Cocoapods, https://github.com/TakeScoop/SwiftyRSA/issues/263
+    pod 'SwiftyRSA', :git => "https://github.com/TakeScoop/SwiftyRSA.git", :tag => '1.8.0'
 
 end
 

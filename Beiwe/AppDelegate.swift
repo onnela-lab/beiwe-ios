@@ -11,11 +11,6 @@ import Sentry
 import UIKit
 import XCGLogger
 
-let log = XCGLogger(identifier: "advancedLogger", includeDefaultDestinations: false)
-
-extension String: LocalizedError {
-    public var errorDescription: String? { return self }
-}
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate {
@@ -182,7 +177,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     func initialize_database() {
         Recline.shared.open()
         StudyManager.sharedInstance.loadDefaultStudy()
-        Recline.shared.compact()
     }
         
     func setupThatDependsOnDatabase(_ launchOptions: [UIApplication.LaunchOptionsKey: Any]?) {
@@ -524,7 +518,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         // uuids present - feature developed october 2021
         if let notificationUUIDsJSONString = notificationUUIDsJSONString {
             print("notificationUUIDsJSONString:", notificationUUIDsJSONString)
-            updateRecievedNotificationUUIDs(notificationUUIDsJSONString as! String)
+            self.updateRecievedNotificationUUIDs(notificationUUIDsJSONString as! String)
         }
         
         // survey ids present
@@ -546,7 +540,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
             StudyManager.sharedInstance.checkForNewSurveys(surveyIds: [])
         }
     }
-    
     
     /// Just json string to array of strings with debug print statements.
     func jsonToSurveyIdArray(_ json_string: String) -> [String] {
@@ -585,7 +578,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         self.currentStudy!.surveyPushNotificationUUIDs!.append(contentsOf: notification_uuids)
     }
     
-
     ////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////// Firebase Stuff ////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -788,8 +780,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     //////////////////////////////////////// SENTRY STUFF //////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////
     
+    // loads sentry key, prints an error if it doesn't work.
     func setupSentry() {
-        // loads sentry key, prints an error if it doesn't work.
         do {
             let dsn_name = SentryConfiguration.sharedInstance.settings["sentry-dsn"] as? String ?? "dev"
             let dsn: String
@@ -799,16 +791,50 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
                 dsn = SentryKeys.development_dsn
             } else { throw "Invalid Sentry configuration" }
             
-            SentrySDK.start { options in
+            SentrySDK.start { (options: Options) in
                 options.dsn = dsn
                 options.debug = false // Enabled debug when first installing is always helpful
                 options.releaseName = Constants.APP_INFO_SHORT
-                // Uncomment the following lines to add more data to your events
+                options.swiftAsyncStacktraces = true
+                options.enableCrashHandler = true
+                options.enableMetrics = true
+                options.enableDefaultTagsForMetrics = true
                 // options.attachScreenshot = true // This adds a screenshot to the error events
                 options.attachViewHierarchy = true // This adds the view hierarchy to the error events
             }
         } catch let error {
             print("Error loading Sentry DSN: \(error)\nSentry will not be enabled.")
+        }
+    }
+    
+    // we have a couple odd points in the app lifecycle that mean we can't default
+    // these values in without some extra logic.
+    func setupSentryTags() {
+        // these are SentryScope objects
+        if !StudyManager.real_study_loaded {
+            SentrySDK.configureScope { (scope: Scope) in
+                scope.setTags([
+                    "user_id": "no study",
+                    "server_url": "no study",
+                ])
+            }
+            return
+        }
+        
+        if let study = self.currentStudy {
+            SentrySDK.configureScope { (scope: Scope) in
+                scope.setTags([
+                    "user_id": study.patientId ?? "nil",
+                    "server_url": study.customApiUrl ?? "nil",
+                ])
+            }
+        } else {
+            SentrySDK.configureScope { (scope: Scope) in
+                scope.setTags([
+                    "user_id": "bad config",
+                    "server_url": "bad config",
+                ])
+            }
         }
     }
 }

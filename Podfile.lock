@@ -95,7 +95,7 @@ PODS:
     - GoogleUtilities/Privacy
   - Hakuba (2.1.1)
   - IDZSwiftCommonCrypto (0.16.1)
-  - KeychainSwift (8.0.3)
+  - KeychainSwift (24.0.0)
   - nanopb (2.30910.0):
     - nanopb/decode (= 2.30910.0)
     - nanopb/encode (= 2.30910.0)
@@ -113,6 +113,9 @@ PODS:
     - Sentry/Core (= 8.37.0)
   - Sentry/Core (8.37.0)
   - SwiftValidator (4.0.0)
+  - SwiftyRSA (1.8.0):
+    - SwiftyRSA/ObjC (= 1.8.0)
+  - SwiftyRSA/ObjC (1.8.0)
   - XCGLogger (7.0.1):
     - XCGLogger/Core (= 7.0.1)
   - XCGLogger/Core (7.0.1):
@@ -130,13 +133,14 @@ DEPENDENCIES:
   - FirebaseMessaging
   - Hakuba (from `https://github.com/eskizyen/Hakuba.git`, branch `Swift3`)
   - IDZSwiftCommonCrypto (~> 0.16.1)
-  - KeychainSwift (~> 8.0)
+  - KeychainSwift (~> 24.0)
   - ObjectMapper (from `https://github.com/Hearst-DD/ObjectMapper.git`, commit `0b96a734de3ea1c87374ae677064f86adb0716ec`)
   - PKHUD (from `https://github.com/pkluz/PKHUD.git`, tag `5.4.0`)
   - ReachabilitySwift (= 5.2.3)
   - ResearchKit (from `https://github.com/ResearchKit/ResearchKit.git`, tag `2.1.0`)
   - Sentry (~> 8.37.0)
   - SwiftValidator (from `https://github.com/SwiftValidatorCommunity/SwiftValidator.git`, branch `master`)
+  - SwiftyRSA (from `https://github.com/TakeScoop/SwiftyRSA.git`, tag `1.8.0`)
   - XCGLogger (~> 7.0.0)
   - XLActionController (~> 5.0.1)
 
@@ -180,6 +184,9 @@ EXTERNAL SOURCES:
   SwiftValidator:
     :branch: master
     :git: https://github.com/SwiftValidatorCommunity/SwiftValidator.git
+  SwiftyRSA:
+    :git: https://github.com/TakeScoop/SwiftyRSA.git
+    :tag: 1.8.0
 
 CHECKOUT OPTIONS:
   Hakuba:
@@ -197,6 +204,9 @@ CHECKOUT OPTIONS:
   SwiftValidator:
     :commit: d370353b7a0ce758a53b189c81e485dcd53c99a4
     :git: https://github.com/SwiftValidatorCommunity/SwiftValidator.git
+  SwiftyRSA:
+    :git: https://github.com/TakeScoop/SwiftyRSA.git
+    :tag: 1.8.0
 
 SPEC CHECKSUMS:
   Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
@@ -213,7 +223,7 @@ SPEC CHECKSUMS:
   GoogleUtilities: ea963c370a38a8069cc5f7ba4ca849a60b6d7d15
   Hakuba: bc5a0422290d086c33a6424a26dd58c1a1136e94
   IDZSwiftCommonCrypto: aefd3487b88dc3d7a1de2553188c720ac3194940
-  KeychainSwift: be9554c0e5f4b1686c775930dc5c6bd9396992ed
+  KeychainSwift: 007c4647486e4563adca839cf02cef00deb3b670
   nanopb: 438bc412db1928dac798aa6fd75726007be04262
   ObjcExceptionBridging: d3d37d62981bb7f252ecb31b62d7e23a96bbfb8a
   ObjectMapper: 1eb41f610210777375fa806bf161dc39fb832b81
@@ -223,9 +233,10 @@ SPEC CHECKSUMS:
   ResearchKit: 145c6c2a272d313a53ab1dc49d84b0d20dde003a
   Sentry: ee060c09b2f7ec1240e95c766ab44c04c7bdb052
   SwiftValidator: 249b6b3ae3b294266c5b9de134d94f18f2d5aa47
+  SwiftyRSA: 735e48d1162b95af42f140c47ea968e8b6b0a54b
   XCGLogger: 1943831ef907df55108b0b18657953f868de973b
   XLActionController: f1f2226d2c6629db197d4a41f2da907085a4cb9d
 
-PODFILE CHECKSUM: 26ae469152245038a6e4564ddcf65c51471dff27
+PODFILE CHECKSUM: 049f48b6df1d6243c6d1c317efaa5adc2bdf6cf0
 
 COCOAPODS: 1.15.2

@@ -164,13 +164,6 @@ class Recline {
             }
         }
     }
-
-    /// runs the database compact operation (why? we have a TINY database.)
-    func compact() {
-        OUTER_RECLINE_QUEUE.sync {
-            // no available compact function on the newest version of couchbase
-        }
-    }
 }
 
 /// class for objects returned from a database query

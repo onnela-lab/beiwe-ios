@@ -209,8 +209,8 @@ class RegisterViewController: FormViewController {
             
             if let patientId = patientId, let phoneNumber = phoneNumber, let newPassword = newPassword, let clinicianPhone = clinicianPhone, let raPhone = raPhone {
                 let registerStudyRequest = RegisterStudyRequest(patientId: patientId, phoneNumber: phoneNumber, newPassword: newPassword)
-                
-                // sets tags for Sentry -- we don't actually know for certain that this works
+
+                // these sentry info tags will not be set otherwise until after registration.
                 SentrySDK.configureScope { scope in
                     scope.setTags(["user_id": patientId, "server_url": server])
                 }
