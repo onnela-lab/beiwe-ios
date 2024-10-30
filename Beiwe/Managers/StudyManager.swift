@@ -1116,6 +1116,8 @@ class StudyManager {
                 let publicKey = try! PublicKey(base64Encoded: clientPublicKey)
                 self.keyRef = publicKey.reference
                 self.publicKey = publicKey
+            } else {
+                fatalError("you can't not have the public key, its required.")
             }
         }
     }
