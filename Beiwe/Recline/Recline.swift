@@ -80,6 +80,9 @@ class Recline {
         do {
             if let doc = doc {
                 try db.defaultCollection().save(document: doc)
+                print(
+                    "Created document id type \(doc.id)? with patientId = \(doc.string(forKey: "patientId")!)"
+                )
             } else {
                 fatalError("Failed to create or fetch the document for saving")
             }
@@ -159,13 +162,6 @@ class Recline {
             } catch {
                 fatalError("error purging document: \(error)")
             }
-        }
-    }
-
-    /// runs the database compact operation (why? we have a TINY database.)
-    func compact() {
-        OUTER_RECLINE_QUEUE.sync {
-            // no available compact function on the newest version of couchbase
         }
     }
 }
