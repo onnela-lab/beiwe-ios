@@ -22,6 +22,7 @@ private let omniring_headers = [
     "IMU_Mag_x",
     "IMU_Mag_y",
     "IMU_Mag_z",
+    "temperature",
     "timestamp"
 ]
 
@@ -39,6 +40,7 @@ private struct OmniringDataPoint {
     var imuMagX: String
     var imuMagY: String
     var imuMagZ: String
+    var temperature: String
     var ringTimestamp: String
 }
 
@@ -86,7 +88,8 @@ class OmniringManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate,
             imuMagX: String(generated[9]),
             imuMagY: String(generated[10]),
             imuMagZ: String(generated[11]),
-            ringTimestamp: String(Int64(generated[12]))
+            temperature: String(generated[12]),
+            ringTimestamp: String(Int64(generated[13]))
         )
         self.cacheLock.lock()
         self.datapoints.append(data)
@@ -177,9 +180,7 @@ class OmniringManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate,
         
         if self.omniringPeripheral == nil {
             self.bluetoothManager?.scanForPeripherals(withServices: nil)
-        }
-        
-        if self.omniringDataCharacteristic != nil {
+        } else if self.omniringDataCharacteristic != nil {
             print("start omniring")
             self.collecting = true
             self.omniringPeripheral?.setNotifyValue(self.collecting, for: self.omniringDataCharacteristic!)
@@ -233,6 +234,7 @@ class OmniringManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate,
                 data.imuMagX,
                 data.imuMagY,
                 data.imuMagZ,
+                data.temperature,
                 data.ringTimestamp
             ])
         }
