@@ -119,9 +119,7 @@ struct StudySettings: Mappable {
     // Omniring
     var omniring = false
     var omniringOffDurationSeconds = 300
-    var omniringOnDurationSeconds = 60
-    var omniringTotalDurationSeconds = 300
-    var omniringGlobalOffsetSeconds = 0
+    var omniringOnDurationSeconds = 0
 
     // firebase/gcm stuff (most of this is junk we don't use)
     var gcmSenderID = ""
@@ -153,10 +151,9 @@ struct StudySettings: Mappable {
         self.bluetoothGlobalOffsetSeconds        <- map["device_settings.bluetooth_global_offset_seconds"]
         self.bluetoothOnDurationSeconds          <- map["device_settings.bluetooth_on_duration_seconds"]
         self.bluetoothTotalDurationSeconds       <- map["device_settings.bluetooth_total_duration_seconds"]
-        self.omniring                           <- map["device_settings.omniring"]
-        self.omniringGlobalOffsetSeconds        <- map["device_settings.omniring_global_offset_seconds"]
-        self.omniringOnDurationSeconds          <- map["device_settings.omniring_on_duration_seconds"]
-        self.omniringTotalDurationSeconds       <- map["device_settings.omniring_total_duration_seconds"]
+        self.omniring                            <- map["device_settings.omniring"]
+        self.omniringOffDurationSeconds          <- map["device_settings.omniring_off_duration_seconds"]
+        self.omniringOnDurationSeconds           <- map["device_settings.omniring_on_duration_seconds"]
         self.callClinicianText                   <- map["device_settings.call_clinician_button_text"]
         // self.calls                               <- map["device_settings.calls"]
         self.checkForNewSurveysFreqSeconds       <- map["device_settings.check_for_new_surveys_frequency_seconds"]
@@ -275,9 +272,7 @@ struct JustStudySettings: Mappable {
     // Omniring
     var omniring = false
     var omniringOffDurationSeconds = 300
-    var omniringOnDurationSeconds = 60
-    var omniringTotalDurationSeconds = 300
-    var omniringGlobalOffsetSeconds = 0
+    var omniringOnDurationSeconds = 0
 
     // Mappable
     mutating func mapping(map: Map) {
@@ -290,10 +285,9 @@ struct JustStudySettings: Mappable {
         self.bluetoothGlobalOffsetSeconds        <- map["bluetooth_global_offset_seconds"]
         self.bluetoothOnDurationSeconds          <- map["bluetooth_on_duration_seconds"]
         self.bluetoothTotalDurationSeconds       <- map["bluetooth_total_duration_seconds"]
-        self.omniring                           <- map["omniring"]
-        self.omniringGlobalOffsetSeconds        <- map["omniring_global_offset_seconds"]
-        self.omniringOnDurationSeconds          <- map["omniring_on_duration_seconds"]
-        self.omniringTotalDurationSeconds       <- map["omniring_total_duration_seconds"]
+        self.omniring                            <- map["device_settings.omniring"]
+        self.omniringOffDurationSeconds          <- map["device_settings.omniring_off_duration_seconds"]
+        self.omniringOnDurationSeconds           <- map["device_settings.omniring_on_duration_seconds"]
         self.callClinicianText                   <- map["call_clinician_button_text"]
         // self.calls                               <- map["calls"]
         self.checkForNewSurveysFreqSeconds       <- map["check_for_new_surveys_frequency_seconds"]

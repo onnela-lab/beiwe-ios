@@ -897,22 +897,17 @@ class StudyManager {
         if self.currentStudy?.studySettings?.omniring != newSettings.omniring {
             anything_changed = true
             self.currentStudy?.studySettings?.omniring = newSettings.omniring
-        }
-        if self.currentStudy?.studySettings?.omniringOnDurationSeconds != newSettings.omniringOnDurationSeconds {
-            anything_changed = true
-            self.currentStudy?.studySettings?.omniringOnDurationSeconds = newSettings.omniringOnDurationSeconds
+            // print("omniring changed to: \(newSettings.omniring)")
         }
         if self.currentStudy?.studySettings?.omniringOffDurationSeconds != newSettings.omniringOffDurationSeconds {
             anything_changed = true
             self.currentStudy?.studySettings?.omniringOffDurationSeconds = newSettings.omniringOffDurationSeconds
+            // print("omniringOffDurationSeconds changed to: \(newSettings.omniringOffDurationSeconds)")
         }
-        if self.currentStudy?.studySettings?.omniringGlobalOffsetSeconds != newSettings.omniringGlobalOffsetSeconds {
+        if self.currentStudy?.studySettings?.omniringOnDurationSeconds != newSettings.omniringOnDurationSeconds {
             anything_changed = true
-            self.currentStudy?.studySettings?.omniringGlobalOffsetSeconds = newSettings.omniringGlobalOffsetSeconds
-        }
-        if self.currentStudy?.studySettings?.omniringTotalDurationSeconds != newSettings.omniringTotalDurationSeconds {
-            anything_changed = true
-            self.currentStudy?.studySettings?.omniringTotalDurationSeconds = newSettings.omniringTotalDurationSeconds
+            self.currentStudy?.studySettings?.omniringOnDurationSeconds = newSettings.omniringOnDurationSeconds
+            // print("omniringOnDurationSeconds changed to: \(newSettings.omniringOnDurationSeconds)")
         }
         
         // accedentally tested it like this outside of if anything_changed, it's fine.
