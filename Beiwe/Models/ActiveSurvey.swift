@@ -42,19 +42,12 @@ class ActiveSurvey: Mappable {
     }
 
     // resets the survey to its original configuration
-    func reset(_ survey: Survey? = nil) {
-        if let survey = survey {
-            self.survey = survey
-        }
+    func reset(_ survey: Survey) {
         // clear out answers
         self.rkAnswers = nil
         self.bwAnswers = [:]
         self.isComplete = false
-        
-        guard let survey = survey else { // unreachable...?
-            return
-        }
-        
+                
         // set up the step ordering (shuffle if the steps are shuffled)
         var steps = [Int](0 ..< survey.questions.count)
         if survey.randomize {

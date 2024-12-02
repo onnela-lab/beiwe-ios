@@ -1,7 +1,6 @@
 struct Constants {
     static let passwordRequirementRegex = "^.{6,}$"
     static let passwordRequirementDescription = NSLocalizedString("password_length_requirement", comment: "")
-    static let defaultStudyId = "default" // FIXME: purge
     
     static let DELIMITER = "," // csv separator character, named for legible code reasons
     static let KEYLENGTH = 128 // encryption key length for any given line of encrypted data.
@@ -27,6 +26,7 @@ struct Constants {
     }
     
     static let APP_INFO_TAG = "iOS Version: \(Constants.APP_VERSION) Build: \(Constants.APP_BUILD) Commit: \(Constants.APP_COMMIT)"
+    static let APP_INFO_SHORT = "\(Constants.APP_VERSION) \(Constants.APP_BUILD) (\(Constants.APP_COMMIT))"
 }
 
 let DEV_TIMEZONE = "America/New_York"

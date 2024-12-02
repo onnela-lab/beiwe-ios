@@ -1,28 +1,26 @@
 import BackgroundTasks
 import Sentry
 
+/// This file is under active development and is not documented. Once we work better code for this
+/// background process management we can document.
+
 func scheduleRefreshHeartbeat() {
-    print("scheduling refresh heartbeat")
+    // print("scheduling refresh heartbeat")
     let request = BGAppRefreshTaskRequest(identifier: BACKGROUND_TASK_NAME_HEARTBEAT_BGREFRESH)
     request.earliestBeginDate = Date(timeIntervalSinceNow: 10)
     do {
         try BGTaskScheduler.shared.submit(request)
     } catch {
         // capture and report this error to sentry.
-        if let sentry_client = Client.shared {
-            sentry_client.snapshotStacktrace {
-                let event = Event(level: .error)
-                event.message = "scheduling refresh heartbeat: \(error)"
-                event.environment = Constants.APP_INFO_TAG
-                sentry_client.appendStacktrace(to: event)
-                sentry_client.send(event: event)
-            }
+        SentrySDK.capture(message: "not a crash - scheduling refresh heartbeat: \(error)") { (scope: Scope) in
+            scope.setEnvironment(Constants.APP_INFO_TAG)
+            scope.setLevel(.error)
         }
     }
 }
 
 func scheduleProcessingHeartbeat() {
-    print("scheduling processing heartbeat")
+    // print("scheduling processing heartbeat")
     let request = BGProcessingTaskRequest(identifier: BACKGROUND_TASK_NAME_HEARTBEAT_BGPROCESSING)
     request.earliestBeginDate = Date(timeIntervalSinceNow: 10)
     request.requiresExternalPower = false
@@ -31,21 +29,16 @@ func scheduleProcessingHeartbeat() {
         try BGTaskScheduler.shared.submit(request)
     } catch {
         // capture and report this error to sentry.
-        if let sentry_client = Client.shared {
-            sentry_client.snapshotStacktrace {
-                let event = Event(level: .error)
-                event.message = "scheduling processing heartbeat: \(error)"
-                event.environment = Constants.APP_INFO_TAG
-                sentry_client.appendStacktrace(to: event)
-                sentry_client.send(event: event)
-            }
+        SentrySDK.capture(message: "not a crash - scheduling processing heartbeat: \(error)") { (scope: Scope) in
+            scope.setEnvironment(Constants.APP_INFO_TAG)
+            scope.setLevel(.error)
         }
     }
 }
 
 @available(iOS 17.0, *)
 func scheduleHealthHeartbeat() {
-    print("scheduling health heartbeat")
+    // print("scheduling health heartbeat")
     let request = BGHealthResearchTaskRequest(identifier: BACKGROUND_TASK_NAME_HEARTBEAT_BGHEALTH)
     request.earliestBeginDate = Date(timeIntervalSinceNow: 10)
     request.requiresExternalPower = false
@@ -55,14 +48,9 @@ func scheduleHealthHeartbeat() {
         try BGTaskScheduler.shared.submit(request)
     } catch {
         // capture and report this error to sentry.
-        if let sentry_client = Client.shared {
-            sentry_client.snapshotStacktrace {
-                let event = Event(level: .error)
-                event.message = "scheduling health heartbeat: \(error)"
-                event.environment = Constants.APP_INFO_TAG
-                sentry_client.appendStacktrace(to: event)
-                sentry_client.send(event: event)
-            }
+        SentrySDK.capture(message: "not a crash - scheduling health heartbeat: \(error)") { (scope: Scope) in
+            scope.setEnvironment(Constants.APP_INFO_TAG)
+            scope.setLevel(.error)
         }
     }
 }
@@ -83,20 +71,20 @@ func updateBackgroundTasksCount() {
         print("There are \(taskRequests.count) BGTaskRequests outstanding right now:")
         for request in taskRequests {
             if let refresh_task_request = request as? BGAppRefreshTaskRequest {
-                print("\t BGAppRefreshTaskRequest - ", request.identifier, request.earliestBeginDate!)
+                // print("\t BGAppRefreshTaskRequest - ", request.identifier, request.earliestBeginDate!)
                 info.append("BGAppRefreshTaskRequest \(request.identifier):\(request.earliestBeginDate!)")
             }
             if let processing_task_request = request as? BGProcessingTaskRequest {
-                print("\t BGProcessingTaskRequest - ", request.identifier, request.earliestBeginDate!,
-                      "external power:", processing_task_request.requiresExternalPower,
-                      "requires network:", processing_task_request.requiresNetworkConnectivity)
+                // print("\t BGProcessingTaskRequest - ", request.identifier, request.earliestBeginDate!,
+                //       "external power:", processing_task_request.requiresExternalPower,
+                //       "requires network:", processing_task_request.requiresNetworkConnectivity)
                 info.append("BGProcessingTaskRequest \(request.identifier):\(request.earliestBeginDate!)")
             }
             // the background health tasks DO NOT SHOW UP. This is not a version-gating bug, I tested it THOROUGHLY,
             // it's either another bug or they are hidden and are not visible to the getPendingTaskRequests function.
             if #available(iOS 17.0, *) {
                 if let health_task_request = request as? BGHealthResearchTaskRequest {
-                    print("\t BGHealthResearchTaskRequest - ", request.identifier, request.earliestBeginDate!)
+                    // print("\t BGHealthResearchTaskRequest - ", request.identifier, request.earliestBeginDate!)
                     info.append("BGHealthResearchTaskRequest \(request.identifier):\(request.earliestBeginDate!)")
                 }
             }
@@ -107,20 +95,20 @@ func updateBackgroundTasksCount() {
 }
 
 func handleHeartbeatRefresh(task: BGAppRefreshTask) {
-    print("BGAppRefreshTask - the handler is getting called \(dateFormatLocal(Date()))")
+    // print("BGAppRefreshTask - the handler is getting called \(dateFormatLocal(Date()))")
     StudyManager.sharedInstance.heartbeat("BGAppRefreshTask - \(Ephemerals.background_task_count)")
     scheduleRefreshHeartbeat()
 }
 
 func handleHeartbeatProcessing(task: BGProcessingTask) {
-    print("BGProcessingTask - the handler is getting called \(dateFormatLocal(Date()))")
+    // print("BGProcessingTask - the handler is getting called \(dateFormatLocal(Date()))")
     StudyManager.sharedInstance.heartbeat("BGProcessingTask - \(Ephemerals.background_task_count)")
     scheduleProcessingHeartbeat()
 }
 
 @available(iOS 17.0, *)
 func handleHeartbeatHealth(task: BGHealthResearchTask) {
-    print("BGHealthResearchTask - the handler is getting called \(dateFormatLocal(Date()))")
+    // print("BGHealthResearchTask - the handler is getting called \(dateFormatLocal(Date()))")
     StudyManager.sharedInstance.heartbeat("BGHealthResearchTask - \(Ephemerals.background_task_count)")
     scheduleHealthHeartbeat()
 }

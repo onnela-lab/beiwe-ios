@@ -1,17 +1,19 @@
 import Alamofire
-import Crashlytics
 import EmitterKit
-import Firebase
+import FirebaseCore
+import FirebaseInstallations
+import FirebaseMessaging
 import Foundation
 import ObjectMapper
-import ReachabilitySwift
+import Reachability
 import Sentry
+import SwiftyRSA
 
 /// Contains all sorts of miiscellaneous study related functionality - this is badly factored and should be refactored into classes that contain their own well-defirned things
 class StudyManager {
     static let sharedInstance = StudyManager() // singleton reference
-    
     // General code assets
+    
     let appDelegate = UIApplication.shared.delegate as! AppDelegate
     let calendar = Calendar.current
     
@@ -19,7 +21,11 @@ class StudyManager {
     var currentStudy: Study?
     var timerManager: TimerManager = TimerManager()
     var gpsManager: GPSManager? // gps manager is slightly special because we use it to keep the app open in the background
-    var keyRef: SecKey? // the study's security key
+    
+    // the participant's RSA key
+    // TODO: refactor keyRef to be the PublicKey object, we are reinstantiating it in Crppto
+    private var publicKey: PublicKey?
+    private var keyRef: SecKey?
     
     // State tracking variables
     var sensorsStartedEver = false
@@ -31,6 +37,18 @@ class StudyManager {
     }
     
     // Common getters
+    
+    /// The only reason that this object is optional is because we need to instantiate
+    /// a study and study manager before the participant hits the accept button to the
+    /// terms of the study / so that we don't ever write data outside of the participant
+    /// completing registration for a study.
+    func getSecKey() -> SecKey {
+        if let keyRef = self.keyRef {
+            return keyRef
+        } else {
+            fatalError("studymanager.keyRef was nil.")
+        }
+    }
     
     /// getters, mutators all the ids of active surveys - not used (anymore?
     func getActiveSurveyIds() -> [String] {
@@ -58,13 +76,14 @@ class StudyManager {
         guard let study = self.currentStudy else {
             return
         }
+        // print("emit_survey_updates_save_study_data got called")
         self.surveysUpdatedEvent.emit(0) // what is this?
         Recline.shared.save(study)
     }
     
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////// Setup and UnSetup ///////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////// Setup and UnSetup ////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     
     func loadDefaultStudy() {
         self.currentStudy = nil
@@ -88,9 +107,9 @@ class StudyManager {
             return
         }
         self.setApiCredentials()
-        DataStorageManager.sharedInstance.dataStorageManagerInit(self.currentStudy!, secKeyRef: self.keyRef)
+        DataStorageManager.sharedInstance.dataStorageManagerInit()
         self.prepareDataServices() // prepareDataServices was 90% of the function body
-        NotificationCenter.default.addObserver(self, selector: #selector(self.reachabilityChanged), name: ReachabilityChangedNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.reachabilityChanged), name: .reachabilityChanged, object: nil)
         
         self.heartbeat_on_dispatch_queue()
     }
@@ -112,7 +131,6 @@ class StudyManager {
         
         // legacy case - we were using a bad location, the CACHE directory, and we may
         // still have files there. adding this on 2024-2-20.
-        DataStorageManager.sharedInstance.moveUnknownJunkToUpload()
         DataStorageManager.sharedInstance.moveOldUnknownJunkToUpload()
         
         // There may be files in the current data directory, this should only happen if the app crashed,
@@ -166,54 +184,10 @@ class StudyManager {
         self.sensorsStartedEver = true
     }
     
-    /// sets the study as consented, sets api credentials
-    // ok I have not tested whether removing the promise from this impacts registration...
-    func setConsented() {
-        // fail if current study or study settings are null
-        guard let study = currentStudy, let studySettings = study.studySettings else {
-            return
-        }
-        // api setup
-        self.setApiCredentials()
-        let currentTime: Int64 = Int64(Date().timeIntervalSince1970)
-        // kick off survey timers
-        study.nextUploadCheck = currentTime + Int64(studySettings.uploadDataFileFrequencySeconds)
-        study.nextSurveyCheck = currentTime + Int64(studySettings.checkForNewSurveysFreqSeconds)
-        // set consented to true (checked over in AppDelegate)
-        study.participantConsented = true
-        // some io stuff
-        DataStorageManager.sharedInstance.dataStorageManagerInit(study, secKeyRef: self.keyRef)
-        DataStorageManager.sharedInstance.ensureDirectoriesExist()
-        // update study stuff?
-        Recline.shared.save(study)
-        self.checkForNewSurveys()
-    }
-    
-    // FIXME: This function has 4 unacceptable failure modes -- called only from setConsented (study registration) and startStudyDataServices
-    /// Sets up the password (api) credential for backend calls
-    func setApiCredentials() {
-        // if there is no study.... don't do this.
-        guard let currentStudy: Study = self.currentStudy else {
-            return
-        }
-        // Setup APIManager's security
-        // Why is this EVER allowed to be the empty string? that's silent failure FOREVER
-        ApiManager.sharedInstance.password = PersistentPasswordManager.sharedInstance.passwordForStudy() ?? ""
-        ApiManager.sharedInstance.customApiUrl = currentStudy.customApiUrl
-        if let patientId = currentStudy.patientId { // again WHY is this even allowed to happen on a null participant id
-            ApiManager.sharedInstance.patientId = patientId
-            if let clientPublicKey = currentStudy.studySettings?.clientPublicKey {
-                do {
-                    // failure means a null key
-                    self.keyRef = try PersistentPasswordManager.sharedInstance.storePublicKeyForStudy(clientPublicKey, patientId: patientId)
-                } catch {
-                    log.error("Failed to store RSA key in keychain.") // why are we not crashing...
-                }
-            } else {
-                log.error("No public key found.  Can't store") // why are we not crashing...
-            }
-        }
-    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////// Survey Submission ///////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // TODO: this location for this code makes no sense, why is it here?
     
     /// takes a(n active) survey and creates the survey answers file
     func submitSurvey(_ activeSurvey: ActiveSurvey, surveyPresenter: TrackingSurveyPresenter? = nil) {
@@ -222,7 +196,7 @@ class StudyManager {
             // get the survey data and write it out
             var trackingSurvey: TrackingSurveyPresenter
             if surveyPresenter == nil {
-                print("hitting case where we were expiring the survey timings? what the fuck?")
+                // print("hitting case where we were 'expiring' the survey timings?")
                 // expiration logic? what is "expired?"
                 trackingSurvey = TrackingSurveyPresenter(surveyId: surveyId, activeSurvey: activeSurvey, survey: survey)
                 trackingSurvey.addTimingsEvent("expired", question: nil)
@@ -243,25 +217,11 @@ class StudyManager {
                 }
             }
         }
-        self.cleanupSurvey(activeSurvey) // call cleanup
     }
     
-    /// miniscule portion of finishing a survey answers file creation, finalizes file sorta; also called in audio surveys
-    func cleanupSurvey(_ activeSurvey: ActiveSurvey) {
-        // removeNotificationForSurvey(activeSurvey)  // I don't know why we don't call this, but we don't.
-        if let surveyId = activeSurvey.survey?.surveyId {
-            let timingsName = TrackingSurveyPresenter.timingDataType + "_" + surveyId
-            // This should be fine. Survey Tracking files always write their output, and even if a
-            // file is never retired it will be found the next time the app opens.
-            // print("looking for a file named \(timingsName) but don't have enough information to find the DataStorage object")
-            // self.surveyTimingsFile?.reset()
-            // DataStorageManager.sharedInstance.closeStore(timingsName)
-        }
-    }
-    
-    ///
-    /// Survey checking logic
-    ///
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////// Active Survey State Logic //////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     
     /// updates the list of surveys in the app ui based on the study timers,
     /// updates the badge count, submits completed surveys, and updates the relevant survey timer.
@@ -271,106 +231,77 @@ class StudyManager {
         guard let study = currentStudy else {
             return
         }
-        
+        print("updateActiveSurveys, forceSave: \(forceSave)")
         // logic that refreshes survey list
-        let activeSurveysModified_1 = self.clear_out_submitted_surveys()
-        let activeSurveysModified_2 = self.ensure_active_surveys()
-        let activeSurveysModified_3 = self.removeOldSurveys()
+        let activeSurveysModified_1 = self.clear_out_completed_surveys()
+        let activeSurveysModified_2 = self.ensure_always_and_trigger_surveys()
+        let activeSurveysModified_3 = self.remove_deleted_surveys()
+        let activeSurveysModified_4 = self.update_any_changed_active_surveys() // should go last
         self.updateBadgerCount()
         
-        // save survey data
+        // save survey data?
         if activeSurveysModified_1 || activeSurveysModified_2 || activeSurveysModified_3 || forceSave {
             self.emit_survey_updates_save_study_data()
         }
     }
     
-    // FIXME: there these two functions: updateActiveSurveys, setActiveSurveys
-    // Are diverged versions of related code, see fixme next to duplicated download surveys code
-    
-    /// sets the active survey on the main app page, force-enables any specified surveys.
-    func setActiveSurveys(surveyIds: [String], sentTime: TimeInterval = 0) {
-        guard let study = self.currentStudy else {
-            return
-        }
-        
-        // force reload all always-available surveys and any passed in surveys
-        for survey in study.surveys {
-            let surveyId = survey.surveyId!, from_notification = surveyIds.contains(surveyId)
-            
-            if from_notification || survey.alwaysAvailable {
-                let activeSurvey = ActiveSurvey(survey: survey)
-                // when we receive a notification we need to record that, this is used to sort surveys on the main screen (I think)
-                if from_notification {
-                    activeSurvey.received = sentTime
-                    // FIXME: study.receivedAudioSurveys and study.receivedTrackingSurveys are junk, they are assigned but never used.
-                    if let surveyType = survey.surveyType {
-                        switch surveyType {
-                        case .AudioSurvey:
-                            study.receivedAudioSurveys = (study.receivedAudioSurveys) + 1
-                        case .TrackingSurvey:
-                            study.receivedTrackingSurveys = (study.receivedTrackingSurveys) + 1
-                        }
-                    }
-                }
-                study.activeSurveys[surveyId] = activeSurvey
-            }
-        }
-        
-        // if the survey id doesn't exist record a log statement
-        for surveyId in surveyIds {
-            if !study.surveyExists(surveyId: surveyId) {
-                print("Could not get survey \(surveyId)")
-                AppEventManager.sharedInstance.logAppEvent(event: "survey_download", msg: "Could not get obtain survey for ActiveSurvey")
-            }
-        }
-        
-        // this is two saves in close succession
-        // Emits a surveyUpdated event to the listener (_what_ listener - this is why signals are an antipattern)
-        StudyManager.sharedInstance.surveysUpdatedEvent.emit(0)
-        Recline.shared.save(study)
-        
-        // set badge number
-        UIApplication.shared.applicationIconBadgeNumber = study.activeSurveys.count
-    }
-    
-    func clear_out_submitted_surveys() -> Bool {
+    /// Removes completed surveys from study.activeSurveys, resets completed always-available
+    /// surveys, implements magic (OBSCURE, it's not great) logic for trigger-on-download surveys.
+    func clear_out_completed_surveys() -> Bool {
         guard let study = currentStudy else {
             return false
         }
-        
+        print("clear_out_completed_surveys")
         // For all active surveys that aren't complete, but have expired, submit them. (id is a string)
         var surveyDataModified = false
+        var surveys_to_remove = [String]()
+        // the reason for this != nill case has been lost to time.
         for activeSurvey in study.activeSurveys.values where activeSurvey.survey != nil {
             // case: always available survey
-            // reset the survey, behavior if we don't is the survey stays in the "done" stage you can't retake it.
-            // (It loads the survey to the done page, which will resave a new version of the data in a file.)
-            if activeSurvey.survey!.alwaysAvailable && activeSurvey.isComplete {
-                surveyDataModified = true
-                activeSurvey.reset(activeSurvey.survey)
-            } else if activeSurvey.isComplete {
-                // case normal survey, is complete
-                surveyDataModified = true
-                // why was this still here... This was supposed to be disabled in 2.4.9 but had to comment it out in 2.4.10.
-                // I guess this is what was causing the race condition bug in 2.4.9, but it also _wasn't_ causing
-                // the extra submitted survey files submitted bug in 2.4.9. This was very confusing.
-                // self.submitSurvey(activeSurvey)
+            // reset the survey, behavior if we don't is the survey stays in the "done" stage
+            // you can't retake it. (It loads the survey to the done page, which will resave a
+            // new version of the data in a file.)
+            // THIS IS ALSO THE OBSCURE LOCATION WHERE WE HANDLE A CRITICAL DETAIL OF TRIGGER
+            // ON FIRST DOWNLOAD SURVEYS.
+            if activeSurvey.isComplete {
+                if activeSurvey.survey!.alwaysAvailable {
+                    print("clear_out_completed_surveys - resetting always available survey \(activeSurvey.survey!.surveyId!)")
+                    activeSurvey.reset(activeSurvey.survey!)
+                    surveyDataModified = true
+                } else if !activeSurvey.survey!.triggerOnFirstDownload {
+                    // case: a non-trigger, non-always-avaiilable survey, is complete, remove entirely.
+                    // To make trigger on first download surveys not identical in behavior to always-
+                    // available surveys we ... never remove them from the active surveys list.
+                    // Yup, that's how we implement them. It's Terrible.
+                    print("clear_out_completed_surveys - found non-AlwaysAvailable, non-triggered completed survey \(activeSurvey.survey!.surveyId!)")
+                    surveys_to_remove.append(activeSurvey.survey!.surveyId!)
+                    surveyDataModified = true
+                }
             }
         }
         
-        // the old code reset a survey timer by 1 week, but that's not even correct because absolute time and relative schedules exist.
+        // delete them (don't mutate the list you are iterating over)
+        for surveyId in surveys_to_remove {
+            study.activeSurveys.removeValue(forKey: surveyId)
+        }
         return surveyDataModified
     }
     
-    /// Checks the database for surveys that should exist, removes active surveys that are not in that list.
-    // FIXME: This does not do anything if surveys are not removed from the database when the app checks for new surveys. NEED TO TEST.
-    func removeOldSurveys() -> Bool {
+    /// Checks the database for surveys that should exist, removes active surveys that
+    /// are not in that list.
+    // FIXME: This does not do anything if surveys are not removed from the database
+    // when the app checks for new surveys. NEED TO TEST.
+    func remove_deleted_surveys() -> Bool {
         guard let study = self.currentStudy else {
             return false
         }
+        print("remove_deleted_surveys")
         var surveyDataModified = false
-        let allSurveyIds = self.getAllSurveyIds() // this is, in-fact, sourced from RecLine
+        let allSurveyIds = self.getAllSurveyIds() // from the database
         for (surveyId, activeSurvey) in study.activeSurveys {
-            if activeSurvey.isComplete && !allSurveyIds.contains(surveyId) {
+            // if the survey no longer exists in the database, remove it
+            if !allSurveyIds.contains(surveyId) {
+                print("remove_deleted_surveys - removing survey \(surveyId)")
                 study.activeSurveys.removeValue(forKey: surveyId)
                 surveyDataModified = true
             }
@@ -378,11 +309,146 @@ class StudyManager {
         return surveyDataModified
     }
     
+    /// 1) These ActiveSurveys in study.activeSurveys are _persistent objects_, they are restored
+    ///     when the app is reopened. They are ~never removed.
+    /// 2) AlwaysAvailable surveys _do not get disabled_ over in `clear_out_completed_surveys`.
+    /// 3) triggerOnFirstDownload surveys don't get unloaded, they just don't get reactivated.
+    ///     over in over in `clear_out_completed_surveys`
+    func ensure_always_and_trigger_surveys() -> Bool {
+        guard let study = self.currentStudy else {
+            return false
+        }
+        print("ensure_always_and_trigger_surveys")
+        
+        var surveyDataModified = false
+        // for each survey, check on its availability, insert (and forcibly overwrite data)
+        for survey in study.surveys {
+            // If a survey does not have a surveyId... I don't even know, but kill it
+            if let survey_id = survey.surveyId {
+                // we only care about trigger and always available surveys here
+                if !(survey.triggerOnFirstDownload || survey.alwaysAvailable) {
+                    print("ensure_always_and_trigger_surveys - skipping survey '\(survey.name)', it is not trigger or always available.")
+                    continue
+                }
+                
+                // study.activeSurveys has non-optional keys, nil means the key is not present.
+                // If it is in the list then it _might but may not be_ visible (I think).
+                let on_the_main_screen = study.activeSurveys[survey_id] != nil
+                
+                if !on_the_main_screen {
+                    // case: new trigger or always available survey, add it.
+                    print("ensure_always_and_trigger_surveys - adding survey '\(survey.name)'")
+                    study.activeSurveys[survey_id] = ActiveSurvey(survey: survey)
+                    surveyDataModified = true
+                } else {
+                    // case: Survey is already loaded
+                    if study.activeSurveys[survey_id]!.survey == survey {
+                        // case: old survey was _not_ updated and was already present.
+                        // Nothin to be done here, move on.
+                        print("ensure_always_and_trigger_surveys - survey '\(survey.name)' is unchanged, skipping.")
+                        continue
+                    }
+                    
+                    // case: old survey was updated. (for future debugging clarity retin these two cases)
+                    // This will cause any partially completed surveys to have state cleared. If the
+                    // surveys are identical. A final else clause should be unreachable because we test
+                    // for that at the top of the loop.
+                    if survey.alwaysAvailable {
+                        print("ensure_always_and_trigger_surveys - alwaysAvailable survey changed '\(survey.name)'.")
+                        study.activeSurveys[survey_id] = ActiveSurvey(survey: survey)
+                        surveyDataModified = true
+                    } else if survey.triggerOnFirstDownload {
+                        print("ensure_always_and_trigger_surveys - trigger survey changed, '\(survey.name)'.")
+                        study.activeSurveys[survey_id] = ActiveSurvey(survey: survey)
+                        surveyDataModified = true
+                    }
+                }
+            }
+        }
+        return surveyDataModified
+    }
+    
+    /// Finds surveys that have changed and replaces them. Has obscure handling for trigger
+    /// on first download surveys.
+    func update_any_changed_active_surveys() -> Bool {
+        guard let study = self.currentStudy else {
+            return false
+        }
+        var any_surveys_updated = false
+        print("update_any_changed_active_surveys")
+        // the dumb loop again
+        // If a survey does not have a surveyId... skip? buh? it's stupid that its optional
+        for target_possibly_updated_survey in study.surveys {
+            if let survey_id = target_possibly_updated_survey.surveyId {
+                if study.activeSurveys[survey_id] == nil {
+                    continue // survey not an active survey
+                }
+                
+                // get the corresponding active survey
+                let the_activesurvey = study.activeSurveys[survey_id]!
+                let activesurvey_survey = the_activesurvey.survey!
+                
+                // Special case of triggerOnFirstDownload surveys - these are retained in the
+                // active survey list (like an always-available survey) but instead of getting
+                // automatically reset is just... stays there forever. We don't want to update
+                // that survey because that will cause it to become visible again.
+                // We just skip it here. This works because the only way for a completed trigger
+                // survey to be reloaded is for it to be activated via push notification
+                // in activate_surveys, which will reload it from scratch.
+                // Surveys that are trigger AND always available should be treated as normal.
+                if the_activesurvey.isComplete && activesurvey_survey.triggerOnFirstDownload && !activesurvey_survey.alwaysAvailable {
+                    print("update_any_changed_active_surveys - survey '\(target_possibly_updated_survey.name)' is a trigger survey and is complete, skipping.")
+                    continue
+                }
+                
+                // run the full survey comparison woo!
+                if activesurvey_survey != target_possibly_updated_survey {
+                    print("update_any_changed_active_surveys - survey '\(target_possibly_updated_survey.name)' changed.")
+                    study.activeSurveys[survey_id] = ActiveSurvey(survey: target_possibly_updated_survey)
+                    any_surveys_updated = true
+                } else {
+                    print("update_any_changed_active_surveys - survey '\(target_possibly_updated_survey.name)' did not change.")
+                }
+            }
+        }
+        return any_surveys_updated
+    }
+    
+    /// loads a list of surveys into active surveys so that they will be displayed.
+    func activate_surveys(surveyIds: [String], sentTime: TimeInterval) -> Bool {
+        guard let study = self.currentStudy else {
+            return false
+        }
+        if surveyIds.count == 0 {
+            return false // if there are no surveys don't do anything
+        }
+        
+        // check every survey we have stored in the database against the passed in surveyIds
+        // (this function runs after the surveys have been updated in most cases, and the case
+        // of not having a survey but receiving that notification is virtually zero.)
+        // (this loop is weird, whatever.)
+        var updated_survey_state = false
+        for survey in study.surveys {
+            if surveyIds.contains(survey.surveyId!) {
+                let activeSurvey = ActiveSurvey(survey: survey)
+                activeSurvey.received = sentTime // used to sort surveys on the main screen.
+                // this action clears out the prior state of the survey.
+                study.activeSurveys[survey.surveyId!] = activeSurvey
+                updated_survey_state = true
+            }
+        }
+        
+        StudyManager.sharedInstance.surveysUpdatedEvent.emit(0)
+        Recline.shared.save(study)
+        return updated_survey_state
+    }
+    
     /// Set the badger count - a count of untaken surveys, excluding always-available surveys.
     func updateBadgerCount() {
         guard let study = self.currentStudy else {
             return
         }
+        
         var bdgrCnt = 0
         for activeSurvey in study.activeSurveys.values where activeSurvey.survey != nil {
             // if survey is not complete and the survey is not an always available survey
@@ -390,77 +456,16 @@ class StudyManager {
                 bdgrCnt += 1
             }
         }
-        // print("Setting badge count to: \(bdgrCnt)")
+        // print("updateBadgerCount - Setting badge count to: \(bdgrCnt)")
         UIApplication.shared.applicationIconBadgeNumber = bdgrCnt
     }
     
-    /// changes from check_surveys_old
-    /// radically simplified equivalent logic
-    /// doesn't generate list of survey ids
-    /// we have no effective scheduling logic here ANYWAY
-    /// FIXME: there is no way this is not bugged even though the logic is equivalent to the old version, because always available and triggerOnFirstDownload are treated identically
-    func ensure_active_surveys() -> Bool {
-        guard let study = self.currentStudy else {
-            return false
-        }
-        
-        var surveyDataModified = false
-        
-        // for each survey, check on its availability
-        for survey in study.surveys where survey.surveyId != nil {
-            // `study.activeSurveys[id] == nil` means the study is not activated...
-            // If so and the survey is a triggerOnFirstDownload or alwaysAvailable survey, add it to active surveys list
-            if study.activeSurveys[survey.surveyId!] == nil && (survey.triggerOnFirstDownload || survey.alwaysAvailable) {
-                print("Adding survey \(survey.name) to active surveys survey.triggerOnFirstDownload: \(survey.triggerOnFirstDownload), survey.alwaysAvailable: \(survey.alwaysAvailable)")
-                study.activeSurveys[survey.surveyId!] = ActiveSurvey(survey: survey)
-                surveyDataModified = true
-            }
-        }
-        return surveyDataModified
-    }
-    
-    // to reduce calls to save there is a single save call in persistentTimerActions
-    // instead of one in each of these setnext functions.
-    
-    /// The Persistant timers, these get set and are checked even across app termination.
-    func setNextUploadTime() {
-        guard let study = currentStudy, let studySettings = study.studySettings else {
-            return
-        }
-        if let t = study.nextUploadCheck { print("previous study.nextUploadCheck:", study.nextUploadCheck!, Date(timeIntervalSince1970: Double(t))) }
-        study.nextUploadCheck = Int64(Date().timeIntervalSince1970) + Int64(studySettings.uploadDataFileFrequencySeconds)
-        if let t = study.nextUploadCheck { print("updated study.nextUploadCheck:", study.nextUploadCheck!, Date(timeIntervalSince1970: Double(t))) }
-    }
-    
-    func setNextSurveyTime() {
-        guard let study = currentStudy, let studySettings = study.studySettings else {
-            return
-        }
-        if let t = study.nextSurveyCheck { print("previous study.nextSurveyCheck:", study.nextSurveyCheck!, Date(timeIntervalSince1970: Double(t))) }
-        study.nextSurveyCheck = Int64(Date().timeIntervalSince1970) + Int64(studySettings.checkForNewSurveysFreqSeconds)
-        if let t = study.nextSurveyCheck { print("updated study.nextSurveyCheck:", study.nextSurveyCheck!, Date(timeIntervalSince1970: Double(t))) }
-    }
-    
-    func setNextDeviceSettingsTime() {
-        guard let study = currentStudy else {
-            return
-        }
-        if let t = study.nextDeviceSettingsCheck { print("previous study.nextDeviceSettingsCheck:", study.nextDeviceSettingsCheck!, Date(timeIntervalSince1970: Double(t))) }
-        study.nextDeviceSettingsCheck = Int64(Date().timeIntervalSince1970) + DEVICE_SETTINGS_INTERVAL
-        if let t = study.nextDeviceSettingsCheck { print("updated study.nextDeviceSettingsCheck:", study.nextDeviceSettingsCheck!, Date(timeIntervalSince1970: Double(t))) }
-    }
-    
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////// Network Operations ////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
-    /// some kind of reachability thing, calls periodicNetworkTransfers
-    @objc func reachabilityChanged(_ notification: Notification) {
-        print("Reachability changed, running periodic network transfers.")
-        self.timerManager.pollServices()
-    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////// Timer Checks //////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     
     /// TODO: move this over to TimerManager
+    /// TODO: convert to store as doubles and use Dates in logic.
     /// These operations all happen to be network operations, and we want them to run
     /// as soon as a network connection is available, which means we need to handle
     /// the case of the app closing.
@@ -510,42 +515,47 @@ class StudyManager {
         }
         
         Recline.shared.save(currentStudy)
-        
-        // currently disabling the complex logic here in favor of an easier strategy.
-        
-        // get the next timer - data type is weird.
-        // let earliest_timer: Int64 = minThatIsntZeroForStudyTimerDetermination(
-        //     currentStudy.nextUploadCheck ?? 0,
-        //     currentStudy.nextSurveyCheck ?? 0,
-        //     currentStudy.nextDeviceSettingsCheck ?? 0
-        // )
-        
-        // // case: everything was zero - I think this can happen at registration.
-        // // case: the earliest timer is in the past
-        // if earliest_timer == 0 || earliest_timer < (now_int + 3000 {
-        //     return default_interval_from_now()
-        // } else {
-        //     // case: normal case, return a Date object of the time of the earliest timer
-        //     return Date(timeIntervalSince1970: TimeInterval(earliest_timer))
-        // }
     }
     
-    // assumes positive integers but the typing isn't UInts because it ... isn't.
-    // this works in our context.... probably....
-    func minThatIsntZeroForStudyTimerDetermination(_ ints: Int64...) -> Int64 {
-        var min = Int64.max
-        /// get the smallest that isn't zero
-        for i in ints {
-            if i > 0 && i < min {
-                min = i
-            }
+    // to reduce calls to save there is a single save call in persistentTimerActions
+    // instead of one in each of these setnext functions.
+    
+    /// The Persistant timers, these get set and are checked even across app termination.
+    func setNextUploadTime() {
+        guard let study = currentStudy, let studySettings = study.studySettings else {
+            return
         }
-        // case: everything was zero (or int64.max, which won't be a thing
-        if min == Int64.max {
-            return 0
+        // if let t = study.nextUploadCheck { print("previous study.nextUploadCheck:", study.nextUploadCheck!, Date(timeIntervalSince1970: Double(t))) }
+        study.nextUploadCheck = Int64(Date().timeIntervalSince1970) + Int64(studySettings.uploadDataFileFrequencySeconds)
+        // if let t = study.nextUploadCheck { print("updated study.nextUploadCheck:", study.nextUploadCheck!, Date(timeIntervalSince1970: Double(t))) }
+    }
+    
+    func setNextSurveyTime() {
+        guard let study = currentStudy, let studySettings = study.studySettings else {
+            return
         }
-        // case: something wasn't zero
-        return min
+        // if let t = study.nextSurveyCheck { print("previous study.nextSurveyCheck:", study.nextSurveyCheck!, Date(timeIntervalSince1970: Double(t))) }
+        study.nextSurveyCheck = Int64(Date().timeIntervalSince1970) + Int64(studySettings.checkForNewSurveysFreqSeconds)
+        // if let t = study.nextSurveyCheck { print("updated study.nextSurveyCheck:", study.nextSurveyCheck!, Date(timeIntervalSince1970: Double(t))) }
+    }
+    
+    func setNextDeviceSettingsTime() {
+        guard let study = currentStudy else {
+            return
+        }
+        // if let t = study.nextDeviceSettingsCheck { print("previous study.nextDeviceSettingsCheck:", study.nextDeviceSettingsCheck!, Date(timeIntervalSince1970: Double(t))) }
+        study.nextDeviceSettingsCheck = Int64(Date().timeIntervalSince1970) + DEVICE_SETTINGS_INTERVAL
+        // if let t = study.nextDeviceSettingsCheck { print("updated study.nextDeviceSettingsCheck:", study.nextDeviceSettingsCheck!, Date(timeIntervalSince1970: Double(t))) }
+    }
+    
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////// Network Operations Kinda //////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    /// some kind of reachability thing, calls periodicNetworkTransfers
+    @objc func reachabilityChanged(_ notification: Notification) {
+        // print("Reachability changed, running periodic network transfers.")
+        self.timerManager.pollServices()
     }
     
     func heartbeat_on_dispatch_queue() {
@@ -566,13 +576,17 @@ class StudyManager {
         )
     }
     
-    /// called from self.setConsented, periodicNetworkTasks, and a debug menu button (I think)
-    /// THE RETURN VALUE IS NOT USED BECAUSE OF COURSE NOT
-    func checkForNewSurveys() {
+    /// Runs the api call for downloading survey data, and _then_ adds any provided surveys to
+    /// to self.activeSurveys. (Adding the new active surveys is guaranteed to run even if the
+    /// network request fails.)
+    /// This implementation is desireable because it isn't uncommon (especially when testing)
+    /// to update a survey and send the survey notification via the button on the Beiwe website.
+    /// Also it is just safer to 99% of the time have all the relevant survey info.)
+    func checkForNewSurveys(surveyIds: [String] = [], sentTime: TimeInterval = 0) {
         guard let study = currentStudy else {
             return
         }
-        print("inside duplicate survey checker function 1")
+        print("checkForNewSurveys")
                
         ApiManager.sharedInstance.makePostRequest(
             GetSurveysRequest(), completion_handler: { (response: DataResponse<String>) in
@@ -588,7 +602,6 @@ class StudyManager {
                                     // we have survey data!
                                     study.surveys = newSurveys
                                     Recline.shared.save(study)
-                                    self.updateActiveSurveys() // differs from other version of code.
                                 } else {
                                     error_message = "download surveys: \(response) - but body was nil"
                                 }
@@ -607,61 +620,14 @@ class StudyManager {
                     log.error(error_message)
                     AppEventManager.sharedInstance.logAppEvent(event: "survey_download", msg: error_message)
                 }
-            }
-        )
-    }
-
-    // FIXME: this code got duplicated and the diverged. we should only have one checksurveys function
-    // but instead we now have two. Both of these have been stripped of the promise architecture
-    // and should retain their basic unique details.
-    // downloadSurveys() was called from push notifications
-    // checkSurveys() was called from timers
-    // The todo here is merge them, which is non trivial because setActiveSurveys and updateActiveSurveys now do different things.
-        
-    /// there was a bunch of duplicated code, one version of the code was in appDelegate
-    func downloadSurveys(surveyIds: [String], sentTime: TimeInterval = 0) {
-        guard let study = self.currentStudy else {
-            return
-        }
-        print("inside duplicate survey checker function 2")
-        
-        // our logic requires those passed-in parameters,
-        ApiManager.sharedInstance.makePostRequest(
-            GetSurveysRequest(), completion_handler: { (response: DataResponse<String>) in
-                var error_message = ""
-                switch response.result {
-                case .success:
-                    if let statusCode = response.response?.statusCode {
-                        // valid 200 range response
-                        if statusCode >= 200 && statusCode < 300 {
-                            let body_response = BodyResponse(body: response.result.value)
-                            if let body_string = body_response.body {
-                                if let newSurveys: [Survey] = Mapper<Survey>().mapArray(JSONString: body_string) {
-                                    // we have survey data!
-                                    study.surveys = newSurveys
-                                    Recline.shared.save(study)
-                                } else {
-                                    error_message = "download surveys: \(response) - but body was nil"
-                                }
-                            }
-                        } else { // all non-200 error codes
-                            error_message = "download surveys: statuscode: \(statusCode), value/body: \(String(describing: response.result.value))"
-                        }
-                    } else { // no error code?
-                        error_message = "download surveys: no status code?"
-                    }
-                case .failure: // general failure?
-                    error_message = "download surveys - error: \(String(describing: response.error))"
-                }
                 
-                // log app event if it couldn't hit the server
-                if error_message != "" {
-                    log.error(error_message)
-                    AppEventManager.sharedInstance.logAppEvent(event: "survey_download", msg: error_message)
+                // if received any surveys to this call
+                if !surveyIds.isEmpty {
+                    self.activate_surveys(surveyIds: surveyIds, sentTime: sentTime)
                 }
                 
                 // even if we didn't get new surveys we need to call setActiveSurveys with the survey ids
-                self.setActiveSurveys(surveyIds: surveyIds, sentTime: sentTime)
+                self.updateActiveSurveys()
             }
         )
     }
@@ -1040,7 +1006,7 @@ class StudyManager {
         }
         
         if error_message != "" {
-            print(error_message)
+            print("Upload error message: ", error_message)
             AppEventManager.sharedInstance.logAppEvent(
                 event: "upload error", msg: error_message, d1: filename)
         }
@@ -1054,18 +1020,24 @@ class StudyManager {
     /// business logic of the upload.
     /// processOnly means don't upload (it's based on reachability)
     func upload() {
-        print("Checking for uploads...")
-
         Ephemerals.start_last_upload = dateFormat(Date())
         DataStorageManager.sharedInstance.moveLeftBehindFilesToUpload()
         
         // if we can't enumerate files, that's insane, crash.
-        let fileEnumerator: FileManager.DirectoryEnumerator =
+        var fileEnumerator: FileManager.DirectoryEnumerator =
             FileManager.default.enumerator(atPath: DataStorageManager.uploadDataDirectory().path)!
+        
+        var message = "all files:"
+        fileEnumerator.allObjects.forEach { message += " \($0)" }
+        print("Checking for uploads ", Date(), " ...", message)
+        
+        // (we exhausted the iterator)
+        fileEnumerator = FileManager.default.enumerator(atPath: DataStorageManager.uploadDataDirectory().path)!
         var filesToProcess: [String] = []
         
         // loop over all and check if each file can be uploaded, assemble the list.
         while let filename = fileEnumerator.nextObject() as? String {
+            // print("uploading:", filename)
             if DataStorageManager.sharedInstance.isUploadFile(filename) {
                 // don't actually know if this can cause a thread confict, don't care, wrapping.
                 self.files_in_flight_lock.lock()
@@ -1125,24 +1097,13 @@ class StudyManager {
                 // report this error to Sentry (but only once per app launch, by checking/appending
                 // file name to a list)
                 if !self.files_with_encoding_errors.contains(filename) {
-                    if let sentry_client = Client.shared {
-                        sentry_client.snapshotStacktrace {
-                            let event = Sentry.Event(level: .error)
-                            event.message = "Encountered encoding error while uploading file"
-                            event.environment = Constants.APP_INFO_TAG
-                            
-                            // todo does this always exist?
-                            if event.extra == nil {
-                                event.extra = [:]
-                            }
-                            if var extras = event.extra {
-                                extras["error"] = "\(error)"
-                                extras["filename"] = filename
-                                extras["user_id"] = self.currentStudy!.patientId
-                            }
-                            sentry_client.appendStacktrace(to: event)
-                            sentry_client.send(event: event)
-                        }
+                    SentrySDK.capture(message: "Encountered encoding error while uploading file") { (scope: Scope) in
+                        // grab the snapshot of the stack trace, add the extras, send
+                        scope.setExtras([
+                            "\(error)": "error",
+                            filename: "filename",
+                            self.currentStudy!.patientId!: "user_id",
+                        ])
                     }
                     self.files_with_encoding_errors.append(filename)
                 }
@@ -1152,6 +1113,59 @@ class StudyManager {
         self.files_in_flight.append(filename)
         self.files_in_flight_lock.unlock()
         // print("upload for \(filename) dispatched")
+    }
+    
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////// Registration ////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    /// sets the study as consented, sets api credentials
+    func setConsented() {
+        // fail if current study or study settings are null
+        guard let study = currentStudy, let studySettings = study.studySettings else {
+            return
+        }
+        // finalize setting up sentry
+        AppDelegate.sharedInstance().setupSentryTags()
+        // api setup
+        self.setApiCredentials()
+        let currentTime: Int64 = Int64(Date().timeIntervalSince1970)
+        // kick off survey timers
+        study.nextUploadCheck = currentTime + Int64(studySettings.uploadDataFileFrequencySeconds)
+        study.nextSurveyCheck = currentTime + Int64(studySettings.checkForNewSurveysFreqSeconds)
+        // set consented to true (checked over in AppDelegate)
+        study.participantConsented = true
+        // some io stuff
+        DataStorageManager.sharedInstance.dataStorageManagerInit()
+        DataStorageManager.sharedInstance.ensureDirectoriesExist()
+        // update study stuff?
+        Recline.shared.save(study)
+        self.checkForNewSurveys()
+    }
+    
+    /// Sets up the password (api) credential for backend calls
+    func setApiCredentials() {
+        // if there is no study.... don't do this.
+        guard let currentStudy: Study = self.currentStudy else {
+            return
+        }
+        // Setup APIManager's security
+        // Why is this EVER allowed to be the empty string? that's silent failure FOREVER
+        ApiManager.sharedInstance.password = PersistentPasswordManager.sharedInstance.passwordForStudy() ?? ""
+        ApiManager.sharedInstance.customApiUrl = currentStudy.customApiUrl
+    
+        // why is this allowed to have a null participant id...
+        // set the api participant id (why is that there?) and the RSA encryption key.
+        if let patientId = currentStudy.patientId {
+            ApiManager.sharedInstance.patientId = patientId
+            if let clientPublicKey = currentStudy.studySettings?.clientPublicKey {
+                let publicKey = try! PublicKey(base64Encoded: clientPublicKey)
+                self.keyRef = publicKey.reference
+                self.publicKey = publicKey
+            } else {
+                fatalError("you can't not have the public key, its required.")
+            }
+        }
     }
     
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1173,7 +1187,7 @@ class StudyManager {
         self.timerManager.clear()
         
         // kill notifications
-        NotificationCenter.default.removeObserver(self, name: ReachabilityChangedNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: .reachabilityChanged, object: nil)
         UIApplication.shared.cancelAllLocalNotifications()
         
         // clear out remaining active study objects
@@ -1212,12 +1226,6 @@ class StudyManager {
         // clear the study, patient id
         self.currentStudy = nil // self.isStudyLoaded will now fail
         ApiManager.sharedInstance.patientId = ""
-        
-        // I don't know what this is and I don't think it matters.
-        let instance = InstanceID.instanceID()
-        instance.deleteID { (error: Error?) in
-            log.error(error.debugDescription)
-        }
     }
     
     /// deletes all studies - used in registration for some reason

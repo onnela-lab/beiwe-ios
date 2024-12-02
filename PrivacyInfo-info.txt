@@ -1,0 +1,78 @@
+Explaination of content in the PrivacyInfo.xcprivacy file
+Starting May 1 2024 the App Store requires certain API calls be justified in this file.
+
+Documentation can be found here:
+https://developer.apple.com/documentation/bundleresources/privacy_manifest_files/describing_use_of_required_reason_api
+
+Big Problem: most of the calls triggering these required use-cases occur in 3rd party libraries, but our libraries are out of date because of breaking changes in newer versions. These permissions have a "this isn't my problem, its a library" (it uses the "SDK", whatever), but that is supposed to go _in the library_, not the app.
+
+For simple logistics reasons we can't go and update every library to a version with a PrivacyInfo.xcprivacy file right now, and we can't even be certain every library has done this. I guess we could go create a PrivacyInfo.xcprivacy file in the local copy of every library? but that seems real dumb? If Apple denies app updates on the first try I guess we can try that.
+
+
+1) NSPrivacyAccessedAPICategorySystemBootTime
+    - covers 2 system calls, systemUptime, mach_absolute_time
+    - our use case exactly manages the sentence below, app container means the app's file directory.
+    - C617.1: """ Declare this reason to access the system boot time in order to measure the amount of time that has elapsed between events that occurred within the app or to perform calculations to enable timers.
+    Information accessed for this reason, or any derived information, may not be sent off-device. There is an exception for information about the amount of time that has elapsed between events that occurred within the app, which may be sent off-device. """
+
+
+2) NSPrivacyAccessedAPICategoryUserDefaults
+    - covers use of `UserDefaults`
+    - this is only called in libraries, not our code.
+    
+    - running `ack -cl UserDefaults` finds usages in FirebaseCore, FirebaseInstallations, FirebaseInstanceID, FirebaseMessaging, GoogleUtilities, and Sentry.
+        - but GoogleUtilities has a class "GULUserDefaults" so that might be a false positive.
+    
+    - C56D.1 (the 3rd party sdk exception) is the actual case but it needs to be in the sdk we can't update...
+    
+    - CA92.1 _is true_ because we don't do anything with this data:
+        Declare this reason to access user defaults to read and write information that is only accessible to the app itself.
+        This reason does not permit reading information that was written by other apps or the system, or writing information that can be accessed by other apps.
+
+
+3) NSPrivacyAccessedAPICategoryFileTimestamp
+    - covers these function calls
+        creationDate
+        modificationDate
+        fileModificationDate
+        contentModificationDateKey
+        creationDateKey
+        getattrlist
+        getattrlistbulk
+        fgetattrlist
+        stat (which is unsearchable?)
+        fstat
+        fstatat
+        lstat
+        getattrlistat
+    - Using searches of `ack -cl name` we can find that this is in use in a bunch of libraries: GoogleUtilities, ResearchKit, Sentry, and XCGLogger.
+    
+    - But we also use it in BWBorderedButton, BWStandardRKButton, and BWTextButton, so we can legitimately use...
+    
+    - C617.1: "Declare this reason to access the timestamps, size, or other metadata of files inside the app container, app group container, or the app’s CloudKit container."
+
+
+4) NSPrivacyAccessedAPICategoryDiskSpace
+    - covers the functions:
+        volumeAvailableCapacityKey
+        volumeAvailableCapacityForImportantUsageKey
+        volumeAvailableCapacityForOpportunisticUsageKey
+        volumeTotalCapacityKey
+        systemFreeSize
+        systemSize
+        statfs
+        statvfs
+        fstatfs
+        fstatvfs
+        getattrlist
+        fgetattrlist
+        getattrlistat
+    - this is only used in 3rd party libraries, we don't use it.
+    - searching with `ack -cl name` shows usage in FirebaseMessaging, Sentry
+
+    - we are forced to use 7D9E.1 - this is _technically_ true because we never use or send this data anywhere.
+        Declare this reason to include disk space information in an optional bug report that the person using the device chooses to submit. The disk space information must be prominently displayed to the person as part of the report.
+        Information accessed for this reason, or any derived information, may be sent off-device only after the user affirmatively chooses to submit the specific bug report including disk space information, and only for the purpose of investigating or responding to the bug report.
+
+    - B728.1 - is about health research, so maybe we can use it in the future.
+    - E174.1 - is about changing app behavior "in a user visible way?" when the storage is low.

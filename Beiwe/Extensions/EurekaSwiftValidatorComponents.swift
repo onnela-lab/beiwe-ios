@@ -28,16 +28,15 @@
 // Fixes & Modifications by Keary Griffin, RocketFarmStudios
 
 import Eureka
-import SwiftValidator
 import ObjectiveC
+import SwiftValidator
 
 open class _SVFieldCell<T>: _FieldCell<T> where T: Equatable, T: InputTypeInitiable {
-
-    required public init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    public required init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
     }
     
-    required public init?(coder aDecoder: NSCoder) {
+    public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
 
@@ -45,15 +44,15 @@ open class _SVFieldCell<T>: _FieldCell<T> where T: Equatable, T: InputTypeInitia
 //        fatalError("init(style:reuseIdentifier:) has not been implemented")
 //    }
 
-    lazy open var validationLabel: UILabel = {
+    open lazy var validationLabel: UILabel = {
         [unowned self] in
         let validationLabel = UILabel()
         validationLabel.translatesAutoresizingMaskIntoConstraints = false
         validationLabel.font = validationLabel.font.withSize(10.0)
         return validationLabel
-        }()
+    }()
 
-    open override func setup() {
+    override open func setup() {
         super.setup()
         textField.autocorrectionType = .default
         textField.autocapitalizationType = .sentences
@@ -62,7 +61,7 @@ open class _SVFieldCell<T>: _FieldCell<T> where T: Equatable, T: InputTypeInitia
         self.height = {
             60
         }
-        contentView.addSubview(validationLabel)
+        contentView.addSubview(self.validationLabel)
 
         let sameLeading: NSLayoutConstraint = NSLayoutConstraint(item: self.contentView, attribute: .leading, relatedBy: .equal, toItem: self.validationLabel, attribute: .leading, multiplier: 1, constant: -20)
         let sameTrailing: NSLayoutConstraint = NSLayoutConstraint(item: self.textField, attribute: .trailing, relatedBy: .equal, toItem: self.validationLabel, attribute: .trailing, multiplier: 1, constant: 0)
@@ -71,9 +70,9 @@ open class _SVFieldCell<T>: _FieldCell<T> where T: Equatable, T: InputTypeInitia
 
         contentView.addConstraints(all)
 
-        validationLabel.textAlignment = NSTextAlignment.right
-        validationLabel.adjustsFontSizeToFitWidth = true
-        resetField()
+        self.validationLabel.textAlignment = NSTextAlignment.right
+        self.validationLabel.adjustsFontSizeToFitWidth = true
+        self.resetField()
     }
 
     func setRules(_ rules: [Rule]?) {
@@ -83,8 +82,8 @@ open class _SVFieldCell<T>: _FieldCell<T> where T: Equatable, T: InputTypeInitia
     override open func textFieldDidChange(_ textField: UITextField) {
         super.textFieldDidChange(textField)
 
-        if autoValidation {
-            validate()
+        if self.autoValidation {
+            self.validate()
         }
     }
 
@@ -93,10 +92,10 @@ open class _SVFieldCell<T>: _FieldCell<T> where T: Equatable, T: InputTypeInitia
     func validate() {
         if let v = self.validator {
             // Registering the rules
-            if !rulesRegistered {
-                v.unregisterField(textField)  //  in case the method has already been called
+            if !self.rulesRegistered {
+                v.unregisterField(textField) //  in case the method has already been called
                 if let r = rules {
-                    v.registerField(textField, errorLabel: validationLabel, rules: r)
+                    v.registerField(textField, errorLabel: self.validationLabel, rules: r)
                 }
                 self.rulesRegistered = true
             }
@@ -104,7 +103,7 @@ open class _SVFieldCell<T>: _FieldCell<T> where T: Equatable, T: InputTypeInitia
             self.valid = true
 
             v.validate({
-                (errors) -> Void in
+                errors in
                 self.resetField()
                 for (field, error) in errors {
                     self.valid = false
@@ -117,43 +116,40 @@ open class _SVFieldCell<T>: _FieldCell<T> where T: Equatable, T: InputTypeInitia
     }
 
     func resetField() {
-        validationLabel.isHidden = true
+        self.validationLabel.isHidden = true
         textField.textColor = UIColor.black
-        //textLabel?.textColor = UIColor.blackColor();
+        // textLabel?.textColor = UIColor.blackColor();
     }
 
     func showError(_ field: UITextField, error: SwiftValidator.ValidationError) {
         // turn the field to red
-        field.textColor = errorColor
+        field.textColor = self.errorColor
         /*
-        if let ph = field.placeholder {
-            let str = NSAttributedString(string: ph, attributes: [NSForegroundColorAttributeName: errorColor])
-            field.attributedPlaceholder = str
-        }
-        */
-        //self.textLabel?.textColor = errorColor
-        self.validationLabel.textColor = errorColor
+         if let ph = field.placeholder {
+             let str = NSAttributedString(string: ph, attributes: [NSForegroundColorAttributeName: errorColor])
+             field.attributedPlaceholder = str
+         }
+         */
+        // self.textLabel?.textColor = errorColor
+        self.validationLabel.textColor = self.errorColor
         error.errorLabel?.text = error.errorMessage // works if you added labels
         error.errorLabel?.isHidden = false
     }
 
     var validator: Validator? {
-        get {
-            if let fvc = formViewController() {
-                return fvc.form.validator
-            }
-            return nil;
+        if let fvc = formViewController() {
+            return fvc.form.validator
         }
+        return nil
     }
 
     var errorColor: UIColor = UIColor.red
     var autoValidation = true
-    var rules: [Rule]? = nil
+    var rules: [Rule]?
 
     fileprivate var rulesRegistered = false
     var valid = false
 }
-
 
 public protocol SVRow {
     var errorColor: UIColor { get set }
@@ -164,7 +160,7 @@ public protocol SVRow {
 
     var valid: Bool { get }
 
-    func validate();
+    func validate()
 }
 
 open class _SVTextRow<Cell: _SVFieldCell<String>>: FieldRow<Cell>, SVRow where Cell: BaseCell, Cell: CellType, Cell: TextFieldCell, Cell.Value == String {
@@ -200,9 +196,7 @@ open class _SVTextRow<Cell: _SVFieldCell<String>>: FieldRow<Cell>, SVRow where C
     }
 
     open var valid: Bool {
-        get {
-            return self.cell.valid
-        }
+        return self.cell.valid
     }
 
     open func validate() {
@@ -211,16 +205,15 @@ open class _SVTextRow<Cell: _SVFieldCell<String>>: FieldRow<Cell>, SVRow where C
 }
 
 open class SVTextCell: _SVFieldCell<String>, CellType {
-
-    required public init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    public required init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
     }
     
-    required public init?(coder aDecoder: NSCoder) {
+    public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
 
-    open override func setup() {
+    override open func setup() {
         super.setup()
         textField.autocorrectionType = .default
         textField.autocapitalizationType = .sentences
@@ -229,8 +222,7 @@ open class SVTextCell: _SVFieldCell<String>, CellType {
 }
 
 open class SVAccountCell: SVTextCell {
-
-    open override func setup() {
+    override open func setup() {
         super.setup()
         textField.autocorrectionType = .no
         textField.autocapitalizationType = .none
@@ -239,33 +231,30 @@ open class SVAccountCell: SVTextCell {
 }
 
 open class SVPhoneCell: SVTextCell {
-
-    open override func setup() {
+    override open func setup() {
         super.setup()
         textField.keyboardType = .phonePad
     }
 }
 
 open class SVSimplePhoneCell: SVTextCell {
-
-    open override func setup() {
+    override open func setup() {
         super.setup()
         textField.keyboardType = .numberPad
     }
 }
 
 open class SVNameCell: SVTextCell {
-
-    open override func setup() {
+    override open func setup() {
         super.setup()
         textField.autocorrectionType = .no
         textField.autocapitalizationType = .words
-        textField.keyboardType = .asciiCapable    }
+        textField.keyboardType = .asciiCapable
+    }
 }
 
 open class SVEmailCell: SVTextCell {
-
-    open override func setup() {
+    override open func setup() {
         super.setup()
         textField.autocorrectionType = .no
         textField.autocapitalizationType = .none
@@ -274,8 +263,7 @@ open class SVEmailCell: SVTextCell {
 }
 
 open class SVPasswordCell: SVTextCell {
-
-    open override func setup() {
+    override open func setup() {
         super.setup()
         textField.autocorrectionType = .no
         textField.autocapitalizationType = .none
@@ -285,17 +273,16 @@ open class SVPasswordCell: SVTextCell {
 }
 
 open class SVURLCell: SVTextCell {
-
-    open override func setup() {
+    override open func setup() {
         super.setup()
         textField.autocorrectionType = .no
         textField.autocapitalizationType = .none
-        textField.keyboardType = .URL    }
+        textField.keyboardType = .URL
+    }
 }
 
 open class SVZipCodeCell: SVTextCell {
-
-    open override func setup() {
+    override open func setup() {
         super.setup()
         textField.autocorrectionType = .no
         textField.autocapitalizationType = .allCharacters
@@ -303,9 +290,7 @@ open class SVZipCodeCell: SVTextCell {
     }
 }
 
-
 extension Form {
-
     fileprivate struct AssociatedKey {
         static var validator: UInt8 = 0
         static var dataValid: UInt8 = 0
@@ -344,7 +329,7 @@ extension Form {
     }
 
     func validateAll() -> Bool {
-        dataValid = true
+        self.dataValid = true
 
         let rows = allRows
         for row in rows {
@@ -353,69 +338,69 @@ extension Form {
                 svRow.validate()
                 let rowValid = svRow.valid
                 svRow.autoValidation = true // from now on autovalidation is enabled
-                if !rowValid && dataValid {
-                    dataValid = false
+                if !rowValid && self.dataValid {
+                    self.dataValid = false
                 }
             }
         }
-        return dataValid
+        return self.dataValid
     }
 }
 
 /// A String valued row where the user can enter arbitrary text.
 
 public final class SVTextRow: _SVTextRow<SVTextCell>, RowType {
-    required public init(tag: String?) {
+    public required init(tag: String?) {
         super.init(tag: tag)
     }
 }
 
 public final class SVAccountRow: _SVTextRow<SVAccountCell>, RowType {
-    required public init(tag: String?) {
+    public required init(tag: String?) {
         super.init(tag: tag)
     }
 }
 
 public final class SVPhoneRow: _SVTextRow<SVPhoneCell>, RowType {
-    required public init(tag: String?) {
+    public required init(tag: String?) {
         super.init(tag: tag)
     }
 }
 
 public final class SVSimplePhoneRow: _SVTextRow<SVSimplePhoneCell>, RowType {
-    required public init(tag: String?) {
+    public required init(tag: String?) {
         super.init(tag: tag)
     }
 }
 
 public final class SVNameRow: _SVTextRow<SVNameCell>, RowType {
-    required public init(tag: String?) {
+    public required init(tag: String?) {
         super.init(tag: tag)
     }
 }
 
 public final class SVEmailRow: _SVTextRow<SVEmailCell>, RowType {
-    required public init(tag: String?) {
+    public required init(tag: String?) {
         super.init(tag: tag)
     }
 }
 
 public final class SVPasswordRow: _SVTextRow<SVPasswordCell>, RowType {
-    required public init(tag: String?) {
+    public required init(tag: String?) {
         super.init(tag: tag)
     }
 }
 
 public final class SVURLRow: _SVTextRow<SVURLCell>, RowType {
-    required public init(tag: String?) {
+    public required init(tag: String?) {
         super.init(tag: tag)
     }
 }
 
 public final class SVZipCodeRow: _SVTextRow<SVZipCodeCell>, RowType {
-    required public init(tag: String?) {
+    public required init(tag: String?) {
         super.init(tag: tag)
     }
 }
 
-// TODO add more
+// TODO: add more

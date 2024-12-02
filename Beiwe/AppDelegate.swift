@@ -1,23 +1,16 @@
 import Alamofire
 import BackgroundTasks
 import CoreMotion
-import Crashlytics
 import EmitterKit
-import Fabric
-import Firebase
+import FirebaseCore
+import FirebaseMessaging
 import Foundation
 import ObjectMapper
-import ReachabilitySwift
 import ResearchKit
 import Sentry
 import UIKit
 import XCGLogger
 
-let log = XCGLogger(identifier: "advancedLogger", includeDefaultDestinations: false)
-
-extension String: LocalizedError {
-    public var errorDescription: String? { return self }
-}
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate {
@@ -61,9 +54,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         return StudyManager.sharedInstance.currentStudy
     }
     
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////// APPLICATION SETUP ////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////// APPLICATION SETUP ////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     
     /// The AppDelegate started function
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
@@ -95,7 +88,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         return true
     }
     
-    // this is currently literally just being tested because I don't know what it does but apple has documentation about it and the BGTasks are completely unreliable right now.
+    /// Target(?) for background app refresh https://developer.apple.com/documentation/uikit/uiapplication/1623031-beginbackgroundtask
+    // """ A handler to be called shortly before the app’s remaining background time
+    // reaches 0. Use this handler to clean up and mark the end of the background task.
+    // Failure to end the task explicitly will result in the termination of the app.
+    // The system calls the handler synchronously on the main thread, blocking the
+    // app’s suspension momentarily. """
     func beginBackgroundTask(withName taskName: String?, expirationHandler handler: (() -> Void)? = nil) -> UIBackgroundTaskIdentifier {
         StudyManager.sharedInstance.heartbeat("beginBackgroundTask")
         return UIBackgroundTaskIdentifier(rawValue: 0)
@@ -107,20 +105,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     //     completionHandler(.newData)
     // }
     
-    func setupLogging() {
-        // Create a destination for the system console log (via NSLog), add the destination to the logger
-        let systemLogDestination = AppleSystemLogDestination(owner: log, identifier: "advancedLogger.systemLogDestination")
-        systemLogDestination.outputLevel = self.debugEnabled ? .debug : .warning
-        systemLogDestination.showLogIdentifier = true
-        systemLogDestination.showFunctionName = true
-        systemLogDestination.showThreadName = true
-        systemLogDestination.showLevel = true
-        systemLogDestination.showFileName = true
-        systemLogDestination.showLineNumber = true
-        systemLogDestination.showDate = true
-        log.add(destination: systemLogDestination)
-    }
-
     // BY THE WAY background app refresh health tasts simply aren't functional as far as it is possible to tell, so we are just rawdogging at and logging everything
     // up to the server inside the requests to the backend because the app isn't stable enough to be a reliable source of truth.
     func setupBackgroundAppRefresh() {
@@ -152,6 +136,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         print("platform: \(platform())")
     }
     
+    func setupLogging() {
+        // Create a destination for the system console log (via NSLog), add the destination to the logger
+        let systemLogDestination = AppleSystemLogDestination(owner: log, identifier: "advancedLogger.systemLogDestination")
+        systemLogDestination.outputLevel = self.debugEnabled ? .debug : .warning
+        systemLogDestination.showLogIdentifier = true
+        systemLogDestination.showFunctionName = true
+        systemLogDestination.showThreadName = true
+        systemLogDestination.showLevel = true
+        systemLogDestination.showFileName = true
+        systemLogDestination.showLineNumber = true
+        systemLogDestination.showDate = true
+        log.add(destination: systemLogDestination)
+    }
+    
     func printLoadedStudyInfo() {
         print("\n\n\n")
         print("patient id: '\(String(describing: ApiManager.sharedInstance.patientId))'")
@@ -180,9 +178,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     func initialize_database() {
         Recline.shared.open()
         StudyManager.sharedInstance.loadDefaultStudy()
-        Recline.shared.compact()
     }
-    
+        
     func setupThatDependsOnDatabase(_ launchOptions: [UIApplication.LaunchOptionsKey: Any]?) {
         // IF A NOTIFICATION WAS RECEIVED while app was in killed state there will be launch options!
         if launchOptions != nil {
@@ -232,7 +229,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
             @unknown default: "unknown: '\(UIApplication.shared.backgroundRefreshStatus.rawValue)'"
             }
         }
-        
+        // print("UIApplication.shared.backgroundTimeRemaining:", UIApplication.shared.backgroundTimeRemaining)
         updateBackgroundTasksCount()
         
         BACKGROUND_DEVICE_INFO_QUEUE.asyncAfter(deadline: .now() + 60, execute: self.deviceInfoUpdateLoop)
@@ -306,9 +303,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         return false
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////// APPLICATION WILL X ///////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////// APPLICATION WILL X //////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     func applicationWillEnterForeground(_ application: UIApplication) {
         print("applicationWillEnterForeground")
@@ -370,9 +367,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         print("applicationWillResignActive")
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////// APPLICATION DID X ////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////// APPLICATION DID X //////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     func applicationDidBecomeActive(_ application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
@@ -415,9 +412,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         AppEventManager.sharedInstance.logAppEvent(event: "locked", msg: "Phone/keystore locked")
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////// PERMISSIONS //////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////// PERMISSIONS //////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     /// this function gets called when CLAuthorization status changes
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
@@ -447,9 +444,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         }
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////// REAL NOTIFICATION CODE ///////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////// REAL NOTIFICATION CODE /////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         print("Failed to register for notifications: \(error.localizedDescription)")
@@ -501,63 +498,90 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         print(messageInfo)
     }
 
-    /// alternate type that handles some casting, it works.
+    /// Alternate type that handles some casting, it works.
     func printMessageInfo(_ notificationRequest: UNNotificationRequest) {
         let messageInfoDict: [AnyHashable: Any] = notificationRequest.content.userInfo
         self.printMessageInfo(messageInfoDict)
     }
     
-    /// the userNotificationCenter functions receive a UNNotification that has to be cast to a UNNotificationRequest and then a dict
+    /// The userNotificationCenter functions receive a UNNotification that has to be cast to a UNNotificationRequest and then a dict
     func handleSurveyNotification(_ notificationRequest: UNNotificationRequest) {
         let messageInfo: [AnyHashable: Any] = notificationRequest.content.userInfo
         self.handleSurveyNotification(messageInfo)
     }
     
-    /// code to run when receiving a push notification with surveys in it. Called from an AppDelegate extension.
+    /// Code to run when receiving a push notification with surveys in it. Called from an AppDelegate extension.
     /// Checks for any new surveys on the server and pops any survey notifications indicated in the push notificattion
     func handleSurveyNotification(_ messageInfo: Dictionary<AnyHashable, Any>) {
-        // return if nothing found
-        guard let surveyIdsString = messageInfo["survey_ids"] else {
-            print("no surveyIds found, checking for new surveys anyway.")
-            StudyManager.sharedInstance.downloadSurveys(surveyIds: [])
-            return
+        let surveyIdsString: Any? = messageInfo["survey_ids"]
+        let notificationUUIDsJSONString: Any? = messageInfo["json_uuids"]
+        
+        // uuids present - feature developed october 2021
+        if let notificationUUIDsJSONString = notificationUUIDsJSONString {
+            print("notificationUUIDsJSONString:", notificationUUIDsJSONString)
+            self.updateRecievedNotificationUUIDs(notificationUUIDsJSONString as! String)
         }
         
-        // extract survey ids to force-display
-        AppEventManager.sharedInstance.logAppEvent(event: "push_notification", msg: "Received notification while app was killed")
-        let surveyIds: [String] = self.jsonToSurveyIdArray(json: surveyIdsString as! String)
-        
-        // downloadSurveys calls setActiveSurveys, even if it errors/fails. We always want to download the most recent survey information.
-        // (old versions of the backend don't supply the sent_time key)
-        if let sentTimeString = messageInfo["sent_time"] as! String? {
-            StudyManager.sharedInstance.downloadSurveys(surveyIds: surveyIds, sentTime: isoStringToTimeInterval(timeString: sentTimeString))
+        // survey ids present
+        if let surveyIdsString = surveyIdsString {
+            // extract survey ids to force-display
+            AppEventManager.sharedInstance.logAppEvent(event: "push_notification", msg: "Received notification while app was killed")
+            let surveyIds: [String] = self.jsonToSurveyIdArray(surveyIdsString as! String)
+            
+            // downloadSurveys calls setActiveSurveys, even if it errors/fails. We always want
+            // to (try) download the most recent survey information.
+            if let sentTimeString = messageInfo["sent_time"] as! String? {
+                StudyManager.sharedInstance.checkForNewSurveys(surveyIds: surveyIds, sentTime: isoStringToTimeInterval(timeString: sentTimeString))
+            } else {
+                // (even older versions of the backend don't supply the sent_time key)
+                StudyManager.sharedInstance.checkForNewSurveys(surveyIds: surveyIds)
+            }
         } else {
-            StudyManager.sharedInstance.downloadSurveys(surveyIds: surveyIds)
+            // we just always always hit the backend for new surveys
+            StudyManager.sharedInstance.checkForNewSurveys(surveyIds: [])
         }
     }
     
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////// MISC BEIWE STUFF /////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // converts json string to an array of strings
-    func jsonToSurveyIdArray(json: String) -> [String] {
-        let surveyIds = try! JSONDecoder().decode([String].self, from: Data(json.utf8))
+    /// Just json string to array of strings with debug print statements.
+    func jsonToSurveyIdArray(_ json_string: String) -> [String] {
+        let surveyIds = try! JSONDecoder().decode([String].self, from: Data(json_string.utf8))
+        //
         for surveyId in surveyIds {
             if !(self.currentStudy?.surveyExists(surveyId: surveyId) ?? false) {
                 print("Received notification for a NEW survey \(surveyId)")
-                AppEventManager.sharedInstance.logAppEvent(event: "push_notification", msg: "Received notification for new survey \(surveyId)")
+                AppEventManager.sharedInstance.logAppEvent(
+                    event: "push_notification", msg: "Received notification for new survey \(surveyId)"
+                )
             } else {
                 print("Received notification for survey \(surveyId)")
-                AppEventManager.sharedInstance.logAppEvent(event: "push_notification", msg: "Received notification for survey \(surveyId)")
+                AppEventManager.sharedInstance.logAppEvent(
+                    event: "push_notification", msg: "Received notification for survey \(surveyId)"
+                )
             }
         }
         return surveyIds
     }
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////// Firebase Stuff ///////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    func updateRecievedNotificationUUIDs(_ notificationIdsJsonListString: String) {
+        let d = Date()
+        let now: String = dateFormatLocalMs(d)
+        // print("updateRecievedSurveyUUIDs", now, notificationIdsJsonListString)
+        
+        // unpack the list of uuids in the json
+        let notification_uuids: [String] = try! JSONDecoder().decode(
+            [String].self, from: Data(notificationIdsJsonListString.utf8)
+        )
+        
+        if self.currentStudy!.surveyPushNotificationUUIDs == nil {
+            self.currentStudy!.surveyPushNotificationUUIDs = [String]()
+        }
+        self.currentStudy!.surveyPushNotificationUUIDs!.append(now)
+        self.currentStudy!.surveyPushNotificationUUIDs!.append(contentsOf: notification_uuids)
+    }
+    
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////// Firebase Stuff ////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     func firebaseLoop() {
         // The app cannot register with firebase until it gets a token, which only occurs at registration time, and it needs access to the appDelegate.
@@ -664,9 +688,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         }
     }
     
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////// UI STUFF ///////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////// STUFF //////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     func initializeUI() {
         // set up colors for researchkit, set the launch screen view.
@@ -720,9 +744,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         }
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////// CRASHLYTICS STUFF ////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////// CRASHLYTICS STUFF ////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     
     // func setupCrashLytics() {
     //     Fabric.with([Crashlytics.self])
@@ -753,24 +777,65 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     //     Crashlytics.sharedInstance().crash()
     // }
 
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////// SENTRY STUFF ////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////// SENTRY STUFF //////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     
+    // loads sentry key, prints an error if it doesn't work.
     func setupSentry() {
-        // loads sentry key, prints an error if it doesn't work.
         do {
-            let dsn = SentryConfiguration.sharedInstance.settings["sentry-dsn"] as? String ?? "dev"
-            if dsn == "release" {
-                Client.shared = try Client(dsn: SentryKeys.release_dsn)
-            } else if dsn == "dev" {
-                Client.shared = try Client(dsn: SentryKeys.development_dsn)
-            } else {
-                throw "Invalid Sentry configuration"
+            let dsn_name = SentryConfiguration.sharedInstance.settings["sentry-dsn"] as? String ?? "dev"
+            let dsn: String
+            if dsn_name == "release" {
+                dsn = SentryKeys.release_dsn
+            } else if dsn_name == "dev" {
+                dsn = SentryKeys.development_dsn
+            } else { throw "Invalid Sentry configuration" }
+            
+            SentrySDK.start { (options: Options) in
+                options.dsn = dsn
+                options.debug = false // Enabled debug when first installing is always helpful
+                options.releaseName = Constants.APP_INFO_SHORT
+                options.swiftAsyncStacktraces = true
+                options.enableCrashHandler = true
+                options.enableMetrics = true
+                options.enableDefaultTagsForMetrics = true
+                // options.attachScreenshot = true // This adds a screenshot to the error events
+                options.attachViewHierarchy = true // This adds the view hierarchy to the error events
             }
-            try Client.shared?.startCrashHandler()
         } catch let error {
-            print("\(error)")
+            print("Error loading Sentry DSN: \(error)\nSentry will not be enabled.")
+        }
+    }
+    
+    // we have a couple odd points in the app lifecycle that mean we can't default
+    // these values in without some extra logic.
+    func setupSentryTags() {
+        // these are SentryScope objects
+        if !StudyManager.real_study_loaded {
+            SentrySDK.configureScope { (scope: Scope) in
+                scope.setTags([
+                    "user_id": "no study",
+                    "server_url": "no study",
+                ])
+            }
+            return
+        }
+        
+        if let study = self.currentStudy {
+            SentrySDK.configureScope { (scope: Scope) in
+                scope.setTags([
+                    "user_id": study.patientId ?? "nil",
+                    "server_url": study.customApiUrl ?? "nil",
+                ])
+            }
+        } else {
+            SentrySDK.configureScope { (scope: Scope) in
+                scope.setTags([
+                    "user_id": "bad config",
+                    "server_url": "bad config",
+                ])
+            }
         }
     }
 }
@@ -809,8 +874,8 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 
 // refresh_token code
 extension AppDelegate: MessagingDelegate {
-    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String) {
-        let dataDict: [String: String] = ["token": fcmToken]
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        let dataDict: [String: String] = ["token": fcmToken ?? ""]
         NotificationCenter.default.post(name: Notification.Name("FCMToken"), object: nil, userInfo: dataDict)
         // Note: This callback is fired at each app startup and whenever a new token is generated.
 
@@ -819,16 +884,7 @@ extension AppDelegate: MessagingDelegate {
             while ApiManager.sharedInstance.patientId == "" {
                 sleep(1)
             }
-            self.sendFCMToken(fcmToken: fcmToken)
+            self.sendFCMToken(fcmToken: fcmToken ?? "")
         }
-    }
-
-    // ios 10 data message
-    // Receive data messages on iOS 10+ directly from FCM (bypassing APNs) when the app is in the foreground.
-    // To enable direct data messages, you can set Messaging.messaging().shouldEstablishDirectChannel to true.
-    func messaging(_ messaging: Messaging, didReceive remoteMessage: MessagingRemoteMessage) {
-        // FIXME: what even is this function
-        log.error("Received data message: \(remoteMessage.appData)")
-        // remoteMessage.messageID
     }
 }

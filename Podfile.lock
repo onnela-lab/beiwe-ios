@@ -1,107 +1,121 @@
 PODS:
   - Alamofire (4.9.1)
-  - couchbase-lite-ios (1.4.4):
-    - couchbase-lite-ios/SQLite (= 1.4.4)
-  - couchbase-lite-ios/SQLite (1.4.4)
-  - Crashlytics (3.14.0):
-    - Fabric (~> 1.10.2)
+  - CouchbaseLite-Swift (3.2.0)
   - EmitterKit (5.2.2)
-  - Eureka (5.3.6)
-  - Fabric (1.10.2)
-  - Firebase/Analytics (6.34.0):
-    - Firebase/Core
-  - Firebase/Core (6.34.0):
-    - Firebase/CoreOnly
-    - FirebaseAnalytics (= 6.9.0)
-  - Firebase/CoreOnly (6.34.0):
-    - FirebaseCore (= 6.10.4)
-  - Firebase/Messaging (6.34.0):
-    - Firebase/CoreOnly
-    - FirebaseMessaging (~> 4.7.1)
-  - FirebaseAnalytics (6.9.0):
-    - FirebaseCore (~> 6.10)
-    - FirebaseInstallations (~> 1.7)
-    - GoogleAppMeasurement (= 6.9.0)
-    - GoogleUtilities/AppDelegateSwizzler (~> 6.7)
-    - GoogleUtilities/MethodSwizzler (~> 6.7)
-    - GoogleUtilities/Network (~> 6.7)
-    - "GoogleUtilities/NSData+zlib (~> 6.7)"
-    - nanopb (~> 1.30906.0)
-  - FirebaseCore (6.10.4):
-    - FirebaseCoreDiagnostics (~> 1.6)
-    - GoogleUtilities/Environment (~> 6.7)
-    - GoogleUtilities/Logger (~> 6.7)
-  - FirebaseCoreDiagnostics (1.7.0):
-    - GoogleDataTransport (~> 7.4)
-    - GoogleUtilities/Environment (~> 6.7)
-    - GoogleUtilities/Logger (~> 6.7)
-    - nanopb (~> 1.30906.0)
-  - FirebaseInstallations (1.7.0):
-    - FirebaseCore (~> 6.10)
-    - GoogleUtilities/Environment (~> 6.7)
-    - GoogleUtilities/UserDefaults (~> 6.7)
-    - PromisesObjC (~> 1.2)
-  - FirebaseInstanceID (4.8.0):
-    - FirebaseCore (~> 6.10)
-    - FirebaseInstallations (~> 1.6)
-    - GoogleUtilities/Environment (~> 6.7)
-    - GoogleUtilities/UserDefaults (~> 6.7)
-  - FirebaseMessaging (4.7.1):
-    - FirebaseCore (~> 6.10)
-    - FirebaseInstanceID (~> 4.7)
-    - GoogleUtilities/AppDelegateSwizzler (~> 6.7)
-    - GoogleUtilities/Environment (~> 6.7)
-    - GoogleUtilities/Reachability (~> 6.7)
-    - GoogleUtilities/UserDefaults (~> 6.7)
-    - Protobuf (>= 3.9.2, ~> 3.9)
-  - GoogleAppMeasurement (6.9.0):
-    - GoogleUtilities/AppDelegateSwizzler (~> 6.7)
-    - GoogleUtilities/MethodSwizzler (~> 6.7)
-    - GoogleUtilities/Network (~> 6.7)
-    - "GoogleUtilities/NSData+zlib (~> 6.7)"
-    - nanopb (~> 1.30906.0)
-  - GoogleDataTransport (7.5.1):
-    - nanopb (~> 1.30906.0)
-  - GoogleUtilities/AppDelegateSwizzler (6.7.2):
+  - Eureka (5.5.0)
+  - FirebaseAnalytics (10.29.0):
+    - FirebaseAnalytics/AdIdSupport (= 10.29.0)
+    - FirebaseCore (~> 10.0)
+    - FirebaseInstallations (~> 10.0)
+    - GoogleUtilities/AppDelegateSwizzler (~> 7.11)
+    - GoogleUtilities/MethodSwizzler (~> 7.11)
+    - GoogleUtilities/Network (~> 7.11)
+    - "GoogleUtilities/NSData+zlib (~> 7.11)"
+    - nanopb (< 2.30911.0, >= 2.30908.0)
+  - FirebaseAnalytics/AdIdSupport (10.29.0):
+    - FirebaseCore (~> 10.0)
+    - FirebaseInstallations (~> 10.0)
+    - GoogleAppMeasurement (= 10.29.0)
+    - GoogleUtilities/AppDelegateSwizzler (~> 7.11)
+    - GoogleUtilities/MethodSwizzler (~> 7.11)
+    - GoogleUtilities/Network (~> 7.11)
+    - "GoogleUtilities/NSData+zlib (~> 7.11)"
+    - nanopb (< 2.30911.0, >= 2.30908.0)
+  - FirebaseCore (10.29.0):
+    - FirebaseCoreInternal (~> 10.0)
+    - GoogleUtilities/Environment (~> 7.12)
+    - GoogleUtilities/Logger (~> 7.12)
+  - FirebaseCoreInternal (10.29.0):
+    - "GoogleUtilities/NSData+zlib (~> 7.8)"
+  - FirebaseInstallations (10.29.0):
+    - FirebaseCore (~> 10.0)
+    - GoogleUtilities/Environment (~> 7.8)
+    - GoogleUtilities/UserDefaults (~> 7.8)
+    - PromisesObjC (~> 2.1)
+  - FirebaseMessaging (10.29.0):
+    - FirebaseCore (~> 10.0)
+    - FirebaseInstallations (~> 10.0)
+    - GoogleDataTransport (~> 9.3)
+    - GoogleUtilities/AppDelegateSwizzler (~> 7.8)
+    - GoogleUtilities/Environment (~> 7.8)
+    - GoogleUtilities/Reachability (~> 7.8)
+    - GoogleUtilities/UserDefaults (~> 7.8)
+    - nanopb (< 2.30911.0, >= 2.30908.0)
+  - GoogleAppMeasurement (10.29.0):
+    - GoogleAppMeasurement/AdIdSupport (= 10.29.0)
+    - GoogleUtilities/AppDelegateSwizzler (~> 7.11)
+    - GoogleUtilities/MethodSwizzler (~> 7.11)
+    - GoogleUtilities/Network (~> 7.11)
+    - "GoogleUtilities/NSData+zlib (~> 7.11)"
+    - nanopb (< 2.30911.0, >= 2.30908.0)
+  - GoogleAppMeasurement/AdIdSupport (10.29.0):
+    - GoogleAppMeasurement/WithoutAdIdSupport (= 10.29.0)
+    - GoogleUtilities/AppDelegateSwizzler (~> 7.11)
+    - GoogleUtilities/MethodSwizzler (~> 7.11)
+    - GoogleUtilities/Network (~> 7.11)
+    - "GoogleUtilities/NSData+zlib (~> 7.11)"
+    - nanopb (< 2.30911.0, >= 2.30908.0)
+  - GoogleAppMeasurement/WithoutAdIdSupport (10.29.0):
+    - GoogleUtilities/AppDelegateSwizzler (~> 7.11)
+    - GoogleUtilities/MethodSwizzler (~> 7.11)
+    - GoogleUtilities/Network (~> 7.11)
+    - "GoogleUtilities/NSData+zlib (~> 7.11)"
+    - nanopb (< 2.30911.0, >= 2.30908.0)
+  - GoogleDataTransport (9.4.1):
+    - GoogleUtilities/Environment (~> 7.7)
+    - nanopb (< 2.30911.0, >= 2.30908.0)
+    - PromisesObjC (< 3.0, >= 1.2)
+  - GoogleUtilities/AppDelegateSwizzler (7.13.3):
     - GoogleUtilities/Environment
     - GoogleUtilities/Logger
     - GoogleUtilities/Network
-  - GoogleUtilities/Environment (6.7.2):
-    - PromisesObjC (~> 1.2)
-  - GoogleUtilities/Logger (6.7.2):
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/Environment (7.13.3):
+    - GoogleUtilities/Privacy
+    - PromisesObjC (< 3.0, >= 1.2)
+  - GoogleUtilities/Logger (7.13.3):
     - GoogleUtilities/Environment
-  - GoogleUtilities/MethodSwizzler (6.7.2):
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/MethodSwizzler (7.13.3):
     - GoogleUtilities/Logger
-  - GoogleUtilities/Network (6.7.2):
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/Network (7.13.3):
     - GoogleUtilities/Logger
     - "GoogleUtilities/NSData+zlib"
+    - GoogleUtilities/Privacy
     - GoogleUtilities/Reachability
-  - "GoogleUtilities/NSData+zlib (6.7.2)"
-  - GoogleUtilities/Reachability (6.7.2):
+  - "GoogleUtilities/NSData+zlib (7.13.3)":
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/Privacy (7.13.3)
+  - GoogleUtilities/Reachability (7.13.3):
     - GoogleUtilities/Logger
-  - GoogleUtilities/UserDefaults (6.7.2):
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/UserDefaults (7.13.3):
     - GoogleUtilities/Logger
+    - GoogleUtilities/Privacy
   - Hakuba (2.1.1)
-  - IDZSwiftCommonCrypto (0.13.0)
-  - KeychainSwift (8.0.3)
-  - nanopb (1.30906.0):
-    - nanopb/decode (= 1.30906.0)
-    - nanopb/encode (= 1.30906.0)
-  - nanopb/decode (1.30906.0)
-  - nanopb/encode (1.30906.0)
-  - ObjcExceptionBridging (1.0.1):
-    - ObjcExceptionBridging/ObjcExceptionBridging (= 1.0.1)
-  - ObjcExceptionBridging/ObjcExceptionBridging (1.0.1)
+  - IDZSwiftCommonCrypto (0.16.1)
+  - KeychainSwift (24.0.0)
+  - nanopb (2.30910.0):
+    - nanopb/decode (= 2.30910.0)
+    - nanopb/encode (= 2.30910.0)
+  - nanopb/decode (2.30910.0)
+  - nanopb/encode (2.30910.0)
+  - ObjcExceptionBridging (7.1.5):
+    - ObjcExceptionBridging/ObjcExceptionBridging (= 7.1.5)
+  - ObjcExceptionBridging/ObjcExceptionBridging (7.1.5)
   - ObjectMapper (4.2.0)
-  - PKHUD (4.2.3)
-  - PromisesObjC (1.2.12)
-  - Protobuf (3.21.1)
-  - ReachabilitySwift (3)
+  - PKHUD (5.4.0)
+  - PromisesObjC (2.4.0)
+  - ReachabilitySwift (5.2.3)
   - ResearchKit (2.1.0-beta)
-  - Sentry (4.5.0):
-    - Sentry/Core (= 4.5.0)
-  - Sentry/Core (4.5.0)
+  - Sentry (8.37.0):
+    - Sentry/Core (= 8.37.0)
+  - Sentry/Core (8.37.0)
   - SwiftValidator (4.0.0)
+  - SwiftyRSA (1.8.0):
+    - SwiftyRSA/ObjC (= 1.8.0)
+  - SwiftyRSA/ObjC (1.8.0)
   - XCGLogger (7.0.1):
     - XCGLogger/Core (= 7.0.1)
   - XCGLogger/Core (7.0.1):
@@ -112,38 +126,34 @@ PODS:
 
 DEPENDENCIES:
   - Alamofire (~> 4.5)
-  - couchbase-lite-ios
-  - Crashlytics (~> 3.4)
-  - EmitterKit (~> 5.1)
+  - CouchbaseLite-Swift
+  - EmitterKit (~> 5.2.2)
   - Eureka
-  - Firebase/Analytics
-  - Firebase/Messaging (~> 6)
+  - FirebaseAnalytics
+  - FirebaseMessaging
   - Hakuba (from `https://github.com/eskizyen/Hakuba.git`, branch `Swift3`)
-  - IDZSwiftCommonCrypto (~> 0.13.0)
-  - KeychainSwift (~> 8.0)
-  - ObjectMapper (from `https://github.com/Hearst-DD/ObjectMapper.git`, branch `master`)
-  - PKHUD (from `https://github.com/pkluz/PKHUD.git`, branch `release/swift4`)
-  - ReachabilitySwift (~> 3)
-  - ResearchKit (from `https://github.com/ResearchKit/ResearchKit.git`, commit `b50e1d7`)
-  - Sentry (from `https://github.com/getsentry/sentry-cocoa.git`, tag `4.5.0`)
-  - SwiftValidator (from `https://github.com/jpotts18/SwiftValidator.git`, branch `master`)
+  - IDZSwiftCommonCrypto (~> 0.16.1)
+  - KeychainSwift (~> 24.0)
+  - ObjectMapper (from `https://github.com/Hearst-DD/ObjectMapper.git`, commit `0b96a734de3ea1c87374ae677064f86adb0716ec`)
+  - PKHUD (from `https://github.com/pkluz/PKHUD.git`, tag `5.4.0`)
+  - ReachabilitySwift (= 5.2.3)
+  - ResearchKit (from `https://github.com/ResearchKit/ResearchKit.git`, tag `2.1.0`)
+  - Sentry (~> 8.37.0)
+  - SwiftValidator (from `https://github.com/SwiftValidatorCommunity/SwiftValidator.git`, branch `master`)
+  - SwiftyRSA (from `https://github.com/TakeScoop/SwiftyRSA.git`, tag `1.8.0`)
   - XCGLogger (~> 7.0.0)
   - XLActionController (~> 5.0.1)
 
 SPEC REPOS:
   trunk:
     - Alamofire
-    - couchbase-lite-ios
-    - Crashlytics
+    - CouchbaseLite-Swift
     - EmitterKit
     - Eureka
-    - Fabric
-    - Firebase
     - FirebaseAnalytics
     - FirebaseCore
-    - FirebaseCoreDiagnostics
+    - FirebaseCoreInternal
     - FirebaseInstallations
-    - FirebaseInstanceID
     - FirebaseMessaging
     - GoogleAppMeasurement
     - GoogleDataTransport
@@ -153,8 +163,8 @@ SPEC REPOS:
     - nanopb
     - ObjcExceptionBridging
     - PromisesObjC
-    - Protobuf
     - ReachabilitySwift
+    - Sentry
     - XCGLogger
     - XLActionController
 
@@ -163,74 +173,70 @@ EXTERNAL SOURCES:
     :branch: Swift3
     :git: https://github.com/eskizyen/Hakuba.git
   ObjectMapper:
-    :branch: master
+    :commit: 0b96a734de3ea1c87374ae677064f86adb0716ec
     :git: https://github.com/Hearst-DD/ObjectMapper.git
   PKHUD:
-    :branch: release/swift4
     :git: https://github.com/pkluz/PKHUD.git
+    :tag: 5.4.0
   ResearchKit:
-    :commit: b50e1d7
     :git: https://github.com/ResearchKit/ResearchKit.git
-  Sentry:
-    :git: https://github.com/getsentry/sentry-cocoa.git
-    :tag: 4.5.0
+    :tag: 2.1.0
   SwiftValidator:
     :branch: master
-    :git: https://github.com/jpotts18/SwiftValidator.git
+    :git: https://github.com/SwiftValidatorCommunity/SwiftValidator.git
+  SwiftyRSA:
+    :git: https://github.com/TakeScoop/SwiftyRSA.git
+    :tag: 1.8.0
 
 CHECKOUT OPTIONS:
   Hakuba:
     :commit: 9d748747369671e162b4f088402eacbfa997121a
     :git: https://github.com/eskizyen/Hakuba.git
   ObjectMapper:
-    :commit: a593b4d647a970b3d184d046f8f52b945083ccf9
+    :commit: 0b96a734de3ea1c87374ae677064f86adb0716ec
     :git: https://github.com/Hearst-DD/ObjectMapper.git
   PKHUD:
-    :commit: 4d8fbf70ae912dd72280cde0a5c1440ada9a7306
     :git: https://github.com/pkluz/PKHUD.git
+    :tag: 5.4.0
   ResearchKit:
-    :commit: b50e1d7
     :git: https://github.com/ResearchKit/ResearchKit.git
-  Sentry:
-    :git: https://github.com/getsentry/sentry-cocoa.git
-    :tag: 4.5.0
+    :tag: 2.1.0
   SwiftValidator:
     :commit: d370353b7a0ce758a53b189c81e485dcd53c99a4
-    :git: https://github.com/jpotts18/SwiftValidator.git
+    :git: https://github.com/SwiftValidatorCommunity/SwiftValidator.git
+  SwiftyRSA:
+    :git: https://github.com/TakeScoop/SwiftyRSA.git
+    :tag: 1.8.0
 
 SPEC CHECKSUMS:
   Alamofire: 85e8a02c69d6020a0d734f6054870d7ecb75cf18
-  couchbase-lite-ios: 3ba7973e9af22e38aaa8dd5869b64c13e0b55dd4
-  Crashlytics: 9220f5bc89e7a618df411b4f639389dbfb0e03d2
+  CouchbaseLite-Swift: 7e9b96259e13bb617fd73b2338dde6d6cb536890
   EmitterKit: e7a27b37118823d8ad413b8396f75e40d59f8cba
-  Eureka: 28ad9dec6286cd7cd601fdf8e8df39bb7356a8f4
-  Fabric: ea977e3cd9c20425516d3dafd3bf8c941c51223f
-  Firebase: c23a36d9e4cdf7877dfcba8dd0c58add66358999
-  FirebaseAnalytics: 3bb096873ee0d7fa4b6c70f5e9166b6da413cc7f
-  FirebaseCore: d3a978a3cfa3240bf7e4ba7d137fdf5b22b628ec
-  FirebaseCoreDiagnostics: 770ac5958e1372ce67959ae4b4f31d8e127c3ac1
-  FirebaseInstallations: 466c7b4d1f58fe16707693091da253726a731ed2
-  FirebaseInstanceID: bd3ffc24367f901a43c063b36c640b345a4a5dd1
-  FirebaseMessaging: 5eca4ef173de76253352511aafef774caa1cba2a
-  GoogleAppMeasurement: a6a3a066369828db64eda428cb2856dc1cdc7c4e
-  GoogleDataTransport: f56af7caa4ed338dc8e138a5d7c5973e66440833
-  GoogleUtilities: 7f2f5a07f888cdb145101d6042bc4422f57e70b3
+  Eureka: 1c18c7fcd8f772cc2ca42d6be36292dffa77eecb
+  FirebaseAnalytics: 23717de130b779aa506e757edb9713d24b6ffeda
+  FirebaseCore: 30e9c1cbe3d38f5f5e75f48bfcea87d7c358ec16
+  FirebaseCoreInternal: df84dd300b561c27d5571684f389bf60b0a5c934
+  FirebaseInstallations: 913cf60d0400ebd5d6b63a28b290372ab44590dd
+  FirebaseMessaging: 7b5d8033e183ab59eb5b852a53201559e976d366
+  GoogleAppMeasurement: f9de05ee17401e3355f68e8fc8b5064d429f5918
+  GoogleDataTransport: 6c09b596d841063d76d4288cc2d2f42cc36e1e2a
+  GoogleUtilities: ea963c370a38a8069cc5f7ba4ca849a60b6d7d15
   Hakuba: bc5a0422290d086c33a6424a26dd58c1a1136e94
-  IDZSwiftCommonCrypto: 00dd37cdfbd149312a7e5a582cf9909f8b129f44
-  KeychainSwift: be9554c0e5f4b1686c775930dc5c6bd9396992ed
-  nanopb: 59317e09cf1f1a0af72f12af412d54edf52603fc
-  ObjcExceptionBridging: c30e00eb3700467e695faeea30e26e18bd445001
-  ObjectMapper: 5a6c9f063ef67e7fc0d7eb8958919e3121396a96
-  PKHUD: 351011b853e6b942e7ee8ad335864cc84c787241
-  PromisesObjC: 3113f7f76903778cf4a0586bd1ab89329a0b7b97
-  Protobuf: 9e88c1e667d75aa2491d211f26ccddde4e8ad4cf
-  ReachabilitySwift: f5b9bb30a0777fac8f09ce8b067e32faeb29bb64
-  ResearchKit: b948fcbadd4454d6b835d2b64471980a467a96a7
-  Sentry: ab6c209f23700d1460691dbc90e19ed0a05d496b
+  IDZSwiftCommonCrypto: aefd3487b88dc3d7a1de2553188c720ac3194940
+  KeychainSwift: 007c4647486e4563adca839cf02cef00deb3b670
+  nanopb: 438bc412db1928dac798aa6fd75726007be04262
+  ObjcExceptionBridging: d3d37d62981bb7f252ecb31b62d7e23a96bbfb8a
+  ObjectMapper: 1eb41f610210777375fa806bf161dc39fb832b81
+  PKHUD: 026ee10894f7d983cdb585138523a2ae098e4424
+  PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
+  ReachabilitySwift: 7f151ff156cea1481a8411701195ac6a984f4979
+  ResearchKit: 145c6c2a272d313a53ab1dc49d84b0d20dde003a
+  Sentry: ee060c09b2f7ec1240e95c766ab44c04c7bdb052
   SwiftValidator: 249b6b3ae3b294266c5b9de134d94f18f2d5aa47
+  SwiftyRSA: 735e48d1162b95af42f140c47ea968e8b6b0a54b
   XCGLogger: 1943831ef907df55108b0b18657953f868de973b
   XLActionController: f1f2226d2c6629db197d4a41f2da907085a4cb9d
 
-PODFILE CHECKSUM: 12f51d4f1d92e3158a6c76f68753f812051beee8
+PODFILE CHECKSUM: 049f48b6df1d6243c6d1c317efaa5adc2bdf6cf0
 
 COCOAPODS: 1.15.2

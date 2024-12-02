@@ -262,7 +262,6 @@ class AudioQuestionViewController: UIViewController, AVAudioRecorderDelegate, AV
         do {
             self.saveEncryptedAudio()
             self.activeSurvey.isComplete = true
-            StudyManager.sharedInstance.cleanupSurvey(self.activeSurvey)
             StudyManager.sharedInstance.updateActiveSurveys(true)
             HUD.flash(.success, delay: 0.5)
             self.cleanupAndDismiss()

@@ -1,5 +1,6 @@
 import Foundation
 import ObjectMapper
+import XCGLogger
 
 /// unused, appears to be an alternate to the upload data file post request
 struct ParamUploadRequest: Mappable, ApiRequest {

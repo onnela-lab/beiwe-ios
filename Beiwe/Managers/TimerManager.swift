@@ -182,11 +182,11 @@ class TimerManager {
     @objc func pollServices() {
         // handy print statemunt, buuuuut timers are perfect when attached to the debugger so it's not actually very useful??
         var t1 = Date()
-        if t1 > self.nextDataServicesCheck {
-            print("pollservices was late by \(String(format: "%.3f", t1.timeIntervalSince1970 - self.expected_wakeup.timeIntervalSince1970)) seconds")
-        } else {
-            print("pollservices was early by \(String(format: "%.3f", self.expected_wakeup.timeIntervalSince1970 - t1.timeIntervalSince1970)) seconds")
-        }
+        // if t1 > self.nextDataServicesCheck {
+        //     print("pollservices was late by \(String(format: "%.3f", t1.timeIntervalSince1970 - self.expected_wakeup.timeIntervalSince1970)) seconds")
+        // } else {
+        //     print("pollservices was early by \(String(format: "%.3f", self.expected_wakeup.timeIntervalSince1970 - t1.timeIntervalSince1970)) seconds")
+        // }
         
         self.clearPollTimer()
         AppEventManager.sharedInstance.logAppEvent(event: "poll_service", msg: "Polling service") // probably pointless
@@ -275,7 +275,7 @@ class TimerManager {
         self.timer = Timer.scheduledTimer(
             timeInterval: seconds, target: self, selector: #selector(self.pollServices), userInfo: nil, repeats: false
         )
-        print("The Timer was set for: \(seconds) seconds")
+        // print("The Timer was set for: \(seconds) seconds")
         AppEventManager.sharedInstance.logAppEvent(event: "set_timer", msg: "Set timer for \(seconds) seconds", d1: String(seconds))
     }
 }

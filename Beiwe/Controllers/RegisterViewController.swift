@@ -1,11 +1,12 @@
 import Eureka
 import ObjectMapper
 import Alamofire
-import Firebase
 import PKHUD
 import Sentry
 import SwiftValidator
 import UIKit
+import FirebaseCore
+import FirebaseMessaging
 
 
 class RegisterViewController: FormViewController {
@@ -34,9 +35,16 @@ class RegisterViewController: FormViewController {
         cell.validationLabel.font = self.small_font // the red validation text one
         cell.errorColor = self.legible_red // (also works with row.errorColor)
         
+        cell.textField.autocapitalizationType = UITextAutocapitalizationType.none
+        cell.textField.autocorrectionType = UITextAutocorrectionType.no
+        cell.textField.spellCheckingType = UITextSpellCheckingType.no
+        cell.textField.smartQuotesType = UITextSmartQuotesType.no
+        cell.textField.smartDashesType = UITextSmartDashesType.no
+        
         // these don't work. It appears to be impossible to set this element's color.
         // cell.titleLabel?.textColor = UIColor.white
         // cell.accessibilityIgnoresInvertColors = true
+        // todo - this stuff is probably because we need to hit the cell.textField.etc
     }
     
     override func viewDidLoad() {
@@ -201,9 +209,12 @@ class RegisterViewController: FormViewController {
             
             if let patientId = patientId, let phoneNumber = phoneNumber, let newPassword = newPassword, let clinicianPhone = clinicianPhone, let raPhone = raPhone {
                 let registerStudyRequest = RegisterStudyRequest(patientId: patientId, phoneNumber: phoneNumber, newPassword: newPassword)
+
+                // these sentry info tags will not be set otherwise until after registration.
+                SentrySDK.configureScope { scope in
+                    scope.setTags(["user_id": patientId, "server_url": server])
+                }
                 
-                // sets tags for Sentry
-                Client.shared?.tags = ["user_id": patientId, "server_url": server]
                 ApiManager.sharedInstance.password = tempPassword ?? ""
                 ApiManager.sharedInstance.patientId = patientId
                 ApiManager.sharedInstance.customApiUrl = server

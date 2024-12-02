@@ -6,7 +6,6 @@ class Study: ReclineObject {
     var studySettings: StudySettings?
     
     // constants (these should not change after registration)
-    var studyId = Constants.defaultStudyId  // except for this one? I don't even know.
     var participantConsented: Bool = false
     var patientId: String?
     var patientPhoneNumber: String = "" // uh, I don't think this is used?
@@ -22,11 +21,10 @@ class Study: ReclineObject {
     var nextSurveyCheck: Int64?
     var nextDeviceSettingsCheck: Int64?
     var lastBadgeCnt = 0
-    var receivedAudioSurveys: Int = 0
-    var receivedTrackingSurveys: Int = 0
     var submittedAudioSurveys: Int = 0 // TODO: what is this and is it breaking uploads
     var submittedTrackingSurveys: Int = 0 // TODO: what is this and is it breaking uploads
-
+    var surveyPushNotificationUUIDs: [String]?
+    
     // app state tracking - default value is "never_populated"
     var lastBackgroundPushNotificationReceived = Constants.DEFAULT_UNPOPULATED_APPINFO
     var lastForegroundPushNotificationReceived = Constants.DEFAULT_UNPOPULATED_APPINFO
@@ -36,11 +34,10 @@ class Study: ReclineObject {
     var surveys: [Survey] = []
     var activeSurveys: [String: ActiveSurvey] = [:]
 
-    init(patientPhone: String, patientId: String, studySettings: StudySettings, apiUrl: String?, studyId: String = Constants.defaultStudyId) {
+    init(patientPhone: String, patientId: String, studySettings: StudySettings, apiUrl: String?) {
         super.init()
         self.patientPhoneNumber = patientPhone
         self.studySettings = studySettings
-        self.studyId = studyId
         self.patientId = patientId
         self.registerDate = Int64(Date().timeIntervalSince1970)
         self.customApiUrl = apiUrl
@@ -55,7 +52,6 @@ class Study: ReclineObject {
         super.mapping(map: map)
         self.patientPhoneNumber <- map["phoneNumber"]
         self.studySettings <- map["studySettings"]
-        self.studyId <- map["studyId"]
         self.patientId <- map["patientId"]
         self.participantConsented <- map["participantConsented"]
         self.clinicianPhoneNumber <- map["clinicianPhoneNumber"]
@@ -65,8 +61,6 @@ class Study: ReclineObject {
         self.surveys <- map["surveys"]
         self.activeSurveys <- map["active_surveys"]
         self.registerDate <- (map["registerDate"], TransformOf<Int64, NSNumber>(fromJSON: { $0?.int64Value }, toJSON: { $0.map { NSNumber(value: $0) } }))
-        self.receivedAudioSurveys <- map["receivedAudioSurveys"]
-        self.receivedTrackingSurveys <- map["receivedTrackingSurveys"]
         self.submittedAudioSurveys <- map["submittedAudioSurveys"]
         self.submittedTrackingSurveys <- map["submittedTrackingSurveys"]
         self.customApiUrl <- map["customApiUrl"]
@@ -78,6 +72,7 @@ class Study: ReclineObject {
         self.lastBackgroundPushNotificationReceived <- map["lastBackgroundPushNotificationReceived"]
         self.lastForegroundPushNotificationReceived <- map["lastForegroundPushNotificationReceived"]
         self.lastApplicationWillTerminate <- map["lastApplicationWillTerminate"]
+        self.surveyPushNotificationUUIDs <- map["lastApplicationWillTerminate"]
     }
 
     func surveyExists(surveyId: String?) -> Bool {
