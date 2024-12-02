@@ -14,6 +14,8 @@
 		32E1436324869B38009FAE5A /* TestNotificationRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32E1436224869B38009FAE5A /* TestNotificationRequest.swift */; };
 		59912EB3230EF09400CAF7EB /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 59912EB1230EF09400CAF7EB /* Localizable.strings */; };
 		59912EB92311A33A00CAF7EB /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 59912EBB2311A33A00CAF7EB /* InfoPlist.strings */; };
+		7329930D2CFE5BB900166A05 /* BluetoothManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7329930B2CFE5BB900166A05 /* BluetoothManager.swift */; };
+		7329930E2CFE5BB900166A05 /* OmniringManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7329930C2CFE5BB900166A05 /* OmniringManager.swift */; };
 		831CC5801F79AF6400CDEFB0 /* AppEventManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 831CC57F1F79AF6400CDEFB0 /* AppEventManager.swift */; };
 		832FFC1E1CC8506900F2E1EF /* GradientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832FFC1D1CC8506900F2E1EF /* GradientView.swift */; };
 		832FFC221CC85A7C00F2E1EF /* BWButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832FFC211CC85A7C00F2E1EF /* BWButton.swift */; };
@@ -108,6 +110,8 @@
 		59912EB6230EF3D100CAF7EB /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "Beiwe/zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		59912EBA2311A33A00CAF7EB /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		59912EBD2311A66B00CAF7EB /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		7329930B2CFE5BB900166A05 /* BluetoothManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothManager.swift; sourceTree = "<group>"; };
+		7329930C2CFE5BB900166A05 /* OmniringManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniringManager.swift; sourceTree = "<group>"; };
 		831CC57F1F79AF6400CDEFB0 /* AppEventManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEventManager.swift; sourceTree = "<group>"; };
 		832FFC1D1CC8506900F2E1EF /* GradientView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GradientView.swift; sourceTree = "<group>"; };
 		832FFC211CC85A7C00F2E1EF /* BWButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BWButton.swift; sourceTree = "<group>"; };
@@ -355,6 +359,8 @@
 		83F6C95E1CA0895000B85914 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				7329930B2CFE5BB900166A05 /* BluetoothManager.swift */,
+				7329930C2CFE5BB900166A05 /* OmniringManager.swift */,
 				83AF04261CADA02A00A37225 /* AccelerometerManager.swift */,
 				831CC57F1F79AF6400CDEFB0 /* AppEventManager.swift */,
 				83AF043E1CB360F300A37225 /* ConsentManager.swift */,
@@ -740,6 +746,8 @@
 				832FFC221CC85A7C00F2E1EF /* BWButton.swift in Sources */,
 				832FFC241CC863F400F2E1EF /* AppColors.swift in Sources */,
 				83B2BDF31CC1D5AA007FAE91 /* UIColor.swift in Sources */,
+				7329930D2CFE5BB900166A05 /* BluetoothManager.swift in Sources */,
+				7329930E2CFE5BB900166A05 /* OmniringManager.swift in Sources */,
 				83AF042F1CB0D48D00A37225 /* MagnetometerManager.swift in Sources */,
 				83E3DE8E1CA477D200EB5349 /* ApiManager.swift in Sources */,
 				83AF04291CAF748C00A37225 /* PowerStateManager.swift in Sources */,
