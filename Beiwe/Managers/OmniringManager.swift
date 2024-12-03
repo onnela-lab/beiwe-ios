@@ -158,7 +158,8 @@ class OmniringManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate,
     }
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
-        if (peripheral.name ?? "").starts(with: "PPG_Ring") {
+        print("discovered \(peripheral.name ?? "")")
+        if (peripheral.name ?? "").starts(with: "OmniRing") {
             self.omniringPeripheral = peripheral
             self.omniringPeripheral?.delegate = self
             central.connect(self.omniringPeripheral!)
