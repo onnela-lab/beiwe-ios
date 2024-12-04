@@ -22,6 +22,7 @@ class OnboardingManager: NSObject, ORKTaskViewControllerDelegate {
         // setup steps for registration
         var steps = [ORKStep]()
         steps += [self.WelcomeStep] // defines the first thing to come up to be the welcome screen
+        
         // this is the registration step, why it is called WaitForRegister is lost to the mists of time (and it is poorly named)
         steps += [ORKWaitStep(identifier: "WaitForRegister")] // behavior of pressing register is defined here (bumps to register card)
         
@@ -31,15 +32,26 @@ class OnboardingManager: NSObject, ORKTaskViewControllerDelegate {
         self.onboardingViewController.delegate = self
         self.retainSelf = self
         
-        // THIS IS A HACK, READ THIS IF YOU ARE GOING TO TRY TO CHANGE THE UI.
-        //  Thiis ui is actually a card view, not a full screen view. Until we change it to be a better full screen view with a button
-        //  we are actually just setting the parent view's background color to be the same as the card's color, mimicing a full screen view.
-        //    Sorry about this its a gross hack (but status bar is now visible, hooray?)
-        //  "stepViewController.view.backgroundColor = AppColors.Beiwe1" has to go somewhere else
-        self.onboardingViewController.view.backgroundColor = AppColors.Beiwe1
-        // self.onboardingViewController.view.tintColor = UIColor.white // nope doesn't force text to be white
-        // self.onboardingViewController.view.accessibilityIgnoresInvertColors = true // also doesn't do anything
+        // THIS IS A UI HACK, IT AFFECTS RegisterViewActivity
+        // READ THIS IF YOU ARE GOING TO TRY TO CHANGE THE UI.
+        //  This ui is actually a card view, not a full screen view.
+        //  We set the parent view's background color to be the same as this card's color
+        //    so it looks full screen, and the status bar remains visible.
         
+        // "stepViewController.view.backgroundColor = AppColors.Beiwe1" has to go somewhere else
+        self.onboardingViewController.view.backgroundColor = AppColors.Beiwe1
+        
+        // this is the bar that has the cancel button - when we updated to ResearchKit 2.1.0
+        // it became white/black depending on dark mode, so now we need to set it explicitly.
+        self.onboardingViewController.navigationBar.backgroundColor = AppColors.Beiwe1
+        
+        // We can't trivially get rid of the cancel button on the card behind the registration card,
+        // because if you dismiss it the user has no way to get back to registration....
+        // (can't currently work out how to block dismissing it, its not very important but this
+        // does make the app feel a little cheap when you fat-finger and dismiss it.  🫠)
+        
+        // self.onboardingViewController.view.tintColor = UIColor.white // nope doesn't force text to be white
+        // self.onboardingViewController.discardable = false  // doesn't appear to do anything with true or false
     }
 
     // called when the onboarding view is done.
@@ -55,10 +67,12 @@ class OnboardingManager: NSObject, ORKTaskViewControllerDelegate {
     func taskViewController(_ taskViewController: ORKTaskViewController, shouldPresent step: ORKStep) -> Bool {
         return true
     }
+
     // 2
     func taskViewController(_ taskViewController: ORKTaskViewController, viewControllerFor step: ORKStep) -> ORKStepViewController? {
         return nil
     }
+
     // 3
     func taskViewController(_ taskViewController: ORKTaskViewController, hasLearnMoreFor step: ORKStep) -> Bool {
         switch step.identifier {
@@ -67,6 +81,7 @@ class OnboardingManager: NSObject, ORKTaskViewControllerDelegate {
         default: return false
         }
     }
+
     // 4
     func taskViewController(_ taskViewController: ORKTaskViewController, stepViewControllerWillAppear stepViewController: ORKStepViewController) {
         // the other half of the ui hack to make it appear to be a full screen singular color

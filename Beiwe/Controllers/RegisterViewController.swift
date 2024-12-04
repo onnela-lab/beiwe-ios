@@ -1,13 +1,12 @@
-import Eureka
-import ObjectMapper
 import Alamofire
+import Eureka
+import FirebaseCore
+import FirebaseMessaging
+import ObjectMapper
 import PKHUD
 import Sentry
 import SwiftValidator
 import UIKit
-import FirebaseCore
-import FirebaseMessaging
-
 
 class RegisterViewController: FormViewController {
     // static assets - communication erro is our generic couldn't-find-it error, it also covers
@@ -29,7 +28,7 @@ class RegisterViewController: FormViewController {
     
     // set the font sizes, colors. Note that the label text is black in light mode and white in dark mode and it seems stuck that way.
     func apply_cell_defaults(_ cell: SVTextCell) {
-        cell.backgroundColor = AppColors.Beiwe1 // the lightes "beiwe color'
+        cell.backgroundColor = AppColors.Beiwe1 // the lightest Beiwe color
         cell.textLabel?.font = self.font // the normal label
         cell.detailTextLabel?.font = self.font // text when there is nothing present in the form
         cell.validationLabel.font = self.small_font // the red validation text one
@@ -49,13 +48,20 @@ class RegisterViewController: FormViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // self.view appears to be the tableview / its container.
+        // self.view.backgroundColor = UIColor.magenta  // is overridden by tableView.backgroundColor
+        // self.view.alpha = 0.5  // is visible if self.tableView.alpha is less than 1
+        
+        // the table view is the "card" in the registration ~form that contains all the cells.
+        // background color sets the color of the whole card modulo the cells we setup just after
         self.tableView.backgroundColor = AppColors.Beiwe2 // one step darker than the light coloring
         
         // set the font sizes, colors.  Note that the label text is black in light mode and white in dark mode and it seems stuck that way.
         // (can't work out how to make a generic type function  to handle different rows)
         SVURLRow.defaultCellSetup = { (cell: SVURLCell, row: SVURLRow) in
             self.apply_cell_defaults(cell)
-            row.placeholderColor = self.less_dark_gray
+            row.placeholderColor = self.less_dark_gray // this is too hard to factor out due to typing
             row.onCellHighlightChanged { cell, row in
                 cell.titleLabel?.textColor = UIColor.white
             }
@@ -363,7 +369,7 @@ class RegisterViewController: FormViewController {
     
     func registrationCompletionHandler(
         _ bodyResponse: BodyResponse,
-        new_password: String, 
+        new_password: String,
         phone_number: String,
         patient_id: String,
         clinician_phone: String,

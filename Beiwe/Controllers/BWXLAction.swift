@@ -109,7 +109,9 @@ open class BWXLHeaderView: UICollectionReusableView {
     }
 }
 
-/// This appears to be the menu view, eg the user menu actions menu
+
+
+/// This Is The User Menu - menu that you open by tapping the user icon after you are registered and logged in
 open class BWXLActionController: ActionController<BWXLCell, ActionData, BWXLHeaderView, BWXLHeaderData, UICollectionReusableView, Void> {
     /// runs when view appears, probably is the visual effect for the background of the main page
     fileprivate lazy var blurView: UIVisualEffectView = {
