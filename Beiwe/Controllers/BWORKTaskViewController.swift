@@ -10,6 +10,7 @@ class BWORKTaskViewController: ORKTaskViewController {
     // }
 
     @objc override func presentCancelOptions(_ saveable: Bool, sender: UIBarButtonItem?) {
+        // print("inside BWORKTaskViewController.presentCancelOptions()")
         super.presentCancelOptions(self.displayDiscard ? saveable : false, sender: sender)
     }
 }
