@@ -159,6 +159,51 @@ func isoStringToTimeInterval(timeString: String) -> TimeInterval {
     return sentTime.timeIntervalSince1970
 }
 
+//////////////////////////////// CONVENIENCE JSON FUNCTIONS ///////////////////////////////////
+//////////////////////////////// CONVENIENCE JSON FUNCTIONS ///////////////////////////////////
+//////////////////////////////// CONVENIENCE JSON FUNCTIONS ///////////////////////////////////
+
+func easyJSON(_ str_list: [String]?) -> String {
+    guard let str_list = str_list else {
+        return "[]"
+    }
+    
+    return String(
+        data: try! JSONSerialization.data(
+            withJSONObject: str_list,
+            options: []
+        ),
+        encoding: .utf8
+    )!
+}
+
+func easyJSON(_ str_str_dict: [String: String]?) -> String {
+    guard let str_str_dict = str_str_dict else {
+        return "{}"
+    }
+    return String(
+        data: try! JSONSerialization.data(
+            withJSONObject: str_str_dict,
+            options: []
+        ),
+        encoding: .utf8
+    )!
+}
+
+func easyJSON(_ str_any_dict: [String: Any]?) throws -> String {
+    // json encoding has to be handled
+    guard let str_any_dict = str_any_dict else {
+        return "{}"
+    }
+    return String(
+        data: try JSONSerialization.data(
+            withJSONObject: str_any_dict,
+            options: []
+        ),
+        encoding: .utf8
+    )!
+}
+
 /////////////////////////////////// THE PRINT FUNCTION ////////////////////////////////////////
 /////////////////////////////////// THE PRINT FUNCTION ////////////////////////////////////////
 /////////////////////////////////// THE PRINT FUNCTION ////////////////////////////////////////

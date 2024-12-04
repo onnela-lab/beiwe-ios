@@ -10,6 +10,15 @@ enum DataStorageErrors: Error {
     case notInitialized
 }
 
+enum DataStorageError: Error {
+    case fileCreationError
+}
+
+// we can't resolve an error where it is not possible to move a file to the upload
+// folder, but we can try again later. LEFT_BEHIND_FILES is our list of these files.
+var LEFT_BEHIND_FILES = [String]()
+let LEFT_BEHIND_FILES_LOCK = NSLock()
+
 /// all file paths in the scope of the app are of this form:
 /// /var/mobile/Containers/Data/Application/49ECF24B-85A4-40C1-BC57-92B742C6ED64/Library/Caches/currentdat(a/patientid_accel_1698721703289.csv
 /// the uuid is randomized per installation. We could remove it with a splice, but regex would be better. (not implemented)
@@ -30,15 +39,45 @@ func shortenPathMore(_ path_string: String) -> String {
     return path_string
 }
 
-// file creation errors
-enum DataStorageError: Error {
-    case fileCreationError
+///////////////////////////// Some generic looking-at-files code /////////////////////////////
+///////////////////////////// Some generic looking-at-files code /////////////////////////////
+///////////////////////////// Some generic looking-at-files code /////////////////////////////
+
+func iterate_file_path(_ path: String) -> [String] {
+    var files: [String] = []
+    if let enumerator = FileManager.default.enumerator(atPath: path) {
+        while let filename = enumerator.nextObject() as? String {
+            files.append(shortenPath(filename))
+        }
+    }
+    return files
 }
 
-// we can't resolve an error where it is not possible to move a file to the upload
-// folder, but we can try again later. LEFT_BEHIND_FILES is our list of these files.
-var LEFT_BEHIND_FILES = [String]()
-let LEFT_BEHIND_FILES_LOCK = NSLock()
+func count_file_paths(_ path: String) -> Int {
+    var count = 0
+    if let enumerator = FileManager.default.enumerator(atPath: path) {
+        while let _filename = enumerator.nextObject() as? String {
+            count += 1
+        }
+    }
+    return count
+}
+
+func get_current_data_files_list() -> [String] {
+    return iterate_file_path(DataStorageManager.currentDataDirectory().path)
+}
+
+func count_current_data_files() -> Int {
+    return count_file_paths(DataStorageManager.currentDataDirectory().path)
+}
+
+func get_upload_files_list() -> [String] {
+    return iterate_file_path(DataStorageManager.uploadDataDirectory().path)
+}
+
+func count_upload_files() -> Int {
+    return count_file_paths(DataStorageManager.uploadDataDirectory().path)
+}
 
 //////////////////////////////////////// DataStorage Manager ///////////////////////////////////////
 //////////////////////////////////////// DataStorage Manager ///////////////////////////////////////
@@ -136,23 +175,23 @@ class DataStorageManager {
     
     // for years we used the .cache directory. wtaf.
     static func currentDataDirectory() -> URL {
-        let cacheDir = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)[0]
-        return URL(fileURLWithPath: cacheDir).appendingPathComponent("currentdata")
+        let dir = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)[0]
+        return URL(fileURLWithPath: dir).appendingPathComponent("currentdata")
     }
 
     static func uploadDataDirectory() -> URL {
-        let cacheDir = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)[0]
-        return URL(fileURLWithPath: cacheDir).appendingPathComponent("uploaddata")
+        let dir = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)[0]
+        return URL(fileURLWithPath: dir).appendingPathComponent("uploaddata")
     }
     
     static func oldCurrentDataDirectory() -> URL {
-        let cacheDir = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true)[0]
-        return URL(fileURLWithPath: cacheDir).appendingPathComponent("currentdata")
+        let dir = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true)[0]
+        return URL(fileURLWithPath: dir).appendingPathComponent("currentdata")
     }
 
     static func oldUploadDataDirectory() -> URL {
-        let cacheDir = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true)[0]
-        return URL(fileURLWithPath: cacheDir).appendingPathComponent("uploaddata")
+        let dir = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true)[0]
+        return URL(fileURLWithPath: dir).appendingPathComponent("uploaddata")
     }
     
     func isUploadFile(_ filename: String) -> Bool {

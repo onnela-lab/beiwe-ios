@@ -1,4 +1,9 @@
 struct Constants {
+    
+    static let ENABLED_FEATURES = [
+        "survey_resend",
+    ]
+    
     static let passwordRequirementRegex = "^.{6,}$"
     static let passwordRequirementDescription = NSLocalizedString("password_length_requirement", comment: "")
     

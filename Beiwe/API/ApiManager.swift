@@ -75,6 +75,9 @@ class ApiManager {
         parameters["os_version"] = UIDevice.current.systemVersion
         parameters["timezone"] = TimeZone.current.identifier
         
+        // testing for the presence of these strings is much MUCH better than comparing version numbers.
+        parameters["supported_features"] = easyJSON(Constants.ENABLED_FEATURES)
+
         // various device metrics to be improved on over time, meant for developer use to debug issues.
         var device_status_report = [String: String]()
         device_status_report["app_commit"] = Constants.APP_COMMIT
@@ -113,6 +116,7 @@ class ApiManager {
         // is there a possible database threading error here on accessing files_in_flight?
         device_status_report["number_uploads_queued"] = String(StudyManager.sharedInstance.files_in_flight.count)
         
+        
         // app state that can't exist until you register for a study
         if let study = StudyManager.sharedInstance.currentStudy {
             device_status_report["last_application_will_terminate"] = study.lastApplicationWillTerminate
@@ -124,27 +128,23 @@ class ApiManager {
             device_status_report["last_background_push_notification_received"] = study.lastBackgroundPushNotificationReceived
             device_status_report["last_foreground_push_notification_received"] = study.lastForegroundPushNotificationReceived
             
-            // neither of these can fail
-            if let surveyPushNotificationUUIDs = study.surveyPushNotificationUUIDs {
-                // print("pushing this list of uuids:", surveyPushNotificationUUIDs)
-                parameters["notification_uuids"] = String(
-                    data: try! JSONEncoder().encode(surveyPushNotificationUUIDs), encoding: .utf8
-                )
-            } else {
-                parameters["notification_uuids"] = "[]"
-            }
+            // This could be extremely verbose... let's do a count?
+            // device_status_report["list_current_data_files"] = easyJSON(get_current_data_files_list())
+            // device_status_report["list_upload_files"] = easyJSON(get_upload_files_list())
+            device_status_report["count_current_data_files"] = String(count_current_data_files())
+            device_status_report["count_upload_files_count"] = String(count_upload_files())
             
-            parameters["active_survey_ids"] = String(
-                data: try! JSONEncoder().encode(StudyManager.sharedInstance.getActiveSurveyIds()), encoding: .utf8
-            )
+            // neither of these can fail
+            parameters["notification_uuids"] = easyJSON(study.surveyPushNotificationUUIDs)
+            parameters["active_survey_ids"] = easyJSON(StudyManager.sharedInstance.getActiveSurveyIds())
         }
         
         // object cannot fail to be serialized, data types are valid....
-        // stupid. We need to convert a [String:String] to a json object, which is a Data (bytes) and then we need to convert THAT to a string.
-        let statusAsJsonDictData = try! JSONSerialization.data(withJSONObject: device_status_report, options: [])
-        parameters["device_status_report"] = String(data: statusAsJsonDictData, encoding: .utf8)!
+        // stupid. We need to convert a [String:String] to a json object, which is a Data
+        // (bytes) and then we need to convert THAT to a string.
+        parameters["device_status_report"] = easyJSON(device_status_report)
     }
-
+    
     /// This looks like it does literally nothing?
     static func serialErr() -> NSError {
         return NSError(domain: "com.beiwe.studies", code: 2, userInfo: nil)
