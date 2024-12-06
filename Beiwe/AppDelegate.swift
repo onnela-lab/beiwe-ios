@@ -72,6 +72,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         NetworkAccessMonitor.start_monitor()
         
         // start some background looping for core app functionality
+        FirebaseApp.configure()
         self.firebaseLoop()
         BACKGROUND_DEVICE_INFO_QUEUE.asyncAfter(deadline: .now() + 60, execute: self.deviceInfoUpdateLoop)
                 

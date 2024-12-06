@@ -60,6 +60,8 @@ let DEVICE_MOTION_CACHE_SIZE = 100
 let GPS_CACHE_SIZE = 100
 let GYRO_CACHE_SIZE = 100
 let MAGNETOMETER_CACHE_SIZE = 100
+let BLUETOOTH_CACHE_SIZE = 100
+let OMNIRING_CACHE_SIZE = 100
 
 struct Ephemerals {
     // device info statuses

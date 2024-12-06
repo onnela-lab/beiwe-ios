@@ -177,6 +177,12 @@ class StudyManager {
         if studySettings.motion && studySettings.motionOnDurationSeconds > 0 {
             self.timerManager.addDataService(on_duration: studySettings.motionOnDurationSeconds, off_duration: studySettings.motionOffDurationSeconds, dataService: DeviceMotionManager())
         }
+        if studySettings.bluetooth && studySettings.bluetoothOnDurationSeconds > 0 {
+            self.timerManager.addDataService(on_duration: studySettings.bluetoothOnDurationSeconds, off_duration: studySettings.bluetoothOffDurationSeconds, dataService: BluetoothManager())
+        }
+        if studySettings.omniring && studySettings.omniringOnDurationSeconds > 0 {
+            self.timerManager.addDataService(on_duration: studySettings.omniringOnDurationSeconds, off_duration: studySettings.omniringOffDurationSeconds, dataService: OmniringManager())
+        }
         
         self.gpsManager!.startGps()
         self.timerManager.start()
@@ -898,6 +904,41 @@ class StudyManager {
             anything_changed = true
             self.currentStudy?.studySettings?.callResearchAssistantButtonEnabled = newSettings.callResearchAssistantButtonEnabled
             // print("callResearchAssistantButtonEnabled changed to: \(newSettings.callResearchAssistantButtonEnabled)")
+        }
+        if self.currentStudy?.studySettings?.bluetooth != newSettings.bluetooth {
+            anything_changed = true
+            self.currentStudy?.studySettings?.bluetooth = newSettings.bluetooth
+        }
+        if self.currentStudy?.studySettings?.bluetoothOnDurationSeconds != newSettings.bluetoothOnDurationSeconds {
+            anything_changed = true
+            self.currentStudy?.studySettings?.bluetoothOnDurationSeconds = newSettings.bluetoothOnDurationSeconds
+        }
+        if self.currentStudy?.studySettings?.bluetoothOffDurationSeconds != newSettings.bluetoothOffDurationSeconds {
+            anything_changed = true
+            self.currentStudy?.studySettings?.bluetoothOffDurationSeconds = newSettings.bluetoothOffDurationSeconds
+        }
+        if self.currentStudy?.studySettings?.bluetoothGlobalOffsetSeconds != newSettings.bluetoothGlobalOffsetSeconds {
+            anything_changed = true
+            self.currentStudy?.studySettings?.bluetoothGlobalOffsetSeconds = newSettings.bluetoothGlobalOffsetSeconds
+        }
+        if self.currentStudy?.studySettings?.bluetoothTotalDurationSeconds != newSettings.bluetoothTotalDurationSeconds {
+            anything_changed = true
+            self.currentStudy?.studySettings?.bluetoothTotalDurationSeconds = newSettings.bluetoothTotalDurationSeconds
+        }
+        if self.currentStudy?.studySettings?.omniring != newSettings.omniring {
+            anything_changed = true
+            self.currentStudy?.studySettings?.omniring = newSettings.omniring
+            // print("omniring changed to: \(newSettings.omniring)")
+        }
+        if self.currentStudy?.studySettings?.omniringOffDurationSeconds != newSettings.omniringOffDurationSeconds {
+            anything_changed = true
+            self.currentStudy?.studySettings?.omniringOffDurationSeconds = newSettings.omniringOffDurationSeconds
+            // print("omniringOffDurationSeconds changed to: \(newSettings.omniringOffDurationSeconds)")
+        }
+        if self.currentStudy?.studySettings?.omniringOnDurationSeconds != newSettings.omniringOnDurationSeconds {
+            anything_changed = true
+            self.currentStudy?.studySettings?.omniringOnDurationSeconds = newSettings.omniringOnDurationSeconds
+            // print("omniringOnDurationSeconds changed to: \(newSettings.omniringOnDurationSeconds)")
         }
         
         // accedentally tested it like this outside of if anything_changed, it's fine.

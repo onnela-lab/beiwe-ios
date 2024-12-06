@@ -72,6 +72,10 @@
 	<string>For medical research</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Beiwe needs to analyze the voice recordings you make in audio surveys for medical research</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Beiwe needs the list of your surrounding Bluetooth peripheral to properly conduct medical research.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>Beiwe needs the list of your surrounding Bluetooth peripheral to properly conduct medical research.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
