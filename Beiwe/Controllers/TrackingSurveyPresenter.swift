@@ -131,19 +131,19 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
                     let questionStep = ORKQuestionStep(identifier: question.questionId)
                     step = questionStep
                     questionStep.answerFormat = ORKTextAnswerFormat.timeOfDayAnswerFormat()
-                
+                    
                 case .Date:
                     let questionStep = ORKQuestionStep(identifier: question.questionId)
                     step = questionStep
                     // dateAnswerFormat with all nils still defaults to the current date
                     questionStep.answerFormat = ORKTextAnswerFormat.dateAnswerFormat(withDefaultDate: nil, minimumDate: nil, maximumDate: nil, calendar: nil)
-                
+                    
                 case .DateTime:
                     // defaults to current date and time
                     let questionStep = ORKQuestionStep(identifier: question.questionId)
                     step = questionStep
                     questionStep.answerFormat = ORKTextAnswerFormat.dateTime()
-                
+                    
                 case .FreeResponse:
                     let questionStep = ORKQuestionStep(identifier: question.questionId)
                     step = questionStep
@@ -169,7 +169,7 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
                     
                 case .InformationText:
                     step = ORKInstructionStep(identifier: question.questionId)
-                
+                    
                 case .Slider:
                     // if somehow there are no values we default to 1 and 10
                     let minValue = question.minValue ?? 1
@@ -197,7 +197,7 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
         finishStep.title = NSLocalizedString("survey_completed", comment: "")
         finishStep.text = StudyManager.sharedInstance.currentStudy?.studySettings?.submitSurveySuccessText
         questionSteps.append(finishStep)
-                
+        
         return hasOptionalSteps
     }
     
@@ -236,6 +236,14 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
             self.surveyViewController!.delegate = self
         }
         
+        let uuids = self.activeSurvey?.mostRecentNotificationUUIDs ?? ""
+        let surveyId = self.activeSurvey?.survey?.surveyId ?? ""
+        AppEventManager.sharedInstance.logAppEvent(
+            event: "opened survey",
+            msg: "survey_id: \(surveyId)",
+            d1: "source_notification_uuids: \(uuids)"
+        )
+        
         self.retainSelf = self // so I guess this is a strong reference to itself?
         self.surveyViewController!.displayDiscard = false
         parent.present(self.surveyViewController!, animated: true, completion: nil)
@@ -247,7 +255,7 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
             return
         }
         var answersString = ""
-
+        
         if let questionType = question.questionType {
             // and now some mess
             switch questionType {
@@ -331,14 +339,14 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
         }
         self.activeSurvey?.bwAnswers[identifier] = answersString
     }
-
+    
     // extracts the answer out of a question object, returns a tuple of objects required for use in writing to a csv
     // the question type, the options for multiple choice questions, and the contents of the answer in string form.
     func questionResponse(_ question: GenericSurveyQuestion) -> (String, String, String) {
         var typeString = ""
         var optionsString = ""
         var answersString = ""
-
+        
         // get the answers and the question type
         guard let questionType = question.questionType else {
             return (typeString, optionsString, answersString)
@@ -374,7 +382,7 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
         }
         return (typeString, optionsString, answersString)
     }
-
+    
     // stores survey answers on a new DataStorage
     func finalizeSurveyAnswers() {
         guard let activeSurvey = activeSurvey,
@@ -413,6 +421,12 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
             dataFile.store(data)
         }
         dataFile.reset() // retires the file
+        
+        AppEventManager.sharedInstance.logAppEvent(
+            event: "saving survey answers",
+            msg: "survey_id: \(surveyId)",
+            d1: "source_notification_uuids: \(activeSurvey.mostRecentNotificationUUIDs ?? "")"
+        )
     }
     
     // writes a timing event for the provided question (and value)
@@ -455,6 +469,7 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
     func closeSurvey() {
         self.retainSelf = nil // clear the reference to self...
         self.surveyTimingsFile?.reset()
+        
         StudyManager.sharedInstance.surveysUpdatedEvent.emit(0) // also unknown
         self.parent?.dismiss(animated: true, completion: nil) // dismiss the researchkit survey
     }

@@ -4,10 +4,6 @@ import ObjectMapper
 /// ActiveSurvey is a mappable (json-backed database object) that holds the current state of a survey
 /// that the study participant is taking.
 class ActiveSurvey: Mappable {
-    // unused...
-    // var notification: UILocalNotification?
-    // var nextScheduledTime: TimeInterval = 0
-    
     // the survey data
     var survey: Survey? // has to be optional because of the required init
     
@@ -17,8 +13,12 @@ class ActiveSurvey: Mappable {
     var stepOrder: [Int]? // sorting for randomizing questions
     
     // the data!
-    var rkAnswers: Data?  // answers for researchkit
+    var rkAnswers: Data? // answers for researchkit
     var bwAnswers: [String: String] = [:] // recorded answers
+    
+    // The most recent relevant survey logic - never cleared once populated.
+    // Create a new ActiveSurvey to clear.
+    var mostRecentNotificationUUIDs: String?
     
     init(survey: Survey) {
         self.survey = survey
@@ -36,9 +36,9 @@ class ActiveSurvey: Mappable {
         self.rkAnswers <- (map["rk_answers"], transformNSData)
         self.bwAnswers <- map["bk_answers"]
         self.stepOrder <- map["stepOrder"]
-        // unused
-        // nextScheduledTime     <- map["expires"]
-        // notification    <- (map["notification"], transformNotification)
+        
+        // NOT TO BE CLEARED IN THE RESET LOGIC
+        self.mostRecentNotificationUUIDs <- map["mostRecentSurveyNotificationUUID"]
     }
 
     // resets the survey to its original configuration
@@ -47,7 +47,7 @@ class ActiveSurvey: Mappable {
         self.rkAnswers = nil
         self.bwAnswers = [:]
         self.isComplete = false
-                
+        
         // set up the step ordering (shuffle if the steps are shuffled)
         var steps = [Int](0 ..< survey.questions.count)
         if survey.randomize {

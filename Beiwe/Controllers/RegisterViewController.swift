@@ -8,6 +8,21 @@ import Sentry
 import SwiftValidator
 import UIKit
 
+let dev_helper: [String: String] = [:]
+
+/// Devs can uncomment this to have the form pre-populate with values for testing.
+/// Enable easy enrollment on the target participant, password will be 6 spaces
+// let dev_helper: [String: String] = [
+//     "server":          "fill me in",
+//     "patientId":       "fill me in",
+//     "tempPassword":    "      ",
+//     "password":        "      ",
+//     "confirmPassword": "      ",
+//     "clinicianPhone":  "5555555555",
+//     "raPhone":         "5555555555",
+// ]
+
+
 class RegisterViewController: FormViewController {
     // static assets - communication erro is our generic couldn't-find-it error, it also covers
     // the case inside the callback function where there was no or bad json/no encryption key.
@@ -98,9 +113,9 @@ class RegisterViewController: FormViewController {
         var section = Section(NSLocalizedString("registration_screen_title", comment: ""))
         section = section
             // server url field (shows the url field, no validation)
+            // ($0 is the row object)
             <<< SVURLRow("server") {
-                // $0 is the ro object
-                // $0.value = "staging.beiwe.org" // speed up your life in debugging by setting a default value
+                $0.value = dev_helper["server"] ?? ""
                 $0.title = NSLocalizedString("registration_server_url_label", comment: "")
                 $0.placeholder = NSLocalizedString("registration_server_url_hint", comment: "")
                 $0.customRules = [RequiredRule()] // indicates required field
@@ -112,7 +127,7 @@ class RegisterViewController: FormViewController {
             }
             // participant id (aka patient id for... no reason)
             <<< SVTextRow("patientId") {
-                // $0.value = "susix3kt"
+                $0.value = dev_helper["patientId"] ?? ""
                 $0.title = NSLocalizedString("registration_user_id_label", comment: "")
                 $0.placeholder = NSLocalizedString("registration_user_id_hint", comment: "")
                 $0.customRules = [RequiredRule()]
@@ -120,7 +135,7 @@ class RegisterViewController: FormViewController {
             }
             // temporary password - has reduced validation
             <<< SVPasswordRow("tempPassword") {
-                // $0.value = "a"
+                $0.value = dev_helper["tempPassword"] ?? ""
                 $0.title = NSLocalizedString("registration_temp_password_label", comment: "")
                 $0.placeholder = NSLocalizedString("registration_temp_password_hint", comment: "")
                 $0.customRules = [RequiredRule()]
@@ -128,7 +143,7 @@ class RegisterViewController: FormViewController {
             }
             // password - has full validation
             <<< SVPasswordRow("password") {
-                // $0.value = "      "
+                $0.value = dev_helper["password"] ?? ""
                 $0.title = NSLocalizedString("registration_new_password_label", comment: "")
                 $0.placeholder = NSLocalizedString("registration_new_password_hint", comment: "")
                 $0.customRules = [RequiredRule(), RegexRule(regex: Constants.passwordRequirementRegex, message: Constants.passwordRequirementDescription)]
@@ -136,7 +151,7 @@ class RegisterViewController: FormViewController {
             }
             // confirm the password
             <<< SVPasswordRow("confirmPassword") {
-                // $0.value = "      "
+                $0.value = dev_helper["confirmPassword"] ?? ""
                 $0.title = NSLocalizedString("registration_confirm_new_password_label", comment: "")
                 $0.placeholder = NSLocalizedString("registration_confirm_new_password_hint", comment: "")
                 $0.customRules = [RequiredRule(), MinLengthRule(length: 1)]
@@ -144,7 +159,7 @@ class RegisterViewController: FormViewController {
             }
             // clinic phone number for general help
             <<< SVSimplePhoneRow("clinicianPhone") {
-                // $0.value = "5555555555"
+                $0.value = dev_helper["clinicianPhone"] ?? ""
                 $0.title = NSLocalizedString("phone_number_entry_your_clinician_label", comment: "")
                 $0.placeholder = NSLocalizedString("phone_number_entry_your_clinician_hint", comment: "")
                 $0.customRules = [RequiredRule(), MinLengthRule(length: 8), MaxLengthRule(length: 15), FloatRule()]
@@ -152,7 +167,7 @@ class RegisterViewController: FormViewController {
             }
             // research assistant phone numeber (more specific help)
             <<< SVSimplePhoneRow("raPhone") {
-                // $0.value = "5555555555"
+                $0.value = dev_helper["raPhone"] ?? ""
                 $0.title = NSLocalizedString("phone_number_entry_research_assistant_label", comment: "")
                 $0.placeholder = NSLocalizedString("phone_number_entry_research_assistant_hint", comment: "")
                 $0.customRules = [RequiredRule(), MinLengthRule(length: 8), MaxLengthRule(length: 15), FloatRule()]
@@ -306,6 +321,7 @@ class RegisterViewController: FormViewController {
         // service and can generate the app-side tokens.  IF THERE IS NO VALUE then we have
         // to insert some defaults because this is a critical and optional part of Beiwe.
         // But.
+        
         // We use ObjectMapper objects for our critical classes, like StudySettings, and the database
         // expects them too. We can only instantiate these classes using `Mapper<StudySettings>().map`,
         // which takes a String of json text.  In order to do this we need to:

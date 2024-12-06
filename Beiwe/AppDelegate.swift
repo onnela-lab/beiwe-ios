@@ -512,70 +512,79 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     /// Code to run when receiving a push notification with surveys in it. Called from an AppDelegate extension.
     /// Checks for any new surveys on the server and pops any survey notifications indicated in the push notificattion
     func handleSurveyNotification(_ messageInfo: Dictionary<AnyHashable, Any>) {
-        let surveyIdsString: Any? = messageInfo["survey_ids"]
-        let notificationUUIDsJSONString: Any? = messageInfo["json_uuids"]
+        let sentTimeString: String? = messageInfo["sent_time"] as? String
         
-        // uuids present - feature developed october 2021
-        if let notificationUUIDsJSONString = notificationUUIDsJSONString {
-            print("notificationUUIDsJSONString:", notificationUUIDsJSONString)
-            self.updateRecievedNotificationUUIDs(notificationUUIDsJSONString as! String)
-        }
+        // payloads
+        let surveyIdsString: String? = messageInfo["survey_ids"] as? String
+        let notificationUUIDsJSONString: String? = messageInfo["survey_uuids_dict"] as? String
+
+        // log uuids present - feature developed october 2021
+        let survey_ids_to_notification_uuids = self.getAndUpdateRecievedNotificationDictUUIDs(notificationUUIDsJSONString)
         
-        // survey ids present
-        if let surveyIdsString = surveyIdsString {
-            // extract survey ids to force-display
-            AppEventManager.sharedInstance.logAppEvent(event: "push_notification", msg: "Received notification while app was killed")
-            let surveyIds: [String] = self.jsonToSurveyIdArray(surveyIdsString as! String)
-            
-            // downloadSurveys calls setActiveSurveys, even if it errors/fails. We always want
-            // to (try) download the most recent survey information.
-            if let sentTimeString = messageInfo["sent_time"] as! String? {
-                StudyManager.sharedInstance.checkForNewSurveys(surveyIds: surveyIds, sentTime: isoStringToTimeInterval(timeString: sentTimeString))
-            } else {
-                // (even older versions of the backend don't supply the sent_time key)
-                StudyManager.sharedInstance.checkForNewSurveys(surveyIds: surveyIds)
-            }
-        } else {
-            // we just always always hit the backend for new surveys
+        // unpack survey ids
+        let surveyIds: [String] = self.jsonToSurveyIdArray(surveyIdsString)
+        
+        if surveyIds.isEmpty {
+            // this is a backwards compatability / deterministic behavior to always hit the
+            // backend for new surveys when receiving a notification.
             StudyManager.sharedInstance.checkForNewSurveys(surveyIds: [])
+            return
         }
+        
+        // activate received notifications
+        StudyManager.sharedInstance.checkForNewSurveys(
+            surveyIds: surveyIds,
+            sentTime: isoStringToTimeInterval(timeString: sentTimeString),  //  used to order surveys
+            survey_ids_to_notification_uuids: survey_ids_to_notification_uuids
+        )
     }
     
     /// Just json string to array of strings with debug print statements.
-    func jsonToSurveyIdArray(_ json_string: String) -> [String] {
+    func jsonToSurveyIdArray(_ json_string: String?) -> [String] {
+        guard let json_string = json_string else {
+            return []
+        }
+        // print("received survey_ids:, `\(json_string)`")
+        // do we want to crash here on malformed data?
+        // Yes. If we receives malformed data at this key value something is very wrong.
         let surveyIds = try! JSONDecoder().decode([String].self, from: Data(json_string.utf8))
-        //
+        
         for surveyId in surveyIds {
+            let msg: String
             if !(self.currentStudy?.surveyExists(surveyId: surveyId) ?? false) {
-                print("Received notification for a NEW survey \(surveyId)")
-                AppEventManager.sharedInstance.logAppEvent(
-                    event: "push_notification", msg: "Received notification for new survey \(surveyId)"
-                )
+                msg = "Received notification for new survey \(surveyId)"
             } else {
-                print("Received notification for survey \(surveyId)")
-                AppEventManager.sharedInstance.logAppEvent(
-                    event: "push_notification", msg: "Received notification for survey \(surveyId)"
-                )
+                msg = "Received notification for survey \(surveyId)"
             }
+            AppEventManager.sharedInstance.logAppEvent(event: "push_notification", msg: msg)
         }
         return surveyIds
     }
     
-    func updateRecievedNotificationUUIDs(_ notificationIdsJsonListString: String) {
-        let d = Date()
-        let now: String = dateFormatLocalMs(d)
-        // print("updateRecievedSurveyUUIDs", now, notificationIdsJsonListString)
+    func getAndUpdateRecievedNotificationDictUUIDs(_ notificationIdsJsonListString: String?) -> [String: [String]] {
+        guard let notificationIdsJsonListString = notificationIdsJsonListString else {
+            // print("received no notification_uuids")
+            return [:]
+        }
+        // print("received notification_uuids:, `\(notificationIdsJsonListString)`")
         
-        // unpack the list of uuids in the json
-        let notification_uuids: [String] = try! JSONDecoder().decode(
-            [String].self, from: Data(notificationIdsJsonListString.utf8)
+        // unpack the dict of [survey_uuid: notification_uuid
+        let survey_ids_to_notification_uuids: [String: [String]] = try! JSONDecoder().decode(
+            [String: [String]].self, from: Data(notificationIdsJsonListString.utf8)
         )
         
+        // weird but this is the appropriate location to initialize it.
         if self.currentStudy!.surveyPushNotificationUUIDs == nil {
             self.currentStudy!.surveyPushNotificationUUIDs = [String]()
         }
-        self.currentStudy!.surveyPushNotificationUUIDs!.append(now)
-        self.currentStudy!.surveyPushNotificationUUIDs!.append(contentsOf: notification_uuids)
+        
+        // the historical list is sent to the backend, the backend only needs the notification uuid.
+        self.currentStudy!.surveyPushNotificationUUIDs!.append(dateFormatLocalWithMs(Date()))
+        for (_survey_id, notification_uuids) in survey_ids_to_notification_uuids {
+            self.currentStudy!.surveyPushNotificationUUIDs!.append(contentsOf: notification_uuids)
+            
+        }
+        return survey_ids_to_notification_uuids
     }
     
     ////////////////////////////////////////////////////////////////////////////////////////////////

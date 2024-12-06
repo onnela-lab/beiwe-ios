@@ -69,19 +69,29 @@ class AppEventManager: DataServiceProtocol {
             return
         }
         
-        // our string list of data
-        var data: [String] = []
-        data.append(String(Int64(Date().timeIntervalSince1970 * 1000)))
-        data.append(self.launchId)
-        data.append(self.getMemoryUsage())
-        data.append(String(UIDevice.current.batteryLevel))
-        data.append(event)
-        data.append(msg)
-        data.append(d1)
-        data.append(d2)
-        data.append(d3)
-        data.append(String(self.eventCount))
-        dataStorage.store(data)
+        let date = Date()
+        let log_content: [String] = [
+            event,
+            msg,
+            d1,
+            d2,
+            d3,
+            String(self.eventCount),
+        ]
+        
+        // uncomment to print the app log
+        // print("==App Log== `\(dateFormatLocalWithMs(date)) - `\(log_content.joined(separator: "` - `"))")
+        
+        // metadata
+        var full_statement: [String] = [
+            String(Int64(date.timeIntervalSince1970 * 1000)),
+            self.launchId,
+            self.getMemoryUsage(),
+            String(UIDevice.current.batteryLevel)
+        ]
+        full_statement.append(contentsOf: log_content)
+        dataStorage.store(full_statement)
+        
         self.eventCount += 1  // update state
     }
 

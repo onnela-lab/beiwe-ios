@@ -51,11 +51,16 @@ class StudyManager {
     }
     
     /// getters, mutators all the ids of active surveys - not used (anymore?
-    func getActiveSurveyIds() -> [String] {
+    func getActuallyActiveSurveyIds() -> [String] {
         guard let study = self.currentStudy else {
             return []
         }
-        return Array(study.activeSurveys.keys)
+        // completed active surveys are not "actually active"
+        var activeSurveyIds: [String] = []
+        for (survey_id, active_survey) in study.activeSurveys where active_survey.isComplete == false {
+            activeSurveyIds.append(survey_id)
+        }
+        return activeSurveyIds
     }
     
     /// iterates over all the surveys IN THE DATABASE, gives you survey ids
@@ -370,46 +375,58 @@ class StudyManager {
         }
         var any_surveys_updated = false
         print("update_any_changed_active_surveys")
-        // the dumb loop again
-        // If a survey does not have a surveyId... skip? buh? it's stupid that its optional
-        for target_possibly_updated_survey in study.surveys {
-            if let survey_id = target_possibly_updated_survey.surveyId {
-                if study.activeSurveys[survey_id] == nil {
-                    continue // survey not an active survey
-                }
-                
-                // get the corresponding active survey
-                let the_activesurvey = study.activeSurveys[survey_id]!
-                let activesurvey_survey = the_activesurvey.survey!
-                
-                // Special case of triggerOnFirstDownload surveys - these are retained in the
-                // active survey list (like an always-available survey) but instead of getting
-                // automatically reset is just... stays there forever. We don't want to update
-                // that survey because that will cause it to become visible again.
-                // We just skip it here. This works because the only way for a completed trigger
-                // survey to be reloaded is for it to be activated via push notification
-                // in activate_surveys, which will reload it from scratch.
-                // Surveys that are trigger AND always available should be treated as normal.
-                if the_activesurvey.isComplete && activesurvey_survey.triggerOnFirstDownload && !activesurvey_survey.alwaysAvailable {
-                    print("update_any_changed_active_surveys - survey '\(target_possibly_updated_survey.name)' is a trigger survey and is complete, skipping.")
-                    continue
-                }
-                
-                // run the full survey comparison woo!
-                if activesurvey_survey != target_possibly_updated_survey {
-                    print("update_any_changed_active_surveys - survey '\(target_possibly_updated_survey.name)' changed.")
-                    study.activeSurveys[survey_id] = ActiveSurvey(survey: target_possibly_updated_survey)
-                    any_surveys_updated = true
-                } else {
-                    print("update_any_changed_active_surveys - survey '\(target_possibly_updated_survey.name)' did not change.")
-                }
+        
+        for target_survey in study.surveys {
+            if target_survey.surveyId == nil {
+                continue // just skip, probably not reachable
+            }
+            let survey_id = target_survey.surveyId!
+            if study.activeSurveys[survey_id] == nil {
+                continue // survey not an active survey
+            }
+            
+            // get the corresponding active survey -
+            let activesurvey = study.activeSurveys[survey_id]!
+            let activesurvey_survey = activesurvey.survey!
+            
+            /// !!!! TriggerOnFirstDownload and Always surveys are retained in activeSurveys[]
+            /// - always-available surveys get reset here, which keeps them visible.
+            /// - trigger surveys do not, they just stay invisible.
+            /// again). The only way for a completed trigger-survey to be reloaded is through a
+            /// new push notification via activate_surveys, which will reload it from scratch.
+            /// Surveys that are trigger AND always-available are treated as normal.)
+            if activesurvey.isComplete && activesurvey_survey.triggerOnFirstDownload && !activesurvey_survey.alwaysAvailable {
+                print("update_any_changed_active_surveys - survey '\(target_survey.name)' is a trigger survey and is complete, skipping.")
+                continue
+            }
+            
+            // run the full survey content comparison, update as appropriate.
+            if activesurvey_survey != target_survey {
+                self.debug_print_activate_changed(target_survey)
+                var new_active_survey = ActiveSurvey(survey: target_survey)
+                // case: if content changes we want to retain the notification tracking
+                new_active_survey.mostRecentNotificationUUIDs = activesurvey.mostRecentNotificationUUIDs
+                study.activeSurveys[survey_id] = new_active_survey
+                any_surveys_updated = true
+            } else {
+                self.debug_print_activate_not_changed(target_survey)
             }
         }
         return any_surveys_updated
     }
     
+    func debug_print_activate_changed(_ survey: Survey) {
+        print("update_any_changed_active_surveys - survey '\(survey.name)' changed.")
+    }
+    
+    func debug_print_activate_not_changed(_ survey: Survey) {
+        print("update_any_changed_active_surveys - survey '\(survey.name)' did not change.")
+    }
+    
     /// loads a list of surveys into active surveys so that they will be displayed.
-    func activate_surveys(surveyIds: [String], sentTime: TimeInterval) -> Bool {
+    func activate_surveys(
+        surveyIds: [String], sentTime: TimeInterval, survey_ids_to_notification_uuids: [String: [String]]?
+    ) -> Bool {
         guard let study = self.currentStudy else {
             return false
         }
@@ -426,6 +443,13 @@ class StudyManager {
             if surveyIds.contains(survey.surveyId!) {
                 let activeSurvey = ActiveSurvey(survey: survey)
                 activeSurvey.received = sentTime // used to sort surveys on the main screen.
+                
+                // update the survey notification
+                if let notification_uuids = survey_ids_to_notification_uuids?[survey.surveyId!] {
+                    // print("\nupdating notification_uuids on survey \(survey.surveyId!) to \(notification_uuids.joined(separator: ","))\n")
+                    activeSurvey.mostRecentNotificationUUIDs = notification_uuids.joined(separator: ",")
+                }
+                
                 // this action clears out the prior state of the survey.
                 study.activeSurveys[survey.surveyId!] = activeSurvey
                 updated_survey_state = true
@@ -433,7 +457,7 @@ class StudyManager {
         }
         
         StudyManager.sharedInstance.surveysUpdatedEvent.emit(0)
-        Recline.shared.save(study)
+        Recline.shared.save(study) // this is critical new app state, save database.
         return updated_survey_state
     }
     
@@ -576,10 +600,13 @@ class StudyManager {
     /// This implementation is desireable because it isn't uncommon (especially when testing)
     /// to update a survey and send the survey notification via the button on the Beiwe website.
     /// Also it is just safer to 99% of the time have all the relevant survey info.)
-    func checkForNewSurveys(surveyIds: [String] = [], sentTime: TimeInterval = 0) {
+    func checkForNewSurveys(
+        surveyIds: [String] = [], sentTime: TimeInterval? = nil, survey_ids_to_notification_uuids: [String: [String]]? = nil
+    ) {
         guard let study = currentStudy else {
             return
         }
+        var sentTime: TimeInterval = sentTime ?? 0
         print("checkForNewSurveys")
                
         ApiManager.sharedInstance.makePostRequest(
@@ -617,7 +644,11 @@ class StudyManager {
                 
                 // if received any surveys to this call
                 if !surveyIds.isEmpty {
-                    self.activate_surveys(surveyIds: surveyIds, sentTime: sentTime)
+                    self.activate_surveys(
+                        surveyIds: surveyIds,
+                        sentTime: sentTime,
+                        survey_ids_to_notification_uuids: survey_ids_to_notification_uuids
+                    )
                 }
                 
                 // even if we didn't get new surveys we need to call setActiveSurveys with the survey ids

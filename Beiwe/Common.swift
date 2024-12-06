@@ -93,7 +93,7 @@ func dateFormatLocal(_ date: Date) -> String {
     return dateFormatter.string(from: date) + "(ET)"
 }
 
-func dateFormatLocalMs(_ date: Date) -> String {
+func dateFormatLocalWithMs(_ date: Date) -> String {
     let dateFormatter = DateFormatter()
     dateFormatter.timeZone = TimeZone(identifier: DEV_TIMEZONE)
     dateFormatter.dateFormat = "y-MM-dd HH:mm:ss.ms"
@@ -151,7 +151,10 @@ func timestampString() -> String {
 }
 
 /// converts the iso time string format to a TimeInterval (integer)
-func isoStringToTimeInterval(timeString: String) -> TimeInterval {
+func isoStringToTimeInterval(timeString: String?) -> TimeInterval {
+    guard  let timeString = timeString  else {
+        return 0
+    }
     let dateFormatter = DateFormatter()
     dateFormatter.locale = Locale(identifier: "en_US_POSIX") // set locale to reliable US_POSIX
     dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"

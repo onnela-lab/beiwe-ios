@@ -4,6 +4,15 @@ import Sentry
 /// This file is under active development and is not documented. Once we work better code for this
 /// background process management we can document.
 
+/// Tests results of tests of background tasks :
+/// - BGHealthResearchTask is not hitting at all - we know this is configured incorrectly, we need to
+///   work out what that is.
+/// - The DispatchQueue mechanisme of sending a heartbeat is 1 or 2 _orders of magnitude_ more frequent
+///   than any of teh background tasks
+/// - Timer - dispatch queue is 43 times more frequent
+/// - bgprocessing task - dispatch queue is 87 times more frequent
+/// - bgapprefresh task - dispatch queue is 107 times more frequent
+
 func scheduleRefreshHeartbeat() {
     // print("scheduling refresh heartbeat")
     let request = BGAppRefreshTaskRequest(identifier: BACKGROUND_TASK_NAME_HEARTBEAT_BGREFRESH)
@@ -93,6 +102,8 @@ func updateBackgroundTasksCount() {
         print(Ephemerals.background_task_count) // debug print
     }
 }
+
+/// These are the callbacks that do the network operation.
 
 func handleHeartbeatRefresh(task: BGAppRefreshTask) {
     // print("BGAppRefreshTask - the handler is getting called \(dateFormatLocal(Date()))")
