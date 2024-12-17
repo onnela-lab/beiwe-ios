@@ -32,7 +32,11 @@ target 'Beiwe' do
     # pops up a heads-up-display on certain pages.
     pod 'PKHUD', :git => 'https://github.com/pkluz/PKHUD.git', :tag => '5.4.0'  # old: :branch => 'release/swift4'
     # the surveys
-    pod 'ResearchKit', :git => 'https://github.com/ResearchKit/ResearchKit.git', :tag => '2.1.0'  #:commit => 'b50e1d7'
+    # pod 'ResearchKit', :git => 'https://github.com/ResearchKit/ResearchKit.git', :tag => '2.1.0'  #:commit => 'b50e1d7'
+    # okaayy, that version of researchkit resulted in a replicable crash involving the survey back button,
+    #   and an issue where the next/submit buttons became invisible.
+    pod 'ResearchKit', :git => 'https://github.com/ResearchKit/ResearchKit.git', :commit => 'b50e1d7'
+
     # no clue
     pod 'Hakuba', :git => 'https://github.com/eskizyen/Hakuba.git', :branch => 'Swift3'
 

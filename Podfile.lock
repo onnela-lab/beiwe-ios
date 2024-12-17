@@ -137,7 +137,7 @@ DEPENDENCIES:
   - ObjectMapper (from `https://github.com/Hearst-DD/ObjectMapper.git`, commit `0b96a734de3ea1c87374ae677064f86adb0716ec`)
   - PKHUD (from `https://github.com/pkluz/PKHUD.git`, tag `5.4.0`)
   - ReachabilitySwift (= 5.2.3)
-  - ResearchKit (from `https://github.com/ResearchKit/ResearchKit.git`, tag `2.1.0`)
+  - ResearchKit (from `https://github.com/ResearchKit/ResearchKit.git`, commit `b50e1d7`)
   - Sentry (~> 8.37.0)
   - SwiftValidator (from `https://github.com/SwiftValidatorCommunity/SwiftValidator.git`, branch `master`)
   - SwiftyRSA (from `https://github.com/TakeScoop/SwiftyRSA.git`, tag `1.8.0`)
@@ -179,8 +179,8 @@ EXTERNAL SOURCES:
     :git: https://github.com/pkluz/PKHUD.git
     :tag: 5.4.0
   ResearchKit:
+    :commit: b50e1d7
     :git: https://github.com/ResearchKit/ResearchKit.git
-    :tag: 2.1.0
   SwiftValidator:
     :branch: master
     :git: https://github.com/SwiftValidatorCommunity/SwiftValidator.git
@@ -199,8 +199,8 @@ CHECKOUT OPTIONS:
     :git: https://github.com/pkluz/PKHUD.git
     :tag: 5.4.0
   ResearchKit:
+    :commit: b50e1d7
     :git: https://github.com/ResearchKit/ResearchKit.git
-    :tag: 2.1.0
   SwiftValidator:
     :commit: d370353b7a0ce758a53b189c81e485dcd53c99a4
     :git: https://github.com/SwiftValidatorCommunity/SwiftValidator.git
@@ -230,13 +230,13 @@ SPEC CHECKSUMS:
   PKHUD: 026ee10894f7d983cdb585138523a2ae098e4424
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   ReachabilitySwift: 7f151ff156cea1481a8411701195ac6a984f4979
-  ResearchKit: 145c6c2a272d313a53ab1dc49d84b0d20dde003a
+  ResearchKit: b948fcbadd4454d6b835d2b64471980a467a96a7
   Sentry: ee060c09b2f7ec1240e95c766ab44c04c7bdb052
   SwiftValidator: 249b6b3ae3b294266c5b9de134d94f18f2d5aa47
   SwiftyRSA: 735e48d1162b95af42f140c47ea968e8b6b0a54b
   XCGLogger: 1943831ef907df55108b0b18657953f868de973b
   XLActionController: f1f2226d2c6629db197d4a41f2da907085a4cb9d
 
-PODFILE CHECKSUM: 049f48b6df1d6243c6d1c317efaa5adc2bdf6cf0
+PODFILE CHECKSUM: f8fdc80cb5036f0336a34ebef83e2e8f0022e7d4
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2
