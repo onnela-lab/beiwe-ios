@@ -1,14 +1,30 @@
 /* 
   InfoPlist.strings
-*/
+ We had some difficulty after a release rejection due to new policy on sensor usage statements,
+ and had to put some options together.
 
-NSCameraUsageDescription = "For medical research with ResearchKit";
-NSHealthShareUsageDescription = "For medical research with ResearchKit";
-NSHealthUpdateUsageDescription = "For medical research with ResearchKit";
-NSLocationAlwaysAndWhenInUseUsageDescription = "Beiwe needs your location at all times to properly conduct medical research.";
-NSLocationAlwaysUsageDescription = "Beiwe needs your location to properly conduct medical research.";
-NSLocationWhenInUseUsageDescription = "Beiwe needs your location to properly conduct medical research.";
-NSMicrophoneUsageDescription = "Record audio survey questions";
-NSMotionUsageDescription = "Beiwe needs access to your sensors to properly conduct medical research.";
-NSPhotoLibraryAddUsageDescription = "For medical research with ResearchKit";
-NSPhotoLibraryUsageDescription = "For medical research with ResearchKit";
+ This language was not submitted:
+ NSHealthShareUsageDescription = "Beiwe needs to access your Apple Health data in order to collect data for the medical, clinical, or academic and scientific research goals of the study you have enrolled in. This data may be used for the development of novel statistical methods particularly in the fields of Digital Phenotyping and Statistical Network Science.";
+ NSHealthUpdateUsageDescription = "Beiwe needs to access your Apple Health data in order to collect data for the medical, clinical, or academic and scientific research goals of the study you have enrolled in. This data may be used for the development of novel statistical methods particularly in the fields of Digital Phenotyping and Statistical Network Science.";
+ NSLocationAlwaysAndWhenInUseUsageDescription = "Beiwe needs to access your Location data in the background in order to collect data for the medical, clinical, or academic and scientific research goals of the study you have enrolled in. This data may be used for the development of novel statistical methods particularly in the fields of Digital Phenotyping and Statistical Network Science.";
+ NSLocationAlwaysUsageDescription = "Beiwe needs to access your Location data in the background in order to collect data for the medical, clinical, or academic and scientific research goals of the study you have enrolled in. This data may be used for the development of novel statistical methods particularly in the fields of Digital Phenotyping and Statistical Network Science.";
+ NSLocationWhenInUseUsageDescription = "Beiwe needs to access your Location data in order to collect data for the medical, clinical, or academic and scientific research goals of the study you have enrolled in. This data may be used for the development of novel statistical methods particularly in the fields of Digital Phenotyping and Statistical Network Science.";
+ NSMotionUsageDescription = "Beiwe needs to access your Device's Motion data in the background in order to collect data for the medical, clinical, or academic and scientific research goals of the study you have enrolled in. This data may be used for the development of novel statistical methods particularly in the fields of Digital Phenotyping and Statistical Network Science.";
+ NSMicrophoneUsageDescription = "Beiwe needs access to your microphone in order to record your ressponse to an audio survey.";
+
+ This language was submitted and approved: */
+
+NSHealthShareUsageDescription = "Beiwe needs to access your Apple Health data in order to collect data for the medical, clinical, or academic and scientific research goals of the study you have enrolled in. The Beiwe app does not use or process the data it collects. All data recorded during studies are securely uploaded to a server and accessed solely by authorized researchers.";
+NSHealthUpdateUsageDescription = "Beiwe needs to access your Apple Health data in order to collect data for the medical, clinical, or academic and scientific research goals of the study you have enrolled in. The Beiwe app does not use or process the data it collects. All data recorded during studies are securely uploaded to a server and accessed solely by authorized researchers.";
+NSLocationAlwaysAndWhenInUseUsageDescription = "Beiwe needs to access your location in the background in order to collect data for the medical, clinical, or academic and scientific research goals of the study you have enrolled in. The Beiwe app does not use or process the data it collects. All data recorded during studies are securely uploaded to a server and accessed solely by authorized researchers.";
+NSLocationAlwaysUsageDescription = "Beiwe needs to access your location in the background in order to collect data for the medical, clinical, or academic and scientific research goals of the study you have enrolled in. The Beiwe app does not use or process the data it collects. All data recorded during studies are securely uploaded to a server and accessed solely by authorized researchers.";
+NSLocationWhenInUseUsageDescription = "Beiwe needs to access your location in order to collect data for the medical, clinical, or academic and scientific research goals of the study you have enrolled in. The Beiwe app does not use or process the data it collects. All data recorded during studies are securely uploaded to a server and accessed solely by authorized researchers.";
+NSMotionUsageDescription = "Beiwe needs to access your Device's Motion data in order to collect data for the medical, clinical, or academic and scientific research goals of the study you have enrolled in. The Beiwe app does not use or process the data it collects. All data recorded during studies are securely uploaded to a server and accessed solely by authorized researchers.";
+
+NSMicrophoneUsageDescription = "Beiwe needs access to your microphone in order to record your ressponse to an audio survey.";
+
+/* We don't need these... */
+NSPhotoLibraryAddUsageDescription = "";
+NSSpeechRecognitionUsageDescription = "";
+NSPhotoLibraryUsageDescription = "";
+NSCameraUsageDescription = "";

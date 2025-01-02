@@ -52,26 +52,6 @@
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>NSCameraUsageDescription</key>
-	<string>For medical research with ResearchKit</string>
-	<key>NSHealthShareUsageDescription</key>
-	<string>For medical research with ResearchKit</string>
-	<key>NSHealthUpdateUsageDescription</key>
-	<string>For medical research with ResearchKit</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Beiwe needs your location at all times to properly conduct medical research.</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Beiwe needs your location to properly conduct medical research.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Beiwe needs your location to properly conduct medical research.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Record audio survey questions</string>
-	<key>NSMotionUsageDescription</key>
-	<string>Beiwe needs access to your sensors to properly conduct medical research.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>For medical research</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Beiwe needs to analyze the voice recordings you make in audio surveys for medical research</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
