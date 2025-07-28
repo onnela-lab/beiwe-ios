@@ -24,11 +24,6 @@ let dev_helper: [String: String] = [:]
 
 
 class RegisterViewController: FormViewController {
-    // static assets - communication erro is our generic couldn't-find-it error, it also covers
-    // the case inside the callback function where there was no or bad json/no encryption key.
-    // The message includes "or you have entered an incorrect server address"
-    static let commErrDelay = 7.0
-    static let commErr = NSLocalizedString("http_message_server_not_found", comment: "")
     
     // validation behavior? always false?
     let autoValidation = false
@@ -286,32 +281,24 @@ class RegisterViewController: FormViewController {
     /// This function should not be called with 200-299 status codes.
     func display_errors(_ statusCode: Int, url: String) {
         print("bad status code during registration: \(statusCode)")
-        var duration = 2.0
-        var err: HUDContentType
+        var msg: String
         
         // determine message based on status code
         if statusCode == 403 || statusCode == 401 {
             // throwing on the url so that the person is presented with extra information if
             // they are hitting the wrong url that happens to throw a 403 or 401.
-            err = .labeledError(
-                title: NSLocalizedString("couldnt_register", comment: ""),
-                subtitle: NSLocalizedString("http_message_403_during_registration", comment: "") + " " + url
-            )
-            duration = 4.0
-        // we used to have this 405 code for participants already registered on another
-        // device, it was removed
-        // } else if statusCode == 405 {
-        //     err = .label(NSLocalizedString("http_message_405", comment: ""))
-        //     duration = 10.0 // long message, long duration (ui is still locked)
+            msg = NSLocalizedString("http_message_403_during_registration", comment: "") + " " + url
         } else if statusCode == 400 {
-            err = .label(NSLocalizedString("http_message_400", comment: ""))
-            duration = 10.0 // long message, long duration (ui is still locked)
+            msg = NSLocalizedString("http_message_400", comment: "")
         } else {
-            err = .label(RegisterViewController.commErr)
-            duration = RegisterViewController.commErrDelay
+            msg = NSLocalizedString("http_message_server_not_found", comment: "")
         }
-        // display the error message
-        HUD.flash(err, delay: duration) // delay is duration
+        
+        let title = NSLocalizedString("couldnt_register", comment: "")
+        let alert = UIAlertController(title: title, message: msg, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        present(alert, animated: true, completion: nil)
+        HUD.hide()  // cannot show messages in hud, it is not accessible
     }
     
     /// We have to do something real stupid, see comments
@@ -397,7 +384,13 @@ class RegisterViewController: FormViewController {
         // (the latter  can theoretically happen if there is a valid json in the response body
         // from a rando website, unlikely but possible).  commErr is the appropriate message.
         guard let studySettings = extractStudySettings(bodyResponse), studySettings.clientPublicKey != nil else {
-            HUD.flash(.label(RegisterViewController.commErr), delay: RegisterViewController.commErrDelay)
+            // dismiss hud and display error message
+            let title = NSLocalizedString("couldnt_register", comment: "")
+            let msg = NSLocalizedString("http_message_server_not_found", comment: "")
+            let alert = UIAlertController(title: title, message: msg, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+            present(alert, animated: true, completion: nil)
+            HUD.hide()
             return
         }
         

@@ -272,6 +272,7 @@ class AudioQuestionViewController: UIViewController, AVAudioRecorderDelegate, AV
         } catch {
             // IDE should say that this is unreachable.
             AppEventManager.sharedInstance.logAppEvent(event: "audio_save_fail", msg: "Save audio failed", d1: String(describing: error))
+            // HUD.flash is not visible to screen readers - not reachable code, don't care
             HUD.flash(.labeledError(title: NSLocalizedString("audio_survey_error_saving_title", comment: ""), subtitle: NSLocalizedString("audio_survey_error_saving_text", comment: "")), delay: 2.0) { finished in
                 self.cleanupAndDismiss()
             }
