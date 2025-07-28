@@ -33,7 +33,11 @@ class AudioQuestionViewController: UIViewController, AVAudioRecorderDelegate, AV
         
         // Do any additional setup after loading the view.
         self.promptLabel.text = self.activeSurvey.survey?.questions[0].prompt ?? ""
-        self.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .trash, target: self, action: #selector(self.cancelButton))
+        
+        // sets the ui element for the back button, which says "Study", to "cancel".
+        // Used to set to trash can, that is not accessible to a screen reader.
+        self.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(self.cancelButton))
+        
         self.reset()
         self.recordingSession = AVAudioSession.sharedInstance()
 

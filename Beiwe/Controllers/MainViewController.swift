@@ -26,7 +26,7 @@ class MainViewController: UIViewController {
         navigationController?.presentTransparentNavigationBar()
         
         // ic-user is the outline of a person in the upper left corner.
-        let leftImage: UIImage? = UIImage(named: "ic-user")!.withRenderingMode(.alwaysOriginal)
+        let leftImage: UIImage? = UIImage(named: "user-settings")!.withRenderingMode(.alwaysOriginal)
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: leftImage, style: UIBarButtonItem.Style.plain, target: self, action: #selector(self.userButton)
         )

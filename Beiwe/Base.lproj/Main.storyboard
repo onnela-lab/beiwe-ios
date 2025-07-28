@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_0" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -120,7 +120,7 @@
                         <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
                         <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
                     </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" misplaced="YES" id="8bC-Xf-vdC" customClass="GradientView" customModule="Beiwe" customModuleProvider="target">
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC" customClass="GradientView" customModule="Beiwe" customModuleProvider="target">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="504"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
@@ -252,7 +252,7 @@
                     </view>
                     <toolbarItems/>
                     <navigationItem key="navigationItem" title="Study" id="oyA-yJ-afD">
-                        <barButtonItem key="leftBarButtonItem" image="ic-user" id="Df7-ve-t6h">
+                        <barButtonItem key="leftBarButtonItem" image="user-settings" id="Df7-ve-t6h">
                             <color key="tintColor" red="0.98823529409999999" green="1" blue="0.96078431369999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" image="ic-info" id="K8S-Ip-8m1"/>
@@ -348,7 +348,7 @@
                         <viewControllerLayoutGuide type="top" id="FNf-0e-voQ"/>
                         <viewControllerLayoutGuide type="bottom" id="Ie1-Cu-aMs"/>
                     </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" misplaced="YES" id="67n-ia-977" customClass="GradientView" customModule="Beiwe" customModuleProvider="target">
+                    <view key="view" contentMode="scaleToFill" id="67n-ia-977" customClass="GradientView" customModule="Beiwe" customModuleProvider="target">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="504"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
@@ -461,7 +461,7 @@
     </scenes>
     <resources>
         <image name="ic-info" width="22.5" height="22.5"/>
-        <image name="ic-user" width="22.5" height="22.5"/>
         <image name="main-image" width="126" height="125"/>
+        <image name="user-settings" width="22.5" height="22.5"/>
     </resources>
 </document>
