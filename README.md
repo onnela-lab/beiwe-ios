@@ -38,3 +38,5 @@ In order to build the app you have to comment out lines 41 and 47 of `PKHUDAsset
 There are two important Build Configurations:
 * "Beiwe": the study server is hardcoded to studies.beiwe.org
 * "Beiwe2": the study server URL gets set after you install the app, on the registration screen.
+
+Note: there is a special variable in Constants `FIRST_PARTY_SERVER_DOMAIN_FOR_ERROR_REPORTING` that specifies the domain a study must be at for developer error reporting to be enabled. This is necessary due to the economics of software development, and the nature of error reports to contain theoretically arbitrary information. Usage of the Beiwe platform is health-adjacent, such an event could violate clinical disclosure agreements or laws.

@@ -320,16 +320,16 @@ class DataStorageManager {
             }
             
             log.error("Error moving(1) \(src) to \(dst), \(error)")
-            SentrySDK.capture(message: "not a crash - Error moving file 1") { (scope: Scope) in
-                scope.setEnvironment(Constants.APP_INFO_TAG)
-                scope.setExtras([
-                    "from": shortenPath(src),
-                    "to": shortenPath(dst),
-                    "error": "\(error)",
-                    "user_id": StudyManager.sharedInstance.currentStudy?.patientId ?? "not_registered",
-                ])
-                scope.setLevel(.error)
-            }
+            // SentrySDK.capture(message: "not a crash - Error moving file 1") { (scope: Scope) in
+            //     scope.setEnvironment(Constants.APP_INFO_TAG)
+            //     scope.setExtras([
+            //         "from": shortenPath(src),
+            //         "to": shortenPath(dst),
+            //         "error": "\(error)",
+            //         "user_id": StudyManager.sharedInstance.currentStudy?.patientId ?? "not_registered",
+            //     ])
+            //     scope.setLevel(.error)
+            // }
         }
     }
     
@@ -597,11 +597,11 @@ class DataStorage {
             }
         }
         
-        SentrySDK.capture(message: message) { (scope: Scope) in
-            scope.setEnvironment(Constants.APP_INFO_TAG) // important for error triage
-            scope.setExtras(extras)
-            scope.setLevel(.error)
-        }
+        // SentrySDK.capture(message: message) { (scope: Scope) in
+        //     scope.setEnvironment(Constants.APP_INFO_TAG) // important for error triage
+        //     scope.setExtras(extras)
+        //     scope.setLevel(.error)
+        // }
     }
     
     ///////////////////////////////////////// Actual write logic ///////////////////////////////////////////

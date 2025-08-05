@@ -1,5 +1,7 @@
 struct Constants {
     
+    static let FIRST_PARTY_SERVER_DOMAIN_FOR_ERROR_REPORTING = "beiwe.org"
+    
     static let ENABLED_FEATURES = [
         "survey_resend",
     ]
