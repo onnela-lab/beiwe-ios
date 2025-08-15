@@ -52,6 +52,22 @@
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>The Beiwe App does not use the camera, this functionality is getting pulled in through a dependency.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>The Beiwe App does not use HealthKit, this functionality is getting pulled in through a dependency. </string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>The Beiwe App does not use HealthKit, this functionality is getting pulled in through a dependency. </string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>The Beiwe App uses location data as one of the core data streams provided by participants in the study they are enrolled in for medical research.  Data is collected at intervals defined by the study's parameters.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>The Beiwe App uses location data as one of the core data streams provided by participants in the study they are enrolled in for medical research.  Data is collected at intervals defined by the study's parameters.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>The Beiwe App uses the microphone to record verbal responses to survey questions provided by the study the user is enrolled in.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>The Beiwe App uses motion data as one of the core data streams provided by participants in the study they are enrolled in for medical research.  Data is collected at intervals defined by the study's parameters.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>The Beiwe App does not use speech recognition, this functionality is getting pulled in through a dependency.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>

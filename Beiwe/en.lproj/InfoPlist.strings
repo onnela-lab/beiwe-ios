@@ -24,7 +24,7 @@ NSMotionUsageDescription = "Beiwe needs to access your Device's Motion data in o
 NSMicrophoneUsageDescription = "Beiwe needs access to your microphone in order to record your ressponse to an audio survey.";
 
 /* We don't need these... */
-NSPhotoLibraryAddUsageDescription = "";
-NSSpeechRecognitionUsageDescription = "";
-NSPhotoLibraryUsageDescription = "";
-NSCameraUsageDescription = "";
+NSPhotoLibraryAddUsageDescription = "PhotoLibraryAdd - This feature is not in use by the Beiwe platform. If you see this message please report a bug with a screenshot to github.com/onnela-lab/beiwe-ios/issues/";
+NSSpeechRecognitionUsageDescription = "SpeechRecognition - This feature is not in use by the Beiwe platform. If you see this message please report a bug with a screenshot to github.com/onnela-lab/beiwe-ios/issues/";
+NSPhotoLibraryUsageDescription = "PhotoLibrary - This feature is not in use by the Beiwe platform. If you see this message please report a bug with a screenshot to github.com/onnela-lab/beiwe-ios/issues/";
+NSCameraUsageDescription = "Camera - This feature is not in use by the Beiwe platform. If you see this message please report a bug with a screenshot to github.com/onnela-lab/beiwe-ios/issues/";
