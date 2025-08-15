@@ -11,7 +11,7 @@ target 'Beiwe' do
     
     # sentry error reporting (was 4.5, that simply stopped compiling in xcode 16 (ios 18 release)
     # Reyva - pod 'Sentry', :git => 'https://github.com/getsentry/sentry-cocoa.git', :tag => '8.36.0'
-    pod 'Sentry', '~> 8.37.0'
+    pod 'Sentry', '~> 8.55.0'
     # pod 'Sentry', :git => 'https://github.com/getsentry/sentry-cocoa.git', :tag => '8.36.0'
     
     # one-off libraries

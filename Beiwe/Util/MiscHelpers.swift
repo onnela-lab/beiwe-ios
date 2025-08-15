@@ -79,7 +79,6 @@ let transformJsonStringInt = TransformOf<Int, Any>(fromJSON: { (value: Any?) -> 
     value
 })
 
-
 /// This is horrendously named.
 /// Bounce refers to user-input "bouncing", the name comes from keyboard keys "bouncing" and triggering multiple inputs even though
 /// they only hit a key once. (on keyboards the electrical impulse is never perfect, so low-level code has to impose a rate limit or delay.)
@@ -130,16 +129,13 @@ func confirmAndCallClinician(_ presenter: UIViewController, callAssistant: Bool 
     if let phoneNumber = number, AppDelegate.sharedInstance().canOpenTel {
         if let phoneUrl = URL(string: "tel:" + phoneNumber) {
             let callAlert = UIAlertController(title: NSLocalizedString("call_clinician_confirmation_title", comment: ""), message: msg, preferredStyle: UIAlertController.Style.alert)
-
             callAlert.addAction(UIAlertAction(title: NSLocalizedString("ok_button_text", comment: ""), style: .default) { (action: UIAlertAction!) in
-                UIApplication.shared.openURL(phoneUrl)
+                UIApplication.shared.open(phoneUrl)
             })
             callAlert.addAction(UIAlertAction(title: NSLocalizedString("cancel_button_text", comment: ""), style: .default) { (action: UIAlertAction!) in
                 print("Call cancelled.")
             })
-            presenter.present(callAlert, animated: true) {
-                // ...
-            }
+            presenter.present(callAlert, animated: true) { /* ... */ }
         }
     }
 }

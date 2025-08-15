@@ -818,8 +818,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
                 options.releaseName = Constants.APP_INFO_SHORT
                 options.swiftAsyncStacktraces = true
                 options.enableCrashHandler = true
-                options.enableMetrics = true
-                options.enableDefaultTagsForMetrics = true
+                // options.enableMetrics = true  // depricated
+                // options.enableDefaultTagsForMetrics = true  // depricated
                 // options.attachScreenshot = true // This adds a screenshot to the error events
                 options.attachViewHierarchy = true // This adds the view hierarchy to the error events
             }
