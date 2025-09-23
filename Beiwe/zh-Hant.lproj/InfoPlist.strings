@@ -1,14 +1,11 @@
-/* 
+/*
   InfoPlist.strings
 */
 
-NSCameraUsageDescription = "用於ResearchKit的醫學研究";
-NSHealthShareUsageDescription = "用於ResearchKit的醫學研究";
-NSHealthUpdateUsageDescription = "用於ResearchKit的醫學研究";
-NSLocationAlwaysAndWhenInUseUsageDescription = "為了研究目的，Beiwe需連結使用定位服務";
-NSLocationAlwaysUsageDescription = "為了研究目的，Beiwe需連結使用定位服務";
-NSLocationWhenInUseUsageDescription = "為了研究目的，Beiwe需連結使用定位服務";
-NSMicrophoneUsageDescription = "語音問卷";
-NSMotionUsageDescription = "Beiwe需要使用您的傳感器來正確進行醫學研究。";
-NSPhotoLibraryAddUsageDescription = "用於ResearchKit的醫學研究";
-NSPhotoLibraryUsageDescription = "用於ResearchKit的醫學研究";
+NSMicrophoneUsageDescription = "Beiwe需要访问您的麦克风以用于您填写语音问卷";
+NSHealthShareUsageDescription = "Beiwe需要访问您的Apple健康数据，以便为您所参与的医学、临床或学术及科学研究项目收集数据。Beiwe应用本身不会使用或处理其收集的数据。研究期间记录的所有数据都会安全地上传至服务器，仅由授权的研究人员访问。";
+NSHealthUpdateUsageDescription = "Beiwe需要访问您的Apple健康数据，以便为您所参与的医学、临床或学术及科学研究项目收集数据。Beiwe应用本身不会使用或处理其收集的数据。研究期间记录的所有数据都会安全地上传至服务器，仅由授权的研究人员访问。";
+NSLocationAlwaysAndWhenInUseUsageDescription = "Beiwe需要在后台访问您的位置，以便为您所参与的医学、临床或学术及科学研究项目收集数据。Beiwe应用本身不会使用或处理其收集的数据。研究期间记录的所有数据都会安全地上传至服务器，仅由授权的研究人员访问。";
+NSLocationAlwaysUsageDescription = "Beiwe需要在后台访问您的位置，以便为您所参与的医学、临床或学术及科学研究项目收集数据。Beiwe应用本身不会使用或处理其收集的数据。研究期间记录的所有数据都会安全地上传至服务器，仅由授权的研究人员访问。";
+NSLocationWhenInUseUsageDescription = "Beiwe需要访问您的位置，以便为您所参与的医学、临床或学术及科学研究项目收集数据。Beiwe应用本身不会使用或处理其收集的数据。研究期间记录的所有数据都会安全地上传至服务器，仅由授权的研究人员访问。";
+NSMotionUsageDescription = "Beiwe需要访问您设备的运动数据，以便为您所参与的医学、临床或学术及科学研究项目收集数据。Beiwe应用本身不会使用或处理其收集的数据。研究期间记录的所有数据都会安全地上传至服务器，仅由授权的研究人员访问。";

@@ -1,51 +1,51 @@
 
 /* Class = "UILabel"; text = "There are no active surveys to take at this time"; ObjectID = "1nA-oJ-wkq"; */
-"1nA-oJ-wkq.text" = "目前問卷尚未開放填寫";
+"1nA-oJ-wkq.text" = "当前暂无可填写问卷";
 
 /* Class = "UIButton"; normalTitle = "Call Clinician"; ObjectID = "2Mg-Ad-WGs"; */
-"2Mg-Ad-WGs.normalTitle" = "與研究團隊聯繫";
+"2Mg-Ad-WGs.normalTitle" = "联系研究团队";
 
 /* Class = "UIViewController"; title = "Audio Question"; ObjectID = "3pR-tX-e0X"; */
-"3pR-tX-e0X.title" = "語音問卷";
+"3pR-tX-e0X.title" = "语音问卷";
 
 /* Class = "UIButton"; normalTitle = "Save"; ObjectID = "5aN-yy-cIR"; */
-"5aN-yy-cIR.normalTitle" = "儲存";
+"5aN-yy-cIR.normalTitle" = "储存";
 
 /* Class = "UILabel"; text = "Password:"; ObjectID = "LYJ-Ie-QQT"; */
-"LYJ-Ie-QQT.text" = "密碼:";
+"LYJ-Ie-QQT.text" = "密码:";
 
 /* Class = "UIButton"; normalTitle = "Contact Clinician"; ObjectID = "Pqy-gE-5gW"; */
-"Pqy-gE-5gW.normalTitle" = "與研究團隊聯繫";
+"Pqy-gE-5gW.normalTitle" = "联系研究团队";
 
 /* Class = "UILabel"; text = "Maximum Length 0 secs"; ObjectID = "Shb-kd-O9W"; */
-"Shb-kd-O9W.text" = "最大長度為0秒";
+"Shb-kd-O9W.text" = "最长时长为 0 秒;
 
 /* Class = "UIButton"; normalTitle = "Forgot Password"; ObjectID = "Ysc-6U-fpb"; */
-"Ysc-6U-fpb.normalTitle" = "忘記密碼";
+"Ysc-6U-fpb.normalTitle" = "忘记密码";
 
 /* Class = "UILabel"; text = "Active Surveys"; ObjectID = "cuf-UH-0CW"; */
-"cuf-UH-0CW.text" = "研究問卷";
+"cuf-UH-0CW.text" = "研究问卷";
 
 /* Class = "UIButton"; normalTitle = "Login"; ObjectID = "fjW-53-3Zu"; */
-"fjW-53-3Zu.normalTitle" = "登入";
+"fjW-53-3Zu.normalTitle" = "登录";
 
 /* Class = "UIButton"; normalTitle = "re-record"; ObjectID = "hCR-ge-r03"; */
-"hCR-ge-r03.normalTitle" = "重新紀錄";
+"hCR-ge-r03.normalTitle" = "重新记录";
 
 /* Class = "UILabel"; text = "new"; ObjectID = "jTS-Yo-USL"; */
 "jTS-Yo-USL.text" = "新增";
 
 /* Class = "UINavigationItem"; title = "Login to your Study"; ObjectID = "m2I-i3-uI3"; */
-"m2I-i3-uI3.title" = "登入研究";
+"m2I-i3-uI3.title" = "登录研究";
 
 /* Class = "UIButton"; normalTitle = "Record"; ObjectID = "o2C-Hl-U4C"; */
-"o2C-Hl-U4C.normalTitle" = "紀錄";
+"o2C-Hl-U4C.normalTitle" = "记录";
 
 /* Class = "UINavigationItem"; title = "Study"; ObjectID = "oyA-yJ-afD"; */
 "oyA-yJ-afD.title" = "研究";
 
 /* Class = "UILabel"; text = "Have Questions?"; ObjectID = "qJ3-Yl-UQJ"; */
-"qJ3-Yl-UQJ.text" = "排解困難?";
+"qJ3-Yl-UQJ.text" = "遇到问题?";
 
 /* Class = "UILabel"; text = "Survey"; ObjectID = "sgq-YE-jwP"; */
 "sgq-YE-jwP.text" = "研究問卷";
@@ -54,4 +54,4 @@
 "vKX-3q-Jmy.text" = "0 秒";
 
 /* Class = "UILabel"; text = "Question"; ObjectID = "zDy-ZL-HgI"; */
-"zDy-ZL-HgI.text" = "問題項目";
+"zDy-ZL-HgI.text" = "问题项目";
