@@ -184,6 +184,10 @@
 		83FDCFD91CBCB6D300AFF716 /* ChangePasswordViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangePasswordViewController.swift; sourceTree = "<group>"; };
 		84CACB8D2835A44B00663065 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		A42DC84D7FED35C57E1B1EE0 /* Pods_Beiwe.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Beiwe.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA07B1C12E8AE8410072E53E /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Main.strings"; sourceTree = "<group>"; };
+		AA07B1C22E8AE8410072E53E /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/LaunchScreen.strings"; sourceTree = "<group>"; };
+		AA07B1C32E8AE8410072E53E /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		AA07B1C42E8AE8410072E53E /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "Beiwe/zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		AA1FCADD2B854A31004BE0AF /* SentryUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentryUtils.swift; sourceTree = "<group>"; };
 		AA63EFB629C2E0FE0074F735 /* DataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataService.swift; sourceTree = "<group>"; };
 		AA774E3A29DFA9440085BDF8 /* UpdateDeviceSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateDeviceSettings.swift; sourceTree = "<group>"; };
@@ -503,6 +507,7 @@
 				"zh-Hant",
 				de,
 				it,
+				"zh-Hans",
 			);
 			mainGroup = 83F98C2D1C923C3600E0B64B;
 			productRefGroup = 83F98C371C923C3600E0B64B /* Products */;
@@ -773,6 +778,7 @@
 				59912EB6230EF3D100CAF7EB /* zh-Hant */,
 				E949EF7728480E59009E183F /* de */,
 				E949EF7B28480E6E009E183F /* it */,
+				AA07B1C42E8AE8410072E53E /* zh-Hans */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -784,6 +790,7 @@
 				59912EBD2311A66B00CAF7EB /* en */,
 				E949EF7628480E59009E183F /* de */,
 				E949EF7A28480E6D009E183F /* it */,
+				AA07B1C32E8AE8410072E53E /* zh-Hans */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -795,6 +802,7 @@
 				59912EB4230EF3D100CAF7EB /* zh-Hant */,
 				E949EF7428480E59009E183F /* de */,
 				E949EF7828480E6D009E183F /* it */,
+				AA07B1C12E8AE8410072E53E /* zh-Hans */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -806,6 +814,7 @@
 				59912EB5230EF3D100CAF7EB /* zh-Hant */,
 				E949EF7528480E59009E183F /* de */,
 				E949EF7928480E6D009E183F /* it */,
+				AA07B1C22E8AE8410072E53E /* zh-Hans */,
 			);
 			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
