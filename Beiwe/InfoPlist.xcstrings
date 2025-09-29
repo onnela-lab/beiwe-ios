@@ -1,0 +1,374 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "comment" : "Bundle display name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Beiwe2"
+          }
+        }
+      }
+    },
+    "CFBundleName" : {
+      "comment" : "Bundle name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Beiwe2"
+          }
+        }
+      }
+    },
+    "NSCameraUsageDescription" : {
+      "comment" : "Privacy - Camera Usage Description",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für medizinische Forschung mit ResearchKit"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Camera - This feature is not in use by the Beiwe platform. If you see this message please report a bug with a screenshot to github.com/onnela-lab/beiwe-ios/issues/"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Per la ricerca medica con ResearchKit"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用於ResearchKit的醫學研究"
+          }
+        }
+      }
+    },
+    "NSHealthShareUsageDescription" : {
+      "comment" : "InfoPlist.strings\n We had some difficulty after a release rejection due to new policy on sensor usage statements,\n and had to put some options together.\n\n This language was not submitted:\n NSHealthShareUsageDescription = \"Beiwe needs to access your Apple Health data in order to collect data for the medical, clinical, or academic and scientific research goals of the study you have enrolled in. This data may be used for the development of novel statistical methods particularly in the fields of Digital Phenotyping and Statistical Network Science.\";\n NSHealthUpdateUsageDescription = \"Beiwe needs to access your Apple Health data in order to collect data for the medical, clinical, or academic and scientific research goals of the study you have enrolled in. This data may be used for the development of novel statistical methods particularly in the fields of Digital Phenotyping and Statistical Network Science.\";\n NSLocationAlwaysAndWhenInUseUsageDescription = \"Beiwe needs to access your Location data in the background in order to collect data for the medical, clinical, or academic and scientific research goals of the study you have enrolled in. This data may be used for the development of novel statistical methods particularly in the fields of Digital Phenotyping and Statistical Network Science.\";\n NSLocationAlwaysUsageDescription = \"Beiwe needs to access your Location data in the background in order to collect data for the medical, clinical, or academic and scientific research goals of the study you have enrolled in. This data may be used for the development of novel statistical methods particularly in the fields of Digital Phenotyping and Statistical Network Science.\";\n NSLocationWhenInUseUsageDescription = \"Beiwe needs to access your Location data in order to collect data for the medical, clinical, or academic and scientific research goals of the study you have enrolled in. This data may be used for the development of novel statistical methods particularly in the fields of Digital Phenotyping and Statistical Network Science.\";\n NSMotionUsageDescription = \"Beiwe needs to access your Device's Motion data in the background in order to collect data for the medical, clinical, or academic and scientific research goals of the study you have enrolled in. This data may be used for the development of novel statistical methods particularly in the fields of Digital Phenotyping and Statistical Network Science.\";\n NSMicrophoneUsageDescription = \"Beiwe needs access to your microphone in order to record your ressponse to an audio survey.\";\n\n This language was submitted and approved:",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für medizinische Forschung mit ResearchKit"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beiwe needs to access your Apple Health data in order to collect data for the medical, clinical, or academic and scientific research goals of the study you have enrolled in. The Beiwe app does not use or process the data it collects. All data recorded during studies are securely uploaded to a server and accessed solely by authorized researchers."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Per la ricerca medica con ResearchKit"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beiwe需要访问您的Apple健康数据，以便为您所参与的医学、临床或学术及科学研究项目收集数据。Beiwe应用本身不会使用或处理其收集的数据。研究期间记录的所有数据都会安全地上传至服务器，仅由授权的研究人员访问。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用於ResearchKit的醫學研究"
+          }
+        }
+      }
+    },
+    "NSHealthUpdateUsageDescription" : {
+      "comment" : "Privacy - Health Update Usage Description",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für medizinische Forschung mit ResearchKit"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beiwe needs to access your Apple Health data in order to collect data for the medical, clinical, or academic and scientific research goals of the study you have enrolled in. The Beiwe app does not use or process the data it collects. All data recorded during studies are securely uploaded to a server and accessed solely by authorized researchers."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Per la ricerca medica con ResearchKit"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beiwe需要访问您的Apple健康数据，以便为您所参与的医学、临床或学术及科学研究项目收集数据。Beiwe应用本身不会使用或处理其收集的数据。研究期间记录的所有数据都会安全地上传至服务器，仅由授权的研究人员访问。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用於ResearchKit的醫學研究"
+          }
+        }
+      }
+    },
+    "NSLocationAlwaysAndWhenInUseUsageDescription" : {
+      "comment" : "Privacy - Location Always and When In Use Usage Description",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beiwe benötigt jederzeit Ihren Standort, um die Studie optimal durchführen zu können."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beiwe needs to access your location in the background in order to collect data for the medical, clinical, or academic and scientific research goals of the study you have enrolled in. The Beiwe app does not use or process the data it collects. All data recorded during studies are securely uploaded to a server and accessed solely by authorized researchers."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beiwe ha bisogno della tua posizione in ogni momento per condurre correttamente la ricerca medica."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beiwe需要在后台访问您的位置，以便为您所参与的医学、临床或学术及科学研究项目收集数据。Beiwe应用本身不会使用或处理其收集的数据。研究期间记录的所有数据都会安全地上传至服务器，仅由授权的研究人员访问。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "為了研究目的，Beiwe需連結使用定位服務"
+          }
+        }
+      }
+    },
+    "NSLocationAlwaysUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beiwe benötigt Ihren Standort, um die Studie optimal durchführen zu können."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beiwe needs to access your location in the background in order to collect data for the medical, clinical, or academic and scientific research goals of the study you have enrolled in. The Beiwe app does not use or process the data it collects. All data recorded during studies are securely uploaded to a server and accessed solely by authorized researchers."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beiwe ha bisogno della tua posizione per condurre correttamente la ricerca medica."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beiwe需要在后台访问您的位置，以便为您所参与的医学、临床或学术及科学研究项目收集数据。Beiwe应用本身不会使用或处理其收集的数据。研究期间记录的所有数据都会安全地上传至服务器，仅由授权的研究人员访问。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "為了研究目的，Beiwe需連結使用定位服務"
+          }
+        }
+      }
+    },
+    "NSLocationWhenInUseUsageDescription" : {
+      "comment" : "Privacy - Location When In Use Usage Description",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beiwe benötigt Ihren Standort, um die Studie optimal durchführen zu können."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beiwe needs to access your location in order to collect data for the medical, clinical, or academic and scientific research goals of the study you have enrolled in. The Beiwe app does not use or process the data it collects. All data recorded during studies are securely uploaded to a server and accessed solely by authorized researchers."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beiwe ha bisogno della tua posizione per condurre correttamente la ricerca medica."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beiwe需要访问您的位置，以便为您所参与的医学、临床或学术及科学研究项目收集数据。Beiwe应用本身不会使用或处理其收集的数据。研究期间记录的所有数据都会安全地上传至服务器，仅由授权的研究人员访问。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "為了研究目的，Beiwe需連結使用定位服務"
+          }
+        }
+      }
+    },
+    "NSMicrophoneUsageDescription" : {
+      "comment" : "Privacy - Microphone Usage Description",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio-Befragung Fragen aufnehmen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beiwe needs access to your microphone in order to record your ressponse to an audio survey."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registra domande questionario audio"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beiwe需要访问您的麦克风以用于您填写语音问卷"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "語音問卷"
+          }
+        }
+      }
+    },
+    "NSMotionUsageDescription" : {
+      "comment" : "Privacy - Motion Usage Description",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beiwe braucht Zugriff auf Ihre Sensoren, um die Studie optimal durchführen zu können."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beiwe needs to access your Device's Motion data in order to collect data for the medical, clinical, or academic and scientific research goals of the study you have enrolled in. The Beiwe app does not use or process the data it collects. All data recorded during studies are securely uploaded to a server and accessed solely by authorized researchers."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beiwe ha bisogno dell'accesso ai sensori dello smarpthone per condurre correttamente la ricerca medica."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beiwe需要访问您设备的运动数据，以便为您所参与的医学、临床或学术及科学研究项目收集数据。Beiwe应用本身不会使用或处理其收集的数据。研究期间记录的所有数据都会安全地上传至服务器，仅由授权的研究人员访问。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beiwe需要使用您的傳感器來正確進行醫學研究。"
+          }
+        }
+      }
+    },
+    "NSPhotoLibraryAddUsageDescription" : {
+      "comment" : "We don't need these...",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für medizinische Forschung mit ResearchKit"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PhotoLibraryAdd - This feature is not in use by the Beiwe platform. If you see this message please report a bug with a screenshot to github.com/onnela-lab/beiwe-ios/issues/"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Per la ricerca medica con ResearchKit"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用於ResearchKit的醫學研究"
+          }
+        }
+      }
+    },
+    "NSPhotoLibraryUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für medizinische Forschung mit ResearchKit"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PhotoLibrary - This feature is not in use by the Beiwe platform. If you see this message please report a bug with a screenshot to github.com/onnela-lab/beiwe-ios/issues/"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Per la ricerca medica con ResearchKit"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用於ResearchKit的醫學研究"
+          }
+        }
+      }
+    },
+    "NSSpeechRecognitionUsageDescription" : {
+      "comment" : "Privacy - Speech Recognition Usage Description",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SpeechRecognition - This feature is not in use by the Beiwe platform. If you see this message please report a bug with a screenshot to github.com/onnela-lab/beiwe-ios/issues/"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.1"
+}
