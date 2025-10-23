@@ -822,6 +822,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
                 // options.enableDefaultTagsForMetrics = true  // depricated
                 // options.attachScreenshot = true // This adds a screenshot to the error events
                 options.attachViewHierarchy = true // This adds the view hierarchy to the error events
+                options.enableCaptureFailedRequests = false
             }
         } catch let error {
             print("Error loading Sentry DSN: \(error)\nSentry will not be enabled.")
