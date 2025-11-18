@@ -59,15 +59,15 @@ struct GenericSurveyQuestion: Mappable, Equatable {
         let displayIf = compare_dict_of_string_to_anyobject(lhs: lhs.displayIf, rhs: rhs.displayIf)
         let required = lhs.required == rhs.required
         
-        if !questionId { print(lhs.questionId, "!=", rhs.questionId) }
-        if !prompt { print(lhs.prompt, "!=", rhs.prompt) }
-        if !questionType { print(lhs.questionType, "!=", rhs.questionType) }
-        if !maxValue { print(lhs.maxValue, "!=", rhs.maxValue) }
-        if !minValue { print(lhs.minValue, "!=", rhs.minValue) }
-        if !selectionValues { print(lhs.selectionValues, "!=", rhs.selectionValues) }
-        if !textFieldType { print(lhs.textFieldType, "!=", rhs.textFieldType) }
-        if !displayIf { print(lhs.displayIf, "!=", rhs.displayIf) }
-        if !required { print(lhs.required, "!=", rhs.required) }
+        // if !questionId { print(lhs.questionId, "!=", rhs.questionId) }
+        // if !prompt { print(lhs.prompt, "!=", rhs.prompt) }
+        // if !questionType { print(lhs.questionType, "!=", rhs.questionType) }
+        // if !maxValue { print(lhs.maxValue, "!=", rhs.maxValue) }
+        // if !minValue { print(lhs.minValue, "!=", rhs.minValue) }
+        // if !selectionValues { print(lhs.selectionValues, "!=", rhs.selectionValues) }
+        // if !textFieldType { print(lhs.textFieldType, "!=", rhs.textFieldType) }
+        // if !displayIf { print(lhs.displayIf, "!=", rhs.displayIf) }  // this line sometimes errors
+        // if !required { print(lhs.required, "!=", rhs.required) }
         
         return questionId &&
             prompt &&
