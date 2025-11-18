@@ -128,6 +128,24 @@ class ApiManager {
             device_status_report["last_background_push_notification_received"] = study.lastBackgroundPushNotificationReceived
             device_status_report["last_foreground_push_notification_received"] = study.lastForegroundPushNotificationReceived
             
+            device_status_report["processinfo_idleDisplaySleepDisabled"] = "\(ProcessInfo.ActivityOptions.idleDisplaySleepDisabled.rawValue)"
+            device_status_report["processinfo_idleSystemSleepDisabled"] = "\(ProcessInfo.ActivityOptions.idleSystemSleepDisabled.rawValue)"
+            device_status_report["processinfo_suddenTerminationDisabled"] = "\(ProcessInfo.ActivityOptions.suddenTerminationDisabled.rawValue)"
+            device_status_report["processinfo_automaticTerminationDisabled"] = "\(ProcessInfo.ActivityOptions.automaticTerminationDisabled.rawValue)"
+            device_status_report["processinfo_userInitiated"] = "\(ProcessInfo.ActivityOptions.userInitiated.rawValue)"
+            device_status_report["processinfo_userInitiatedAllowingIdleSystemSleep"] = "\(ProcessInfo.ActivityOptions.userInitiatedAllowingIdleSystemSleep.rawValue)"
+            device_status_report["processinfo_background"] = "\(ProcessInfo.ActivityOptions.background.rawValue)"
+            device_status_report["processinfo_latencyCritical"] = "\(ProcessInfo.ActivityOptions.latencyCritical.rawValue)"
+            
+            if #available(iOS 16.0, *) {
+                device_status_report["processinfo_trackingEnabled"] = "\(ProcessInfo.ActivityOptions.trackingEnabled.rawValue)"
+                device_status_report["processinfo_animationTrackingEnabled"] = "\(ProcessInfo.ActivityOptions.animationTrackingEnabled.rawValue)"
+                device_status_report["processinfo_userInteractive"] = "\(ProcessInfo.ActivityOptions.userInteractive.rawValue)"
+            }
+            
+            device_status_report["processinfo_isLowPowerModeEnabled"] = "\(ProcessInfo.processInfo.isLowPowerModeEnabled)"
+            device_status_report["processinfo_ThermalState"] = "\(ProcessInfo.processInfo.thermalState.rawValue)"  // - nominal = 0  fair = 1  serious = 2  critical = 3
+            
             // This could be extremely verbose... let's do a count?
             // device_status_report["list_current_data_files"] = easyJSON(get_current_data_files_list())
             // device_status_report["list_upload_files"] = easyJSON(get_upload_files_list())
