@@ -30,7 +30,7 @@ target 'Beiwe' do
     pod 'SwiftValidator', :git => 'https://github.com/SwiftValidatorCommunity/SwiftValidator.git', :branch => 'master'
     
     # pops up a heads-up-display on certain pages.
-    pod 'PKHUD', :git => 'https://github.com/pkluz/PKHUD.git', :tag => '5.4.0'  # old: :branch => 'release/swift4'
+    pod 'PKHUD', :git => 'https://github.com/pkluz/PKHUD.git', :tag => '5.4.0'
     # the surveys
     # pod 'ResearchKit', :git => 'https://github.com/ResearchKit/ResearchKit.git', :tag => '2.1.0'  #:commit => 'b50e1d7'
     # okaayy, that version of researchkit resulted in a replicable crash involving the survey back button,
@@ -71,6 +71,16 @@ post_install do |installer|
         end
     end
     
+    # PKHUD 5.4.0 wraps its Bundle.module extension behind #if IS_FRAMEWORK_TARGET,
+    # which isn't set by CocoaPods. Define it so the extension is compiled.
+    installer.pods_project.targets.each do |target|
+        if target.name == 'PKHUD'
+            target.build_configurations.each do |config|
+                config.build_settings['SWIFT_ACTIVE_COMPILATION_CONDITIONS'] = '$(inherited) IS_FRAMEWORK_TARGET'
+            end
+        end
+    end
+
     installer.pods_project.targets.each do |target|
         if target.name == 'Eureka' || target.name == 'XLActionController' || target.name == 'ResearchKit' || target.name == 'ReachabilitySwift' || target.name == 'IDZSwiftCommonCrypto'
             target.build_configurations.each do |config|
