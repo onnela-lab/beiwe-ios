@@ -2,15 +2,16 @@ name: Build
 
 on:
   push:
-    branches:
-      - main
-      - 'tillahoffmann/**'
   pull_request:
     branches:
       - main
 
 jobs:
   build:
+    if: >-
+      github.event_name == 'pull_request'
+      || github.ref == 'refs/heads/main'
+      || github.repository_owner == 'tillahoffmann'
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
