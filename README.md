@@ -1,15 +1,12 @@
-**NOTE:**
-In order to build the app you have to comment out lines 41 and 47 of `PKHUDAssets.swift`. For unknown reasons `IS_FRAMEWORK_TARGET` of this package is not getting set to `true` at build time. (This file is located at `{REPO}/pods/PKHUD/PKHUDAssents.swift` after you install the Cocoapods requirements.) You will have to do this every time you run `pod update` or `pod install`. __If you work out how to fix this please let us know.__
-
 ### Building the Beiwe iOS app
 1. This is an iOS app, you need to be on a mac running a modern (usually within the most recent 3 macOS releases). You need to then install Xcode and the Xcode CLI tools.
     - You may need to consent to the CLI tools before step 2 works.
-2. Install an up-to-date version of Cocoapods.
-    - There may already be a version of Cocoapods from Xcode/CLI Tools automatically installed via `gem`, but it is usually out of date. We recommend using Homebrew a version installed via the Homebrew package manager.
-    - [Install Homebrew](https://brew.sh/)
-    - Install Cocoapods: `brew install cocoapods`.
-3. In Xcode, open Beiwe.xcworkspace, (**not** Beiwe.xcodeproj)
-4. Inside this project directory (inside the `beiwe-ios` directory), run `pod install`.
+2. Install [rbenv](https://github.com/rbenv/rbenv) and the Ruby version specified in `.ruby-version`:
+    - `rbenv install`
+3. Install dependencies:
+    - `bundle install`
+    - `bundle exec pod install`
+4. In Xcode, open Beiwe.xcworkspace, (**not** Beiwe.xcodeproj)
 5. Add a `GoogleService-Info.plist` file.
     - **Note:** this is a credentials file connected to your specific Firebase account.
     - In order for push notifications to work on iOS, which is necessary for most use cases, [please see the documentation]( LINK_HERE )), requires that you set up with valid Apple Push Notification Service (APNS)credentials from the App Store account that you will publish your app on, and that you then add them to the Firebase Online Console.  You do not need functional APNS credentials to just build the app.

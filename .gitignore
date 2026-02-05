@@ -10,3 +10,4 @@ Private/*
 GoogleService-Info.plist
 
 .sentryclirc
+vendor/
