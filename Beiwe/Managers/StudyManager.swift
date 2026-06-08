@@ -156,7 +156,7 @@ class StudyManager {
         if studySettings.gps && studySettings.gpsOnDurationSeconds > 0 {
             self.timerManager.addDataService(on_duration: studySettings.gpsOnDurationSeconds, off_duration: studySettings.gpsOffDurationSeconds, dataService: self.gpsManager!)
         }
-        if studySettings.accelerometer && studySettings.gpsOnDurationSeconds > 0 {
+        if studySettings.accelerometer && studySettings.accelerometerOnDurationSeconds > 0 {
             self.timerManager.addDataService(on_duration: studySettings.accelerometerOnDurationSeconds, off_duration: studySettings.accelerometerOffDurationSeconds, dataService: AccelerometerManager())
         }
         if studySettings.powerState {
@@ -168,7 +168,7 @@ class StudyManager {
         if studySettings.reachability {
             self.timerManager.addDataService(ReachabilityManager())
         }
-        if studySettings.gyro {
+        if studySettings.gyro && studySettings.gyroOnDurationSeconds > 0 {
             self.timerManager.addDataService(on_duration: studySettings.gyroOnDurationSeconds, off_duration: studySettings.gyroOffDurationSeconds, dataService: GyroManager())
         }
         if studySettings.magnetometer && studySettings.magnetometerOnDurationSeconds > 0 {
@@ -184,7 +184,7 @@ class StudyManager {
     }
     
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////// Survey Submission ///////////////////////////////////////////
+    /////////////////////////////////////// Survey Submission //////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // TODO: this location for this code makes no sense, why is it here?
     
