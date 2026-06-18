@@ -44,7 +44,7 @@ class MainViewController: UIViewController {
         self.surveyTableView.backgroundColor = UIColor.clear
         // hakuba.registerCell(SurveyCell)
 
-        var clinicianText: String = (
+        let clinicianText: String = (
             StudyManager.sharedInstance.currentStudy?.studySettings?.callClinicianText ?? NSLocalizedString("default_call_clinician_text", comment: "")
         )
         self.callClinicianButton.setTitle(clinicianText, for: UIControl.State())
@@ -68,7 +68,46 @@ class MainViewController: UIViewController {
         // refresh surveys as last step of view load
         self.refreshSurveys()
     }
+    
+    
+    /// sort ordering is as follows:
+    /// - the first section is the triggered surveys, the second section are the always available surveys
+    /// - first sort by survey name
+    /// - identifiers are alwaysAvailable, name, surveyId
+    func getActiveSurveySorted() -> [(String, ActiveSurvey)] {
+        var always_available: [(String, ActiveSurvey)] = []
+        var always_available_unnamed: [(String, ActiveSurvey)] = []
+        var triggered: [(String, ActiveSurvey)] = []
+        var triggered_unnamed: [(String, ActiveSurvey)] = []
+        
+        // populate
+        if let activeSurveys = StudyManager.sharedInstance.currentStudy?.activeSurveys {
+            for (survey_id, active) in activeSurveys {
+                if active.survey!.alwaysAvailable {
+                    if let name = active.survey?.name, !name.isEmpty, name != ""  {
+                        always_available.append((survey_id, active))
+                    } else {
+                        always_available_unnamed.append((survey_id, active))
+                    }
+                } else {
+                    if let name = active.survey?.name, !name.isEmpty, name != ""  {
+                        triggered.append((survey_id, active))
+                    } else {
+                        triggered_unnamed.append((survey_id, active))
+                    }
+                }
+            }
+        }
+        
+        // sort subsections
+        triggered.sort { $0.1.survey!.name < $1.1.survey!.name }
+        triggered_unnamed.sort { $0.0 < $1.0 }
+        always_available.sort { $0.1.survey!.name < $1.1.survey!.name }
+        always_available_unnamed.sort { $0.0 < $1.0 }
 
+        return triggered + triggered_unnamed + always_available + always_available_unnamed
+    }
+    
     /// updates the ui list of surveys
     func refreshSurveys() {
         // clean out the current list, add a new empty section at the beginning
@@ -77,10 +116,7 @@ class MainViewController: UIViewController {
 
         var active_survey_count = 0
         if let activeSurveys = StudyManager.sharedInstance.currentStudy?.activeSurveys {
-            // sort surveys by the time that they were received by the app (I think)
-            let sortedSurveys = activeSurveys.sorted { s1, s2 -> Bool in
-                s1.1.received > s2.1.received
-            }
+            let sortedSurveys = getActiveSurveySorted()
             
             // because surveys do not have their state cleared when the done button is pressed, the buttons retain
             // the incomplete label and tapping on a finished always available survey results in loading to the "done" buttton on that survey.

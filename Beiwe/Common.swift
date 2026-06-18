@@ -233,6 +233,15 @@ public func print(_ items: Any..., separator: String = " ", terminator: String =
     Swift.print(terminator, separator: "", terminator: "")
 }
 
+let PRANT_TIMER = false
+
+public func printTimer(_ items: Any..., separator: String = " ", terminator: String = "\n") {
+    if PRANT_TIMER {
+        print(items, separator: separator, terminator: terminator)
+    }
+}
+
+
 ////////////////////////////////////// SENTRY //////////////////////////////////////////
 ////////////////////////////////////// SENTRY //////////////////////////////////////////
 ////////////////////////////////////// SENTRY //////////////////////////////////////////
