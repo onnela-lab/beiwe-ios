@@ -230,7 +230,7 @@ class StudyManager {
         guard let study = currentStudy else {
             return
         }
-        print("updateActiveSurveys, forceSave: \(forceSave)")
+        printTimer("updateActiveSurveys, forceSave: \(forceSave)")
         // logic that refreshes survey list
         let activeSurveysModified_1 = self.clear_out_completed_surveys()
         let activeSurveysModified_2 = self.ensure_always_and_trigger_surveys()
@@ -250,7 +250,7 @@ class StudyManager {
         guard let study = currentStudy else {
             return false
         }
-        print("clear_out_completed_surveys")
+        printTimer("clear_out_completed_surveys")
         // For all active surveys that aren't complete, but have expired, submit them. (id is a string)
         var surveyDataModified = false
         var surveys_to_remove = [String]()
@@ -264,7 +264,7 @@ class StudyManager {
             // ON FIRST DOWNLOAD SURVEYS.
             if activeSurvey.isComplete {
                 if activeSurvey.survey!.alwaysAvailable {
-                    print("clear_out_completed_surveys - resetting always available survey \(activeSurvey.survey!.surveyId!)")
+                    // printTimer("clear_out_completed_surveys - resetting always available survey \(activeSurvey.survey!.surveyId!)")
                     activeSurvey.reset(activeSurvey.survey!)
                     surveyDataModified = true
                 } else if !activeSurvey.survey!.triggerOnFirstDownload {
@@ -272,7 +272,7 @@ class StudyManager {
                     // To make trigger on first download surveys not identical in behavior to always-
                     // available surveys we ... never remove them from the active surveys list.
                     // Yup, that's how we implement them. It's Terrible.
-                    print("clear_out_completed_surveys - found non-AlwaysAvailable, non-triggered completed survey \(activeSurvey.survey!.surveyId!)")
+                    // printTimer("clear_out_completed_surveys - found non-AlwaysAvailable, non-triggered completed survey \(activeSurvey.survey!.surveyId!)")
                     surveys_to_remove.append(activeSurvey.survey!.surveyId!)
                     surveyDataModified = true
                 }
@@ -294,13 +294,13 @@ class StudyManager {
         guard let study = self.currentStudy else {
             return false
         }
-        print("remove_deleted_surveys")
+        printTimer("remove_deleted_surveys")
         var surveyDataModified = false
         let allSurveyIds = self.getAllSurveyIds() // from the database
         for (surveyId, activeSurvey) in study.activeSurveys {
             // if the survey no longer exists in the database, remove it
             if !allSurveyIds.contains(surveyId) {
-                print("remove_deleted_surveys - removing survey \(surveyId)")
+                // printTimer("remove_deleted_surveys - removing survey \(surveyId)")
                 study.activeSurveys.removeValue(forKey: surveyId)
                 surveyDataModified = true
             }
@@ -317,7 +317,7 @@ class StudyManager {
         guard let study = self.currentStudy else {
             return false
         }
-        print("ensure_always_and_trigger_surveys")
+        printTimer("ensure_always_and_trigger_surveys")
         
         var surveyDataModified = false
         // for each survey, check on its availability, insert (and forcibly overwrite data)
@@ -326,7 +326,7 @@ class StudyManager {
             if let survey_id = survey.surveyId {
                 // we only care about trigger and always available surveys here
                 if !(survey.triggerOnFirstDownload || survey.alwaysAvailable) {
-                    print("ensure_always_and_trigger_surveys - skipping survey '\(survey.name)', it is not trigger or always available.")
+                    // printTimer("ensure_always_and_trigger_surveys - skipping survey '\(survey.name)', it is not trigger or always available.")
                     continue
                 }
                 
@@ -336,7 +336,7 @@ class StudyManager {
                 
                 if !on_the_main_screen {
                     // case: new trigger or always available survey, add it.
-                    print("ensure_always_and_trigger_surveys - adding survey '\(survey.name)'")
+                    // printTimer("ensure_always_and_trigger_surveys - adding survey '\(survey.name)'")
                     study.activeSurveys[survey_id] = ActiveSurvey(survey: survey)
                     surveyDataModified = true
                 } else {
@@ -344,7 +344,7 @@ class StudyManager {
                     if study.activeSurveys[survey_id]!.survey == survey {
                         // case: old survey was _not_ updated and was already present.
                         // Nothin to be done here, move on.
-                        print("ensure_always_and_trigger_surveys - survey '\(survey.name)' is unchanged, skipping.")
+                        // printTimer("ensure_always_and_trigger_surveys - survey '\(survey.name)' is unchanged, skipping.")
                         continue
                     }
                     
@@ -353,11 +353,11 @@ class StudyManager {
                     // surveys are identical. A final else clause should be unreachable because we test
                     // for that at the top of the loop.
                     if survey.alwaysAvailable {
-                        print("ensure_always_and_trigger_surveys - alwaysAvailable survey changed '\(survey.name)'.")
+                        // printTimer("ensure_always_and_trigger_surveys - alwaysAvailable survey changed '\(survey.name)'.")
                         study.activeSurveys[survey_id] = ActiveSurvey(survey: survey)
                         surveyDataModified = true
                     } else if survey.triggerOnFirstDownload {
-                        print("ensure_always_and_trigger_surveys - trigger survey changed, '\(survey.name)'.")
+                        // printTimer("ensure_always_and_trigger_surveys - trigger survey changed, '\(survey.name)'.")
                         study.activeSurveys[survey_id] = ActiveSurvey(survey: survey)
                         surveyDataModified = true
                     }
@@ -374,7 +374,7 @@ class StudyManager {
             return false
         }
         var any_surveys_updated = false
-        print("update_any_changed_active_surveys")
+        printTimer("update_any_changed_active_surveys")
         
         for target_survey in study.surveys {
             if target_survey.surveyId == nil {
@@ -396,7 +396,7 @@ class StudyManager {
             /// new push notification via activate_surveys, which will reload it from scratch.
             /// Surveys that are trigger AND always-available are treated as normal.)
             if activesurvey.isComplete && activesurvey_survey.triggerOnFirstDownload && !activesurvey_survey.alwaysAvailable {
-                print("update_any_changed_active_surveys - survey '\(target_survey.name)' is a trigger survey and is complete, skipping.")
+                // printTimer("update_any_changed_active_surveys - survey '\(target_survey.name)' is a trigger survey and is complete, skipping.")
                 continue
             }
             
@@ -416,11 +416,11 @@ class StudyManager {
     }
     
     func debug_print_activate_changed(_ survey: Survey) {
-        print("update_any_changed_active_surveys - survey '\(survey.name)' changed.")
+        // printTimer("update_any_changed_active_surveys - survey '\(survey.name)' changed.")
     }
     
     func debug_print_activate_not_changed(_ survey: Survey) {
-        print("update_any_changed_active_surveys - survey '\(survey.name)' did not change.")
+        // printTimer("update_any_changed_active_surveys - survey '\(survey.name)' did not change.")
     }
     
     /// loads a list of surveys into active surveys so that they will be displayed.
@@ -607,7 +607,7 @@ class StudyManager {
             return
         }
         var sentTime: TimeInterval = sentTime ?? 0
-        print("checkForNewSurveys")
+        printTimer("checkForNewSurveys")
                
         ApiManager.sharedInstance.makePostRequest(
             GetSurveysRequest(), completion_handler: { (response: DataResponse<String>) in
@@ -1014,7 +1014,8 @@ class StudyManager {
         
         var message = "all files:"
         fileEnumerator.allObjects.forEach { message += " \($0)" }
-        print("Checking for uploads ", Date(), " ...", message)
+        printTimer("Checking for uploads", Date())
+        // printTimer("Checking for uploads ", Date(), " ...", message)
         
         // (we exhausted the iterator)
         fileEnumerator = FileManager.default.enumerator(atPath: DataStorageManager.uploadDataDirectory().path)!
@@ -1053,7 +1054,7 @@ class StudyManager {
             }
         }
         Ephemerals.end_last_upload = dateFormat(Date())
-        print("Done with uploads.")
+        printTimer("Done with uploads.")
     }
     
     func dispatch_upload(_ filename: String) {

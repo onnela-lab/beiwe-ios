@@ -49,6 +49,7 @@ class Recline {
     }
 
     func _save<T: ReclineObject>(_ obj: T) {
+        // print("db _save() called")
         // give up early if db is not instantiated
         guard let db = self.db else {
             fatalError(
@@ -80,9 +81,7 @@ class Recline {
         do {
             if let doc = doc {
                 try db.defaultCollection().save(document: doc)
-                print(
-                    "Created document id type \(doc.id)? with patientId = \(doc.string(forKey: "patientId")!)"
-                )
+                // print("Created document id type \(doc.id)? with patientId = \(doc.string(forKey: "patientId")!)")
             } else {
                 fatalError("Failed to create or fetch the document for saving")
             }

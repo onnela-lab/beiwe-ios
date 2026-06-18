@@ -160,7 +160,7 @@ class DataStorageManager {
                 attributes: [FileAttributeKey(rawValue: FileAttributeKey.protectionKey.rawValue): FileProtectionType.none]
             )
         } catch {
-            print("\(error)")
+            print("datastorage error:\n\(error)")
             if recur > 0 {
                 log.error("create_directories recur at \(recur).")
                 Thread.sleep(forTimeInterval: Constants.RECUR_SLEEP_DURATION)

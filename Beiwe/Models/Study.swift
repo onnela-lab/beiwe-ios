@@ -21,8 +21,8 @@ class Study: ReclineObject {
     var nextSurveyCheck: Int64?
     var nextDeviceSettingsCheck: Int64?
     var lastBadgeCnt = 0
-    var submittedAudioSurveys: Int = 0 // TODO: what is this and is it breaking uploads
-    var submittedTrackingSurveys: Int = 0 // TODO: what is this and is it breaking uploads
+    var submittedAudioSurveys: Int = 0 // These are counters that state the total number of submitted surveys
+    var submittedTrackingSurveys: Int = 0
     var surveyPushNotificationUUIDs: [String]?
     
     // app state tracking - default value is "never_populated"
