@@ -791,17 +791,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     
     // loads sentry key, prints an error if it doesn't work.
     func setupSentry() {
+        // print("setupSentry")
         // only report errors from devices registered to the onnela lab domain - we have error
         // reporting limits that the devs have to pay for, and disclosure of arbitrary information
         // in an error report is a potential liability.
-        if let studyURL = self.currentStudy?.customApiUrl {
-            if studyURL.contains(Constants.FIRST_PARTY_SERVER_DOMAIN_FOR_ERROR_REPORTING) {
-                print("1st party server, enabling sentry.")
-            } else {
-                print("3rd party server, disabling sentry.")
-                return
-            }
-        }
+        // aaaaand the value isn't loaded because it has not been instantiated yet so this doesn't work at alllll...
+        // if let studyURL = self.currentStudy?.customApiUrl {
+        //     if studyURL.contains(Constants.FIRST_PARTY_SERVER_DOMAIN_FOR_ERROR_REPORTING) {
+        //         print("1st party server, enabling sentry.")
+        //     } else {
+        //         print("3rd party server, disabling sentry.")
+        //         return
+        //     }
+        // }
         
         do {
             let dsn_name = SentryConfiguration.sharedInstance.settings["sentry-dsn"] as? String ?? "dev"
