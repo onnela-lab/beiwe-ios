@@ -9,6 +9,7 @@ class BWORKTaskViewController: ORKTaskViewController {
     //     return UIStatusBarStyle.LightContent
     // }
 
+    // should be uncalled after adding taskViewControllerShouldConfirmCancel to TrackingSurveyPresenter
     @objc override func presentCancelOptions(_ saveable: Bool, sender: UIBarButtonItem?) {
         // print("inside BWORKTaskViewController.presentCancelOptions()")
         super.presentCancelOptions(self.displayDiscard ? saveable : false, sender: sender)

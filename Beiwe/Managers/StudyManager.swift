@@ -184,41 +184,6 @@ class StudyManager {
     }
     
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////// Survey Submission //////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // TODO: this location for this code makes no sense, why is it here?
-    
-    /// takes a(n active) survey and creates the survey answers file
-    func submitSurvey(_ activeSurvey: ActiveSurvey, surveyPresenter: TrackingSurveyPresenter? = nil) {
-        // only run if this stuff exists and it is a TrackingSurvey, but then later there is checking of the survey type so maybe not.
-        if let survey = activeSurvey.survey, let surveyId = survey.surveyId, let surveyType = survey.surveyType, surveyType == .TrackingSurvey {
-            // get the survey data and write it out
-            var trackingSurvey: TrackingSurveyPresenter
-            if surveyPresenter == nil {
-                // print("hitting case where we were 'expiring' the survey timings?")
-                // expiration logic? what is "expired?"
-                trackingSurvey = TrackingSurveyPresenter(surveyId: surveyId, activeSurvey: activeSurvey, survey: survey)
-                trackingSurvey.addTimingsEvent("expired", question: nil)
-            } else {
-                trackingSurvey = surveyPresenter! // current survey I think?
-            }
-            trackingSurvey.finalizeSurveyAnswers() // its done, do the its-done thing (writes file)
-            
-            // increment number of submitted surveys
-            if activeSurvey.bwAnswers.count > 0 {
-                if let surveyType = survey.surveyType { // ... isn't this already instantiated?
-                    switch surveyType {
-                    case .AudioSurvey:
-                        self.currentStudy?.submittedAudioSurveys = (self.currentStudy?.submittedAudioSurveys ?? 0) + 1
-                    case .TrackingSurvey:
-                        self.currentStudy?.submittedTrackingSurveys = (self.currentStudy?.submittedTrackingSurveys ?? 0) + 1
-                    }
-                }
-            }
-        }
-    }
-    
-    ////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////// Active Survey State Logic //////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////
     
@@ -238,7 +203,7 @@ class StudyManager {
         let activeSurveysModified_4 = self.update_any_changed_active_surveys() // should go last
         self.updateBadgerCount()
         
-        // save survey data?
+        // save survey data - except for some reason we don't check activeSurveysModified_4 here
         if activeSurveysModified_1 || activeSurveysModified_2 || activeSurveysModified_3 || forceSave {
             self.emit_survey_updates_save_study_data()
         }
@@ -579,7 +544,7 @@ class StudyManager {
     func heartbeat_on_dispatch_queue() {
         print("Scheduling dispatchqueue heartbeat...")
         HEARTBEAT_QUEUE.asyncAfter(deadline: .now() + Constants.HEARTBEAT_INTERVAL, execute: {
-            print("running heartbeat on dispatch queue \(Date())")
+            printTimer("running heartbeat on dispatch queue \(Date())")
             self.heartbeat("DispatchQueue \(Constants.HEARTBEAT_INTERVAL) secondly - \(Ephemerals.background_task_count)")
             self.heartbeat_on_dispatch_queue()
         })

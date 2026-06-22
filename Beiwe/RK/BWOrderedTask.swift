@@ -1,3 +1,4 @@
+// identical except for superclass to BWNavigatableTask
 class BWOrderedTask: ORKOrderedTask {
     override func step(after step: ORKStep?, with result: ORKTaskResult) -> ORKStep? {
         // log.info("stepAfterStep for \(step?.identifier)")

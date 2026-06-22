@@ -155,6 +155,9 @@ class ApiManager {
             // neither of these can fail
             parameters["notification_uuids"] = easyJSON(study.surveyPushNotificationUUIDs)
             parameters["active_survey_ids"] = easyJSON(StudyManager.sharedInstance.getActuallyActiveSurveyIds())
+            
+            device_status_report["total_tracking_surveys_submitted_count"] = "\(study.submittedTrackingSurveys)"
+            device_status_report["total_audio_surveys_submitted_count"] = "\(study.submittedAudioSurveys)"
         }
         
         // object cannot fail to be serialized, data types are valid....

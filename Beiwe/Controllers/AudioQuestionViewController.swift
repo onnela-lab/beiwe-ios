@@ -268,6 +268,8 @@ class AudioQuestionViewController: UIViewController, AVAudioRecorderDelegate, AV
             self.activeSurvey.isComplete = true
             StudyManager.sharedInstance.updateActiveSurveys(true)
             HUD.flash(.success, delay: 0.5)
+            StudyManager.sharedInstance.currentStudy?.submittedAudioSurveys =
+                (StudyManager.sharedInstance.currentStudy?.submittedAudioSurveys ?? 0) + 1
             self.cleanupAndDismiss()
         } catch {
             // IDE should say that this is unreachable.

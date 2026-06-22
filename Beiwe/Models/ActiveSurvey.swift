@@ -33,7 +33,7 @@ class ActiveSurvey: Mappable {
         self.isComplete <- map["is_complete"]
         self.survey <- map["survey"]
         self.received <- map["received"]
-        self.rkAnswers <- (map["rk_answers"], transformNSData)
+        self.rkAnswers <- (map["rk_answers"], transformNSData)  // this is survey restoration data
         self.bwAnswers <- map["bk_answers"]
         self.stepOrder <- map["stepOrder"]
         
