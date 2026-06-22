@@ -1,33 +1,33 @@
 import Foundation
 
 /**
- This file was an unholy mess of absolute crap. It implemented 3 classes, had a dictionary lookup mapped to a set of unreadable
- closures that depended on two of those classes. The original dev clearly gave up and worked out a clever hack to reusing his
- code by wrapping everything in an extra "and" evaluation instead of making a clear entry point.
+ This file was an unholy mess of absolute crap. It implemented 3 classes, had a dictionary lookup
+ mapped to a set of unreadable closures that depended on two of those classes. The original dev
+ clearly gave up and worked out a clever hack to reusing his code by wrapping everything in an extra
+ "and" evaluation instead of making a clear entry point.
  
  Oh and the closure dict was dynamically generated at runtime. ...
  
  This code runs whenever:
- - the initial survey card pops up
- - an answer to any question is updated
- - an answer to any question is cleared
- - the next, cancel, or skip buttons are pressed. Everything but submit.
+ - the initial survey card pops up (init)
+ - an answer to any question is updated or cleared
+ - the next, cancel, or skip buttons are pressed.
  - and SOMETIMES IT JUST RUNS IN THE BACKGROUND FOR NO REASON (this is a bug, at time of documenting I don't know where or why)
- 
+
  When this code runs it runs for ALL QUESTIONS IN THE CURRENT SURVEY.
- Unless you are Very VERY thorough and careful you cannot read print statements in this file, because they will be
- clogged up with hundres of other print statements from logic running for all your other questions.
- 
  SO.
  DO. NOT. try to condense this file.
- DO. NOT. litter the code with typing casts that aren't tested and use fatalError with a Very clear error message.
- DO. NOT. commit unnecessary print statements, the ones here are probably sufficient.
+ INDENT print statements in this file in order to distinguish them.
+ DISABLE the print logic flag below after you are done debugging.
  
- And finally.
-                                                  TEST YOUR CODE.
- 
- -Eli
  */
+
+let printQuestionLogic_enabled = false
+public func printQuestionLogic(_ items: Any..., separator: String = " ", terminator: String = "\n") {
+    if printQuestionLogic_enabled {
+        print(items, separator: separator, terminator: terminator)
+    }
+}
 
 
 /// Skip logic
@@ -45,14 +45,17 @@ class BWSkipStepNavigationRule: ORKSkipStepNavigationRule {
     convenience init(displayIf: [String: AnyObject]?) {
         self.init(coder: NSCoder())
         self.displayIf = displayIf ?? [:]
-    }
+        printQuestionLogic("\tconvenience init called, \tdisplayIf: \(self.displayIf)")
+    }	
     
     override func stepShouldSkip(with taskResult: ORKTaskResult) -> Bool {
-        // print("stepShouldSkip time!")
+        printQuestionLogic("\tstepShouldSkip time!")
         // if there is no skip logic then the question should not be skipped
         
+        // printQuestionLogic("\tstepShouldSkip: taskResult: \(taskResult), displayIf: \(self.displayIf)")
+        
         if self.displayIf.isEmpty {
-            // print("\nQUESTION WITHOUT SKIP LOGIC\n")
+            // printQuestionLogic("\t\nQUESTION WITHOUT SKIP LOGIC\n")
             return false
         }
         
@@ -61,12 +64,18 @@ class BWSkipStepNavigationRule: ORKSkipStepNavigationRule {
         }
         
         // evaluate - the logic returns true if there is a match, which means we need to invert the output of the logic, lol...
-        return !self.evaluateSingleLogicPair(self.displayIf.keys.first!, self.displayIf.values.first!, taskResult)
+        let x = !self.evaluateSingleLogicPair(self.displayIf.keys.first!, self.displayIf.values.first!, taskResult)
+        printQuestionLogic("stepShouldSkip - returning `\(x)`")
+        return x
     }
     
     /// The negation code is very verbose for the error messages, it gets its own function.
     func dispatch_negation(_ payload: AnyObject, _ taskResult: ORKTaskResult) -> Bool {
-        // for these operators the payload will be a list of other logic pairs, assert that the class is as expected
+        
+        printQuestionLogic("\tdispatch_negation: payload: \(payload), taskResult: \(taskResult)")
+        
+        // for these operators the payload will be a list of other logic pairs, assert that the
+        // class is as expected
         guard let payload_dict = payload as? NSDictionary else {
             fatalError("Encountered invalid type of payload dict: \(payload.classForCoder)")
         }
@@ -89,6 +98,9 @@ class BWSkipStepNavigationRule: ORKSkipStepNavigationRule {
     
     /// `and` and `or` are very fiddly due to error messages, they get their own function.
     func dispatch_and_or(_ operation: String, _ payload: AnyObject, _ taskResult: ORKTaskResult) -> Bool {
+        
+        printQuestionLogic("\tdispatch_and_or - operation: `\(operation)`")
+        
         // its an array of any number of NSDictionaries
         guard let payload_list = payload as? NSArray else {
             fatalError("Encountered invalid type of payload dict: \(payload.classForCoder), \(payload)")
@@ -108,7 +120,8 @@ class BWSkipStepNavigationRule: ORKSkipStepNavigationRule {
             }
         }
         
-        // 'and' and 'or' should work fine on any size payload_list - and the NSDictionary cast has already been tested above so we don't need to catch it.
+        // 'and' and 'or' should work fine on any size payload_list - and the NSDictionary cast has
+        // already been tested above so we don't need to catch it.
         if operation == "or" {
             for dict in payload_list {
                 if let dict = dict as? NSDictionary {
@@ -137,10 +150,7 @@ class BWSkipStepNavigationRule: ORKSkipStepNavigationRule {
     
     /// consumes
     func evaluateSingleLogicPair(_ operation: String, _ payload: AnyObject, _ taskResult: ORKTaskResult) -> Bool {
-        // print("evaluateSingleLogicPair start - operation: \(operation), type of payload: \(payload.classForCoder)")
-        // defer {
-        //     print("\t evaluateSingleLogicPair end")
-        // }
+        printQuestionLogic("\tevaluateSingleLogicPair start - operation: `\(operation)`")
         
         if operation == "not" {
             return dispatch_negation(payload, taskResult)
@@ -172,28 +182,29 @@ class BWSkipStepNavigationRule: ORKSkipStepNavigationRule {
         fatalError("Encountered invalid operation: \(operation)")
     }
     
-    /// extracts the answer value to a given question result, indicates via a string the type of logical evaluation required.
+    /// extracts the answer value to a given question result, indicates via a string the type of
+    /// logical evaluation required.
     func extractAnswer(_ stepResult: ORKStepResult) -> ([NSNumber], String) {
         // there were no answers to the question, numerical type is irrelevant
         guard let results = stepResult.results else {
-            // print("no results, returning empty - \(stepResult.results)")
+            // printQuestionLogic("\tno results, returning empty - \(stepResult.results)")
             return ([NSNumber](), self.DOUBLE)
         }
         
         if results.count == 0 {
-            // print("\t results count is 0?")
+            // printQuestionLogic("\t\t results count is 0?")
             return ([NSNumber](), self.DOUBLE)
         }
         
         // I think results[0] is sufficient because we only ever have single answers to questions.
         switch results[0] {
         case let choiceResult as ORKChoiceQuestionResult:
-            // print("case - choiceResult")
+            // printQuestionLogic("\tcase - choiceResult")
             // choice (radio button and checkbox) questions
             return self.do_choice_stuff(choiceResult)
             
         case let questionResult as ORKQuestionResult:
-            // print("case - questionResult")
+            // printQuestionLogic("\tcase - questionResult")
             // numerical open response questions can provide floating-point answers, so need doubles
             if let answer = questionResult.answer {
                 // this magically converts only valid numerical strings - apparently
@@ -207,7 +218,7 @@ class BWSkipStepNavigationRule: ORKSkipStepNavigationRule {
             return ([NSNumber](), self.DOUBLE)
             
         case let scaleResult as ORKScaleQuestionResult:
-            // print("case - scaleResult")
+            // printQuestionLogic("\tcase - scaleResult")
             // don't know what uses this.....
             if let answer: NSNumber = scaleResult.scaleAnswer {
                 return ([answer], self.INT)
@@ -223,11 +234,12 @@ class BWSkipStepNavigationRule: ORKSkipStepNavigationRule {
     
     /// choice question logic (radio buttons and checkboxes) operates on the selected answer number, rather
     /// than the value of the answer itself. They are slightly more cumbersome so have their own function.
-    /// Choice question answers should be interpreted as ints.
+    /// Choice question answers should be interpreted as ints.  return is like ([1,2], "int")
+    /// These are indices, they are zero indexed
     func do_choice_stuff(_ choiceResult: ORKChoiceQuestionResult) -> ([NSNumber], String) {
-        // print("do_choice_stuff")
+        // printQuestionLogic("\t=== do_choice_stuff ===")
         guard let choiceAnswers = choiceResult.choiceAnswers else {
-            return ([NSNumber](), self.INT)
+            return ([NSNumber](), self.INT)  // ([], "int")
         }
         
         var selected_answers = [NSNumber]()
@@ -236,20 +248,30 @@ class BWSkipStepNavigationRule: ORKSkipStepNavigationRule {
                 selected_answers.append(num)
             }
         }
-        // print("selected_answers:", selected_answers)
-        return (selected_answers, self.INT)
+        printQuestionLogic("\tdo_choice_stuff - selected_answers:", selected_answers)
+        
+        let x = (selected_answers, self.INT)
+        printQuestionLogic("\tdo_choice_stuff - final return: \(x)")
+        return x
     }
     
-    /// takes a numerical operation, a target question, and a comparitor (and the blob of data to extract the question's answer from),
-    /// extracts everything correctly, dispatches the correct comparitor.
+    /// takes a numerical operation, a target question, and a comparitor (and the blob of data to
+    /// extract the question's answer from), it extracts everything, dispatches the correct
+    /// comparitor, and returns a boolean of the comparison result.  If it cannot find the target
+    /// question's answer, it returns false.
     func numeric_logic(_ operation: String, _ target: String, _ compare_me: NSNumber, _ taskResult: ORKTaskResult) -> Bool {
+        
         let answer_numbers: [NSNumber]
         let comparison_primitive_type: String
         // if it isn't any of the operators try it as the question id
         if let targetAnswer: ORKStepResult = taskResult.stepResult(forStepIdentifier: target) {
             (answer_numbers, comparison_primitive_type) = self.extractAnswer(targetAnswer)
+            printQuestionLogic("\tnumeric logic - extracted answer for `\(target)`: `\(answer_numbers)`")
         } else {
-            return true // um, it wasn't anything and we default to should display?
+            printQuestionLogic("\tnumeric logic - couldn't find a step result for `\(target)`, returning false")
+            // When there was no answer at all it means it is an unanswered question. The question
+            // is unanswered, it cannot satisfy any numeric condition.
+            return false // bug - this was set to return true - must be false.
         }
         
         if comparison_primitive_type == self.DOUBLE {
@@ -270,20 +292,45 @@ class BWSkipStepNavigationRule: ORKSkipStepNavigationRule {
         for num in numbers {
             answer_numbers.append(num.doubleValue)
         }
-        // print("double - operator: \(operation), compare value: \(compare_me), answer values: \(answer_numbers)")
+        printQuestionLogic("\tdouble - operator: \(operation), compare value: \(compare_me), answer values: \(answer_numbers)")
         
         if operation == "==" {
-            for num in answer_numbers { if num == compare_me { return true } }
+            for num in answer_numbers {
+                if num == compare_me {
+                    printQuestionLogic("\tdouble `\(num)` == `\(compare_me)` returned true")
+                    return true
+                }
+            }
         } else if operation == "<" {
-            for num in answer_numbers { if num < compare_me { return true } }
+            for num in answer_numbers {
+                if num < compare_me {
+                    printQuestionLogic("\tdouble `\(num)` < `\(compare_me)` returned true")
+                    return true
+                }
+            }
         } else if operation == "<=" {
-            for num in answer_numbers { if num <= compare_me { return true } }
+            for num in answer_numbers {
+                if num <= compare_me {
+                    printQuestionLogic("\tdouble `\(num)` <= `\(compare_me)` returned true")
+                    return true
+                }
+            }
         } else if operation == ">" {
-            for num in answer_numbers { if num > compare_me { return true } }
+            for num in answer_numbers {
+                if num > compare_me {
+                    printQuestionLogic("\tdouble `\(num)` > `\(compare_me)` returned true")
+                    return true
+                }
+            }
         } else if operation == ">=" {
-            for num in answer_numbers { if num >= compare_me { return true } }
+            for num in answer_numbers {
+                if num >= compare_me {
+                    printQuestionLogic("\tdouble `\(num)` >= `\(compare_me)` returned true")
+                    return true
+                }
+            }
         }
-        // print("\t nope")
+        printQuestionLogic("\tdouble returned false")
         return false
     }
     
@@ -293,20 +340,50 @@ class BWSkipStepNavigationRule: ORKSkipStepNavigationRule {
         for num in numbers {
             answer_numbers.append(num.intValue)
         }
-        // print("int - operator: \(operation), compare value: \(compare_me), answer values: \(answer_numbers)")
+        printQuestionLogic("\tint - operator: \(operation), compare value: \(compare_me), answer values: \(answer_numbers)")
         
         if operation == "==" {
-            for num in answer_numbers { if num == compare_me { return true } }
+            for num in answer_numbers {
+                printQuestionLogic("\tif \(num) == \(compare_me)")
+                if num == compare_me {
+                    printQuestionLogic("\tint compare return true")
+                    return true
+                }
+            }
         } else if operation == "<" {
-            for num in answer_numbers { if num < compare_me { return true } }
+            for num in answer_numbers {
+                printQuestionLogic("\tif \(num) < \(compare_me)")
+                if num < compare_me {
+                    printQuestionLogic("\tint compare return true")
+                    return true
+                }
+            }
         } else if operation == "<=" {
-            for num in answer_numbers { if num <= compare_me { return true } }
+            for num in answer_numbers {
+                printQuestionLogic("\tif \(num) <= \(compare_me)")
+                if num <= compare_me {
+                    printQuestionLogic("\tint compare return true")
+                    return true
+                }
+            }
         } else if operation == ">" {
-            for num in answer_numbers { if num > compare_me { return true } }
+            for num in answer_numbers {
+                printQuestionLogic("\tif \(num) > \(compare_me)")
+                if num > compare_me {
+                    printQuestionLogic("\tint compare return true")
+                    return true
+                }
+            }
         } else if operation == ">=" {
-            for num in answer_numbers { if num >= compare_me { return true } }
+            for num in answer_numbers {
+                printQuestionLogic("\tif \(num) >= \(compare_me)")
+                if num >= compare_me {
+                    printQuestionLogic("\tint compare return true")
+                    return true
+                }
+            }
         }
-        // print("\t nope")
+        printQuestionLogic("\tint compare return false")
         return false
     }
 }

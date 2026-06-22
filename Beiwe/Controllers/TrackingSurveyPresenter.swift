@@ -57,7 +57,6 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
         
         // timings file
         let timingsName = TrackingSurveyPresenter.timingDataType + "_" + surveyId
-        print("creating new survey timings file with name \(timingsName)")
         self.surveyTimingsFile = DataStorageManager.sharedInstance.createStore(
             timingsName, headers: TrackingSurveyPresenter.timingsHeaders
         )
@@ -465,12 +464,12 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
     }
     
     func dismissCurrentQuestion() {
-        print("dismissCurrentQuestion")
+        // print("dismissCurrentQuestion")
         self.valueChangeHandler?.flush() // force the debouncer to fire and clear it
         self.valueChangeHandler = nil
         
         if let currentQuestion = currentQuestion {
-            print("dismissCurrentQuestion -- it dismissed the current question for realz")
+            // print("dismissCurrentQuestion -- inner dismissed current question")
             // write a timings event that question has been dismissed?
             self.addTimingsEvent("dismissing question", question: currentQuestion)
             self.currentQuestion = nil
@@ -497,12 +496,12 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
     func handleRequiredQuestion(_ stepViewController: ORKStepViewController, _ identifier: String) -> Bool {
         // the isEnabled and isHidden properties for the continue and skip buttons are both os version blocked
         // (16 and 15, respectively) .... and isenabled doesn't do anything?
-        print("handleRequiredQuestion...")
+        
         if identifier != "finished", let question = questionIdToQuestion[identifier] {
-            print("...question id \(identifier)")
+            // print("handleRequiredQuestion... question id \(identifier)")
             // InformationText questions cannot be required and do not have skip buttons.
             if question.required && question.questionType != SurveyQuestionType.InformationText {
-                print("...questiontype is required")
+                // print("handleRequiredQuestion... required")
                 // TODO: fix this bug, maybe it is specific to [radio buttons?]
                 // setting the step as optional Doesn't work reliably. At least for the first question, if it is a radio button question,
                 // the next button will be clickable all subsequent times after the first time it is answered. (this is at least true for
@@ -516,33 +515,27 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
 
                 // stash the continue buttons - these are always present together - these are different objects per-question
                 if let a_continue_button = stepViewController.continueButtonItem {
-                    print("... found a continue button...")
                     self.the_continue_button = a_continue_button
-                }else{
-                    print("... did not find a continue button...")
                 }
                 if let an_internal_continue_button = stepViewController.internalContinueButtonItem {
-                    print("... found an internal continue button...")
                     self.the_internal_continue_button = an_internal_continue_button
-                }else{
-                    print("... did not find an internal continue button...")
                 }
                 
                 // Determiine whether there is an answer to the current questiion.
                 // (Testing for the empty string should be pointless due to behaviior in storeAnswer())
                 if let some_answer = self.activeSurvey.bwAnswers[identifier], some_answer != "", some_answer != NO_ANSWER_SELECTED {
-                    print("... found an answer to the question, it is `\(some_answer)`...")
+                    // print("handleRequiredQuestion...required... found an answer to the question, it is `\(some_answer)`...")
                     stepViewController.continueButtonItem = self.the_continue_button
                     stepViewController.internalContinueButtonItem = self.the_internal_continue_button
                     return true
                 } else {
-                    print("... did not find an answer to the question...")
+                    // print("handleRequiredQuestion... required...did not find an answer to the question...")
                     stepViewController.continueButtonItem = nil
                     stepViewController.internalContinueButtonItem = nil
                     return false
                 }
-            }else{
-                print("question is not required")
+            } else {
+                // print("handleRequiredQuestion, not required")
             }
             
         }
@@ -605,21 +598,21 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
      - NOT called when skip is pressed.
      */
     func taskViewController(_ taskViewController: ORKTaskViewController, didChange result: ORKTaskResult) {
-        print("\ntaskViewController RESULT CHANGED - Q id: `\(taskViewController.currentStepViewController?.step?.identifier)`\n")
+        // print("\ntaskViewController RESULT CHANGED - Q id: `\(taskViewController.currentStepViewController?.step?.identifier)`\n")
         // print("taskViewController.currentStepViewController?.step: `\(taskViewController.currentStepViewController?.step)`")
         // print("\(result)\n(result.results)")
         
         // update the answer data for this question, if there is a question
         if let identifier = taskViewController.currentStepViewController!.step?.identifier {
             self.storeAnswer(identifier, result: result)
-            let currentValue = self.activeSurvey.bwAnswers[identifier]
-            print("before valuechange call")
+            let currentValue = self.activeSurvey.bwAnswers[identifier] // (type is now a str)
+            // print("result changed, value is now `\(currentValue)`")
+            
             self.valueChangeHandler?.call(currentValue)  // debounce
-            print("after valuechange call")
+            // print("finished valuechange call...")
             
             // must to be called after the question answer has been updated
             self.handleRequiredQuestion(taskViewController.currentStepViewController!, identifier)
-            print("after handleRequiredQuestion call")
         }
     }
     
@@ -709,7 +702,7 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
             default:
                 // load the question
                 if let question = questionIdToQuestion[identifier] {
-                    print("loading next question, with identifier \(identifier)")
+                    // print("loading next question, with identifier \(identifier)")
                     self.currentQuestion = question
                     if self.activeSurvey.bwAnswers[identifier] == nil {
                         self.activeSurvey.bwAnswers[identifier] = ""
@@ -736,7 +729,7 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
                 
                 // if this is the final question set the button text correctly.
                 if let finalQuestionId = self.finalQuestionId, finalQuestionId == identifier {
-                    print("setting end survey text")
+                    // print("setting end survey text")
                     stepViewController.continueButtonTitle = NSLocalizedString("submit_survey_title", comment: "")
                 }
             }
