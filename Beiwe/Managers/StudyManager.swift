@@ -571,7 +571,7 @@ class StudyManager {
         guard let study = currentStudy else {
             return
         }
-        var sentTime: TimeInterval = sentTime ?? 0
+        let sentTime: TimeInterval = sentTime ?? 0
         printTimer("checkForNewSurveys")
                
         ApiManager.sharedInstance.makePostRequest(
