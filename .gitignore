@@ -10,3 +10,7 @@ Private/*
 GoogleService-Info.plist
 
 .sentryclirc
+.vscode/
+.python-version
+
+build
