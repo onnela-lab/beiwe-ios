@@ -28,7 +28,8 @@ class MagnetometerManager: DataServiceProtocol {
     let queue = OperationQueue()
     let cacheLock = NSLock()
     
-    // the offset
+    // the offset - required for timestamp calculations
+    // this has to be updated periodically as the program runs, otherwise it drifts
     var offset_since_1970: Double = 0
 
     init() {
@@ -51,6 +52,9 @@ class MagnetometerManager: DataServiceProtocol {
     
     /// protocol function
     func startCollecting() {
+        // This value drifts based on device sleep, reset it at the start of every recording cycle.
+        self.offset_since_1970 = Date().timeIntervalSince1970 - ProcessInfo.processInfo.systemUptime
+        
         // print("Turning \(self.storeType) collection on")
         // this closure is the function that records data
         self.motionManager.startMagnetometerUpdates(to: self.queue) { (magData: CMMagnetometerData?, _: Error?) in

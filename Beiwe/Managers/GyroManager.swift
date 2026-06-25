@@ -30,6 +30,7 @@ class GyroManager: DataServiceProtocol {
     let queue = OperationQueue()
     
     // we need an offset for time calculations
+    // this has to be updated periodically as the program runs, otherwise it drifts
     var offset_since_1970: Double = 0
 
     init () {
@@ -54,6 +55,9 @@ class GyroManager: DataServiceProtocol {
 
     /// protocol instruction - sets the delegate(?) function
     func startCollecting() {
+        // This value drifts based on device sleep, reset it at the start of every recording cycle.
+        self.offset_since_1970 = Date().timeIntervalSince1970 - ProcessInfo.processInfo.systemUptime
+        
         // print("Turning \(self.storeType) collection on")
         // print("gyroUpdateInterval: \(motionManager.gyroUpdateInterval)")
         // set the closure as the delegate function

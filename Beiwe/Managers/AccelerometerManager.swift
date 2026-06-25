@@ -25,6 +25,7 @@ class AccelerometerManager: DataServiceProtocol {
     var datapoints = [AccelerometerDataPoint]()
     
     // we need an offset for timestamp calculations, that's just how it works.
+    // this has to be updated periodically as the program runs, otherwise it drifts
     var offset_since_1970: Double = 0
     
     // accelerometer's callback has a non-optional queue, we want exactly one queue.
@@ -52,9 +53,11 @@ class AccelerometerManager: DataServiceProtocol {
 
     /// protocol function
     func startCollecting() {
+        // This value drifts based on device sleep, reset it at the start of every recording cycle.
+        self.offset_since_1970 = Date().timeIntervalSince1970 - ProcessInfo.processInfo.systemUptime
+        
         // print("Turning \(self.storeType) collection on")
         // print("accelerometerUpdateInterval: \(motionManager.accelerometerUpdateInterval)")
-        
         // set the closure function as the delegate for updates
         self.motionManager.startAccelerometerUpdates(to: self.queue) { (accelData: CMAccelerometerData?, _: Error?) in
             if let accelData = accelData {

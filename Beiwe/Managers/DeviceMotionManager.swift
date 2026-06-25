@@ -54,6 +54,7 @@ class DeviceMotionManager: DataServiceProtocol {
     let queue = OperationQueue()
     
     // we need an offset timestamp for timecode calculations
+    // this has to be updated periodically as the program runs, otherwise it drifts
     var offset_since_1970: Double = 0
     
     init() {
@@ -75,6 +76,9 @@ class DeviceMotionManager: DataServiceProtocol {
     
     /// protocol function
     func startCollecting() {
+        // This value drifts based on device sleep, reset it at the start of every recording cycle.
+        self.offset_since_1970 = Date().timeIntervalSince1970 - ProcessInfo.processInfo.systemUptime
+        
         // print("Turning \(self.storeType) collection on")
         
         self.motionManager.startDeviceMotionUpdates(using: CMAttitudeReferenceFrame.xArbitraryZVertical, to: self.queue) {
