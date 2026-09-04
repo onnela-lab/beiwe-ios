@@ -170,13 +170,13 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
             if let textFieldType = question.textFieldType {
                 switch textFieldType {
                 case .SingleLine:
-                    let multiline_text = ORKTextAnswerFormat.textAnswerFormat()
-                    multiline_text.multipleLines = false
-                    questionStep.answerFormat = multiline_text
-                case .MultiLine:
                     let singleline_text = ORKTextAnswerFormat.textAnswerFormat()
-                    singleline_text.multipleLines = true
+                    singleline_text.multipleLines = false
                     questionStep.answerFormat = singleline_text
+                case .MultiLine:
+                    let multiline_text = ORKTextAnswerFormat.textAnswerFormat()
+                    multiline_text.multipleLines = true
+                    questionStep.answerFormat = multiline_text
                 case .Numeric:
                     questionStep.answerFormat = ORKNumericAnswerFormat(
                         // numeric answers have min and max ranges, "unit" is a localizeable field for like miles vs kilometers.
