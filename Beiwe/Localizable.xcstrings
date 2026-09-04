@@ -480,6 +480,7 @@
       }
     },
     "check_for_surveys_button" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2731,6 +2732,7 @@
       }
     },
     "unregister_alert_text" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2799,6 +2801,7 @@
       }
     },
     "unregister_button" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2834,6 +2837,7 @@
     },
     "upload_data_button" : {
       "comment" : "Main view controller",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
