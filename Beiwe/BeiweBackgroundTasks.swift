@@ -12,6 +12,7 @@ import Sentry
 /// - Timer - dispatch queue is 43 times more frequent
 /// - bgprocessing task - dispatch queue is 87 times more frequent
 /// - bgapprefresh task - dispatch queue is 107 times more frequent
+/// Over time this drifted towards 50x cumulative based on data sourced from production
 
 func scheduleRefreshHeartbeat() {
     // print("scheduling refresh heartbeat")
@@ -99,7 +100,7 @@ func updateBackgroundTasksCount() {
             }
         }
         Ephemerals.background_task_count = info.joined(separator: ",")
-        print(Ephemerals.background_task_count) // debug print
+        // print(Ephemerals.background_task_count)
     }
 }
 
@@ -107,20 +108,20 @@ func updateBackgroundTasksCount() {
 
 func handleHeartbeatRefresh(task: BGAppRefreshTask) {
     // print("BGAppRefreshTask - the handler is getting called \(dateFormatLocal(Date()))")
-    StudyManager.sharedInstance.heartbeat("BGAppRefreshTask - \(Ephemerals.background_task_count)")
+    StudyManager.sharedInstance.heartbeat("BGAppRefreshTask")
     scheduleRefreshHeartbeat()
 }
 
 func handleHeartbeatProcessing(task: BGProcessingTask) {
     // print("BGProcessingTask - the handler is getting called \(dateFormatLocal(Date()))")
-    StudyManager.sharedInstance.heartbeat("BGProcessingTask - \(Ephemerals.background_task_count)")
+    StudyManager.sharedInstance.heartbeat("BGProcessingTask")
     scheduleProcessingHeartbeat()
 }
 
 @available(iOS 17.0, *)
 func handleHeartbeatHealth(task: BGHealthResearchTask) {
     // print("BGHealthResearchTask - the handler is getting called \(dateFormatLocal(Date()))")
-    StudyManager.sharedInstance.heartbeat("BGHealthResearchTask - \(Ephemerals.background_task_count)")
+    StudyManager.sharedInstance.heartbeat("BGHealthResearchTask")
     scheduleHealthHeartbeat()
 }
 

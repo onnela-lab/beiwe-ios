@@ -542,20 +542,30 @@ class StudyManager {
     }
     
     func heartbeat_on_dispatch_queue() {
-        print("Scheduling dispatchqueue heartbeat...")
+        // print("Scheduling dispatchqueue heartbeat...")
         HEARTBEAT_QUEUE.asyncAfter(deadline: .now() + Constants.HEARTBEAT_INTERVAL, execute: {
             printTimer("running heartbeat on dispatch queue \(Date())")
-            self.heartbeat("DispatchQueue \(Constants.HEARTBEAT_INTERVAL) secondly - \(Ephemerals.background_task_count)")
+            self.heartbeat("DispatchQueue")
             self.heartbeat_on_dispatch_queue()
         })
     }
     
-    /// dispatches the heartbeat signal to the server
+    /// dispatches and rate limits the heartbeat message to the server
     func heartbeat(_ message: String) {
-        print("Sending heartbeat...")
+        let seconds_since_prior = Date().timeIntervalSince1970 - Ephemerals.lastHeartbeat
+        // print("heartbeat - seconds since prior heartbeat: \(seconds_since_prior)")
+        
+        // we allow 1 second of earliness to account for the case of us being at 299.999 seconds
+        // which would otherwise result in 1 2*HEARTBEAT_INTERVAL periodicity.
+        if seconds_since_prior < (Constants.HEARTBEAT_INTERVAL - 1) {
+            return
+        }
+        
+        // update the timer and send
+        Ephemerals.lastHeartbeat = Date().timeIntervalSince1970
         ApiManager.sharedInstance.extremelySimplePostRequest(
             "/mobile-heartbeat/",
-            extra_parameters: ["message": "(" + message + ")"]
+            extra_parameters: ["message": message]
         )
     }
     

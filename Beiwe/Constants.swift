@@ -79,4 +79,9 @@ struct Ephemerals {
     static var lastApplicationDidEnterBackground = Constants.DEFAULT_UNPOPULATED_APPINFO
     static var lastApplicationDidReceiveMemoryWarning = Constants.DEFAULT_UNPOPULATED_APPINFO
     static var lastSuccessfulLogin = Constants.DEFAULT_UNPOPULATED_APPINFO
+    
+    static var lastHeartbeat = 0.0
 }
+
+
+
