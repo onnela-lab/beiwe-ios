@@ -72,7 +72,12 @@ class Study: ReclineObject {
         self.lastBackgroundPushNotificationReceived <- map["lastBackgroundPushNotificationReceived"]
         self.lastForegroundPushNotificationReceived <- map["lastForegroundPushNotificationReceived"]
         self.lastApplicationWillTerminate <- map["lastApplicationWillTerminate"]
-        self.surveyPushNotificationUUIDs <- map["lastApplicationWillTerminate"]
+        // Before 2.5.7 this line used the "lastApplicationWillTerminate" key (copy-paste bug). Being the last
+        // writer, the uuid list won the key on save, so lastApplicationWillTerminate always read back as
+        // never_populated, and the uuid list was silently correct. With the key fixed, the list starts over
+        // empty on the first launch after upgrade; that is fine, the backend already has every uuid the app
+        // reported (SurveyNotificationReport is create-or-ignore and only needs to see each uuid once).
+        self.surveyPushNotificationUUIDs <- map["surveyPushNotificationUUIDs"]
     }
 
     func surveyExists(surveyId: String?) -> Bool {
