@@ -375,6 +375,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
 
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+        // NOTE: this is best-effort. iOS only calls applicationWillTerminate when the app is in the
+        // foreground (or is a suspended app being cleanly terminated); a force-quit from the app switcher
+        // while suspended, a jetsam kill, a crash, or a device shutdown will NOT hit this function, so
+        // the "terminate" app log event below (and lastApplicationWillTerminate) are not a reliable
+        // record of every app death. Use the launch event of the next session to detect those cases.
         print("applicationWillTerminate")
         if let study = self.currentStudy {
             study.lastApplicationWillTerminate = self.currentTimestamp
