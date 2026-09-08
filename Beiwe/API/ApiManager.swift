@@ -94,14 +94,7 @@ class ApiManager {
         // Location services configuration
         device_status_report["location_services_enabled"] = Ephemerals.locationServicesEnabledDescription
         device_status_report["location_significant_change_monitoring_enabled"] = Ephemerals.significantLocationChangeMonitoringAvailable
-        device_status_report["location_permission"] = switch CLLocationManager.authorizationStatus() {
-        case .notDetermined: "not_determined"
-        case .restricted: "restricted"
-        case .denied: "denied"
-        case .authorizedAlways: "authorized_always"
-        case .authorizedWhenInUse: "authorized_when_in_use"
-        @unknown default: "unknown: '\(CLLocationManager.authorizationStatus().rawValue)'"
-        }
+        device_status_report["location_permission"] = locationPermissionDescription()
         
         // Ephemerals are items that for one reason or another are stored on and not perisistent.
         

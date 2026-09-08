@@ -1,3 +1,4 @@
+import CoreLocation
 import Sentry
 import XCGLogger
 
@@ -148,6 +149,19 @@ func smartformat(_ unix_timestamp: TimeInterval) -> String {
 
 func timestampString() -> String {
     return dateFormat(Date())
+}
+
+/// the current location permission as a string, can be one of not_determined, restricted, denied,
+/// authorized_always, or authorized_when_in_use. (used in the device status report and the app log)
+func locationPermissionDescription() -> String {
+    return switch CLLocationManager.authorizationStatus() {
+    case .notDetermined: "not_determined"
+    case .restricted: "restricted"
+    case .denied: "denied"
+    case .authorizedAlways: "authorized_always"
+    case .authorizedWhenInUse: "authorized_when_in_use"
+    @unknown default: "unknown: '\(CLLocationManager.authorizationStatus().rawValue)'"
+    }
 }
 
 /// converts the iso time string format to a TimeInterval (integer)
