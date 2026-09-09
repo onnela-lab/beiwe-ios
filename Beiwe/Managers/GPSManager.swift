@@ -163,6 +163,13 @@ class GPSManager: NSObject, CLLocationManagerDelegate, DataServiceProtocol {
         AppEventManager.sharedInstance.logAppEvent(event: "gps \"FinishDeferredUpdatesWithError\" error message received", d1: error_message)
     }
     
+    /// Invoked when either the authorizationStatus or accuracyAuthorization properties change (iOS 14+),
+    /// also fires once when the delegate is assigned. Defers to the AppDelegate's permission tracking, which
+    /// writes a permission_changed app log event only when the value actually differs from the last known one.
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        AppDelegate.sharedInstance().updatePermissionStates()
+    }
+    
     /*  locationManager:didFailWithError:
     Invoked when an error has occurred. Error types are defined in "CLError.h". */
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
