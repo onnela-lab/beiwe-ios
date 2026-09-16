@@ -202,9 +202,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     func deviceInfoUpdateLoop() {
         Ephemerals.lastAppStart = self.currentTimestamp
         
-        // This takes an amount of time to run / must be run ~asynchronously
+        // locationServicesEnabledDescription and notification_permission are device info datapoints taht need to be checked on periiodically
+        // because they require async calls to get their values, and we can't wait on them every time we do a network request.
+        Ephemerals.locationServicesEnabledDescription = CLLocationManager.locationServicesEnabled().description
+        Ephemerals.significantLocationChangeMonitoringAvailable = CLLocationManager.significantLocationChangeMonitoringAvailable().description
+        
+        self.updatePermissionStates()
+        
+        // print("UIApplication.shared.backgroundTimeRemaining:", UIApplication.shared.backgroundTimeRemaining)
+        updateBackgroundTasksCount()
+        
+        BACKGROUND_DEVICE_INFO_QUEUE.asyncAfter(deadline: .now() + 60, execute: self.deviceInfoUpdateLoop)
+    }
+    
+    /// Reads the current state of the permissions/settings that data collection depends on (location permission,
+    /// notification permission, Background App Refresh), stores them on Ephemerals (for the device status report),
+    /// and writes a "permission_changed" app log event for any that differ from the last known value.
+    /// Runs once a minute from deviceInfoUpdateLoop, every time the app becomes active, and from the location
+    /// authorization callbacks (location is the only one of these with a native change callback; the other two
+    /// can only be detected by polling, and this app doesn't persist last-known values across launches so the
+    /// first read after every launch establishes the baseline and is not logged as a change).
+    func updatePermissionStates() {
+        // location permission
+        let location_permission = locationPermissionDescription()
+        self.logPermissionChange("location", previous: Ephemerals.location_permission, current: location_permission)
+        Ephemerals.location_permission = location_permission
+        
+        // notification permission - This takes an amount of time to run / must be run ~asynchronously
         UNUserNotificationCenter.current().getNotificationSettings(completionHandler: { settings in
-            Ephemerals.notification_permission = switch settings.authorizationStatus {
+            let notification_permission = switch settings.authorizationStatus {
             case .notDetermined: "not_determined"
             case .denied: "denied"
             case .authorized: "authorized"
@@ -212,26 +238,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
             case .ephemeral: "ephemeral"
             @unknown default: "unknown: '\(settings.authorizationStatus.rawValue)'"
             }
+            self.logPermissionChange("notification", previous: Ephemerals.notification_permission, current: notification_permission)
+            Ephemerals.notification_permission = notification_permission
         })
-
-        // locationServicesEnabledDescription and notification_permission are device info datapoints taht need to be checked on periiodically
-        // because they require async calls to get their values, and we can't wait on them every time we do a network request.
-        Ephemerals.locationServicesEnabledDescription = CLLocationManager.locationServicesEnabled().description
-        Ephemerals.significantLocationChangeMonitoringAvailable = CLLocationManager.significantLocationChangeMonitoringAvailable().description
         
         // backgroundRefreshStatus needs to be run on the main thread, but we can do this asynchronously somehow? and that's better? hunh?
         DispatchQueue.main.async {
-            Ephemerals.backgroundRefreshStatus = switch UIApplication.shared.backgroundRefreshStatus {
+            let backgroundRefreshStatus = switch UIApplication.shared.backgroundRefreshStatus {
             case .available: "available"
             case .denied: "denied"
             case .restricted: "restricted"
             @unknown default: "unknown: '\(UIApplication.shared.backgroundRefreshStatus.rawValue)'"
             }
+            self.logPermissionChange("background_app_refresh", previous: Ephemerals.backgroundRefreshStatus, current: backgroundRefreshStatus)
+            Ephemerals.backgroundRefreshStatus = backgroundRefreshStatus
         }
-        // print("UIApplication.shared.backgroundTimeRemaining:", UIApplication.shared.backgroundTimeRemaining)
-        updateBackgroundTasksCount()
-        
-        BACKGROUND_DEVICE_INFO_QUEUE.asyncAfter(deadline: .now() + 60, execute: self.deviceInfoUpdateLoop)
+    }
+    
+    /// Writes a permission_changed event to the app log if a permission's value differs from its last known value.
+    /// The first population after app launch (from the NOT_POPULATED sentinel) is the baseline, not a change.
+    func logPermissionChange(_ name: String, previous: String, current: String) {
+        if previous == current || previous == Ephemerals.NOT_POPULATED {
+            return
+        }
+        print("permission changed - \(name): \(previous) -> \(current)")
+        AppEventManager.sharedInstance.logAppEvent(
+            event: "permission_changed", msg: "\(name): \(previous) -> \(current)", d1: name, d2: previous, d3: current)
     }
     
     /// anything that depends on app state at initialization time needs to go after this has run
@@ -343,6 +375,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
 
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+        // NOTE: this is best-effort. iOS only calls applicationWillTerminate when the app is in the
+        // foreground (or is a suspended app being cleanly terminated); a force-quit from the app switcher
+        // while suspended, a jetsam kill, a crash, or a device shutdown will NOT hit this function, so
+        // the "terminate" app log event below (and lastApplicationWillTerminate) are not a reliable
+        // record of every app death. Use the launch event of the next session to detect those cases.
         print("applicationWillTerminate")
         if let study = self.currentStudy {
             study.lastApplicationWillTerminate = self.currentTimestamp
@@ -375,6 +412,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         print("applicationDidBecomeActive")
         Ephemerals.lastApplicationDidBecomeActive = self.currentTimestamp
         AppEventManager.sharedInstance.logAppEvent(event: "foreground", msg: "Application entered foreground")
+        
+        // the participant may have changed a permission in Settings.app while we were in the background.
+        self.updatePermissionStates()
 
         // Send FCM Token everytime the app launches
         if ApiManager.sharedInstance.patientId != "" /* && FirebaseApp.app() != nil*/ {
@@ -416,7 +456,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     /// this function gets called when CLAuthorization status changes
+    /// (only while this AppDelegate is the delegate of self.locManager, which is set up in ConsentManager,
+    /// the GPSManager has its own CLLocationManager and gets its own copy of this callback.)
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        self.updatePermissionStates() // logs a permission_changed event if it actually changed
         switch status {
         case .notDetermined:
             // If status has not yet been determied, ask for authorization

@@ -64,11 +64,14 @@ let GYRO_CACHE_SIZE = 100
 let MAGNETOMETER_CACHE_SIZE = 100
 
 struct Ephemerals {
+    static let NOT_POPULATED = "not populated, this is an app bug"
+    
     // device info statuses
-    static var notification_permission = "not populated, this is an app bug"
-    static var locationServicesEnabledDescription = "not populated, this is an app bug"
-    static var significantLocationChangeMonitoringAvailable = "not populated, this is an app bug"
-    static var backgroundRefreshStatus = "not populated, this is an app bug"
+    static var notification_permission = NOT_POPULATED
+    static var location_permission = NOT_POPULATED
+    static var locationServicesEnabledDescription = NOT_POPULATED
+    static var significantLocationChangeMonitoringAvailable = NOT_POPULATED
+    static var backgroundRefreshStatus = NOT_POPULATED
     static var transition_count = 0
     static var background_task_count = "(not populated yet?)"
     static var start_last_upload = "not populated"
