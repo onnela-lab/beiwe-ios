@@ -20,7 +20,8 @@ class TimerManager {
     var dataCollectionServices: [DataServiceStatus] = []
     var areServicesRunning = false
     
-    // timer stuff () the app ~only keeps track of the next timer event to occur, and updates it accordingly.  (I don't know why it is spread across 2 variables.)
+    // timer stuff () the app ~only keeps track of the next timer event to occur, and updates it
+    // accordingly.  (I don't know why it is spread across 2 variables.)
     var timer: Timer = Timer()
     var expected_wakeup: Date = Date(timeIntervalSince1970: 0)
     var nextSurveyDisplayUpdate: Date = Date(timeIntervalSince1970: 0)
@@ -50,15 +51,15 @@ class TimerManager {
     
     /// enables the timer
     func start() {
-        // print("TimerManager.start()")
         self.areServicesRunning = true
-        self.startPollTimer(1.5) // this value is purely to differentiate from a +1.0 seconds value for clarity when debugging.
+        // this value is purely to differentiate from a +1.0 seconds value for clarity when debugging.
+        self.startServicesTimer(1.5)
     }
     
     /// stops timers for everything
     func stop_all_services() {
         self.areServicesRunning = false
-        self.clearPollTimer()
+        self.clearServicesTimer()
         // call finishCollecting on every collection service in dataCollectionServices
         for dataStatus in self.dataCollectionServices {
             // print("global timer stop, calling finishCollecting on \(dataStatus.dataService.self)")
@@ -80,8 +81,8 @@ class TimerManager {
         self.dataCollectionServices = []
     }
     
-    /// clear a poll timer safely
-    func clearPollTimer() {
+    /// clear a Services timer safely
+    func clearServicesTimer() {
         self.timer.invalidate()
         self.timer = Timer() // clear out the old timer object, make a new one
     }
@@ -94,48 +95,61 @@ class TimerManager {
     //     return self.nextHeartbeat
     // }
     
-    func nextNewFilesCheck(_ now: Date) -> Date {
+    func nextCreateNewFilesCheck(_ now: Date) {
+        // THIS IS A PERIODIC TIMER TASK AND IS NOT ALLOWED TO BLOCK
+        // FIXME: this one probably blocks a bit inside io tasks
+        
         // reset files periodically - exact behavior varies by data stream.
         if now > self.nextNewFiles {
             // (900 is also the hardcoded default on createNewDataFileFrequencySeconds)
-            var next_time = StudyManager.sharedInstance.currentStudy?.studySettings?.createNewDataFileFrequencySeconds ?? 900
+            let next_time = StudyManager.sharedInstance.currentStudy?.studySettings?.createNewDataFileFrequencySeconds ?? 900
             self.all_services_new_files()
-            return Date(timeIntervalSince1970: now.timeIntervalSince1970 + Double(next_time))
+            self.nextNewFiles = Date(timeIntervalSince1970: now.timeIntervalSince1970 + Double(next_time))
         }
-        return self.nextNewFiles
     }
     
     // TODO: if we ever get weekly survey logic implemented put it here. Currently this just
     // checks if the current displayed surveys are correct, returns the 5 minute timer.
-    func nextSurveyAvailabilityCheck(_ now: Date) -> Date {
+    func nextSurveyAvailabilityCheck(_ now: Date) {
+        // THIS IS A PERIODIC TIMER TASK AND IS NOT ALLOWED TO BLOCK
         if now > self.nextSurveyDisplayUpdate {
             StudyManager.sharedInstance.updateActiveSurveys()
+            self.nextSurveyDisplayUpdate = default_interval_from_now()
         }
-        return default_interval_from_now()
+    }
+    
+    func checkDataCollectionServicesToggleLogic(_ now: Date) {
+        if now > self.nextDataServicesCheck {
+            self.nextDataServicesCheck = self.runDataCollectionServicesToggleLogic(now)
+        }
     }
     
     /// Starts or stops every data service, returns the time interval until the next event.
     /// called in self.pollServices, which assigns to self
-    func runDataCollectionServicesToggleLogic(_ now: TimeInterval) -> Date {
+    func runDataCollectionServicesToggleLogic(_ now: Date) -> Date {
+        // THIS IS A PERIODIC TIMER TASK AND IS NOT ALLOWED TO BLOCK
+        
         // print("ToggleLogic")
-        var next_toggle_check = now + (10 * 60) // default is a ten minute timer
+        let now_interval = now.timeIntervalSince1970
+        var next_toggle_check = now_interval + (10 * 60) // default is a ten minute timer
         
         // for every data service get its nextToggleTime, turn it on or off as appropriate,
         // set state as appropriate, update nextToggleTime.
         for dataStatus in self.dataCollectionServices {
-            // 1 - get the toggle time from the DataServiceStatus - this value is set to current time at initialization, e.g. it always starts "in the past".
+            // 1 - get the toggle time from the DataServiceStatus - this value is set to current
+            // time at initialization, e.g. it always starts "in the past".
             // print("ToggleLogic - timer check for \(dataStatus.dataService)")
             if var toggleTime = dataStatus.nextToggleTime?.timeIntervalSince1970 {
                 // 2 - if that time is in the past, toggle.
                 // print("ToggleLogic - \(dataStatus.dataService) - toggletime: \(smartformat(toggleTime))")
-                if toggleTime <= now {
+                if toggleTime <= now_interval {
                     // 2a - toggle off if on, update .nextToggleTime
                     // print("ToggleLogic - \(dataStatus.dataService) - was in the past, time to toggle.")
                     if dataStatus.currentlyOn {
                         // print("ToggleLogic - \(dataStatus.dataService) - it was on, toggling off.")
                         dataStatus.dataService.pauseCollecting()
                         dataStatus.currentlyOn = false
-                        dataStatus.nextToggleTime = Date(timeIntervalSince1970: now + dataStatus.offDurationSeconds)
+                        dataStatus.nextToggleTime = Date(timeIntervalSince1970: now_interval + dataStatus.offDurationSeconds)
                         // print("ToggleLogic - \(dataStatus.dataService) - next toggle time: \(smartformat(dataStatus.nextToggleTime!.timeIntervalSince1970))")
                         
                         // 2b - toggle on if off, update .nextToggleTime
@@ -149,12 +163,12 @@ class TimerManager {
                             dataStatus.nextToggleTime = nil
                             // print("ToggleLogic - \(dataStatus.dataService) - no off time, runs forever.")
                         } else {
-                            dataStatus.nextToggleTime = Date(timeIntervalSince1970: now + dataStatus.onDurationSeconds)
+                            dataStatus.nextToggleTime = Date(timeIntervalSince1970: now_interval + dataStatus.onDurationSeconds)
                             // print("ToggleLogic - \(dataStatus.dataService) - next toggle time: \(smartformat(dataStatus.nextToggleTime!.timeIntervalSince1970))")
                         }
                     }
                     
-                    // update local variable from nextToggleTime because it may have changed
+                    // update local variable from nextToggleTime because it may have changed (this comment seems incorrect)
                     toggleTime = dataStatus.nextToggleTime?.timeIntervalSince1970 ?? Double.greatestFiniteMagnitude
                 }
                 
@@ -175,53 +189,55 @@ class TimerManager {
     /// Timers
     ///
     
+    let timerServicesLock = NSLock()
+        
     /// Runs StudyManaager.periodicNetworkTransfers, sets next survey update, starts another timer.
     /// When this function doesn't find anything to do it takes miniscule fractions of a second,
     /// When it does find stuff to do, like dispatch 30 file uploads, it takes a half second.
     /// (profiled on an iphone 15 pro max).
-    @objc func pollServices() {
-        // handy print statemunt, buuuuut timers are perfect when attached to the debugger so it's not actually very useful??
-        var t1 = Date()
-        // if t1 > self.nextDataServicesCheck {
-        //     print("pollservices was late by \(String(format: "%.3f", t1.timeIntervalSince1970 - self.expected_wakeup.timeIntervalSince1970)) seconds")
-        // } else {
-        //     print("pollservices was early by \(String(format: "%.3f", self.expected_wakeup.timeIntervalSince1970 - t1.timeIntervalSince1970)) seconds")
-        // }
+    @objc func runTimerServices() {
         
-        self.clearPollTimer()
-        AppEventManager.sharedInstance.logAppEvent(event: "poll_service", msg: "Polling service") // probably pointless
-        
-        // return early if services are not running (should not be running)
-        if !self.areServicesRunning {
-            return
+        let t1 = Date().timeIntervalSince1970 - self.expected_wakeup.timeIntervalSince1970
+        if t1 > 0 {
+            // print("pollservices was late by \(String(format: "%.3f", t1.timeIntervalSince1970 - self.expected_wakeup.timeIntervalSince1970)) seconds")
+            print("pollservices was late by \(String(format: "%.3f", t1)) seconds")
+            
+        } else {
+            // print("pollservices was early by \(String(format: "%.3f", self.expected_wakeup.timeIntervalSince1970 - t1.timeIntervalSince1970)) seconds")
+            print("pollservices was early by \(String(format: "%.3f", t1)) seconds")
         }
         
         let now = Date() // from before the network tasks execute
-        let now_interval = now.timeIntervalSince1970
         
-        /// set the next service date (its a timeInterval object) to the next event time
-        self.nextDataServicesCheck = self.runDataCollectionServicesToggleLogic(now_interval)
+        if !self.areServicesRunning {  // return early if services are not running (yet)
+            setTheNextServicesTimer(now)
+            return
+        }
+        
+        timerServicesLock.lock() // one at a time, as a precaution
+        
+        // these functions all handle the check for the rate-limiting of the individual "services"
+        self.checkDataCollectionServicesToggleLogic(now)
         // self.nextHeartbeat = self.heartbeatTimerCheck(now)
-        self.nextNewFiles = self.nextNewFilesCheck(now)
-        self.nextSurveyDisplayUpdate = self.nextSurveyAvailabilityCheck(now)
+        self.nextCreateNewFilesCheck(now)
+        self.nextSurveyAvailabilityCheck(now)
         
         // Determines which persistent actions (actions that have some state persisting across
         // app launches) to run and runs them,
-        // bug (its either int truncation or it returns the Previous time) - this sometimes returns a value before now.
-        // self.nextPersistentTasks = StudyManager.sharedInstance.persistentTimerActions(now)
         StudyManager.sharedInstance.persistentTimerActions(now)
         // update timer
-        self.setTheNextPollTimer(now) // it's literally the next function, keeping function clean.
+        self.setTheNextServicesTimer(now) // it's literally the next function, keeping function clean.
         
         // var t2 = Date()
         // print("pollServices took \(String(format: "%.3f", t2.timeIntervalSince(t1))) seconds")
+        timerServicesLock.unlock()
     }
     
     /// This logic is currently disabled, we are going to try a 10 second timer - having difficulty
     /// getting the nextPersistentTasks to not return a value before now, but I think that's actually
     /// normal because those can be skipped and it uses a "missed" flag, which is meh. It also has
     /// integer-based time where everytihng else has Float or Date() time.
-    func setTheNextPollTimer(_ now: Date) {
+    func setTheNextServicesTimer(_ now: Date) {
         // if self.nextDataServicesCheck < now {
         //     fatalError("self.nextDataServicesCheck (\(nextDataServicesCheck)) was set to a time before now (\(now))")
         // }
@@ -247,12 +263,12 @@ class TimerManager {
         //     self.nextNewFiles,
         //     self.nextPersistentTasks,
         //     self.nextSurveyDisplayUpdate
+        // print("self.nextPersistentTasks:", self.nextPersistentTasks.timeIntervalSince1970 - now.timeIntervalSince1970)
         // )
         
         // print("self.nextDataServicesCheck:", self.nextDataServicesCheck.timeIntervalSince1970 - now.timeIntervalSince1970)
         // print("self.nextHeartbeat:", self.nextHeartbeat.timeIntervalSince1970 - now.timeIntervalSince1970)
         // print("self.nextNewFiles:", self.nextNewFiles.timeIntervalSince1970 - now.timeIntervalSince1970)
-        // print("self.nextPersistentTasks:", self.nextPersistentTasks.timeIntervalSince1970 - now.timeIntervalSince1970)
         // print("self.nextSurveyDisplayUpdate:", self.nextSurveyDisplayUpdate.timeIntervalSince1970 - now.timeIntervalSince1970)
         
         // self.expected_wakeup = next_check
@@ -265,17 +281,20 @@ class TimerManager {
         // print("nextServicesCheck: \(smartformat(self.nextDataServicesCheck)), (\(nextDataServicesCheck_seconds - now_seconds) seconds)")
         // print("self.nextSettingsUpdate: \(self.nextSettingsUpdate), \(now - self.nextSettingsUpdate)")
         
+        // expected_wakeup is only used in the logging code above
         self.expected_wakeup = Date(timeIntervalSinceNow: 10.0)
-        self.startPollTimer(10.0)
+        self.startServicesTimer(10.0)
     }
 
     /// start the poll timer - called in start (1.5 seconds), and in setTheNextPolltimer.
-    func startPollTimer(_ seconds: Double) {
-        self.clearPollTimer()
+    func startServicesTimer(_ seconds: Double) {
+        self.clearServicesTimer()
         self.timer = Timer.scheduledTimer(
-            timeInterval: seconds, target: self, selector: #selector(self.pollServices), userInfo: nil, repeats: false
+            timeInterval: seconds, target: self, selector: #selector(self.runTimerServices),
+            userInfo: nil, repeats: false
         )
         // print("The Timer was set for: \(seconds) seconds")
-        AppEventManager.sharedInstance.logAppEvent(event: "set_timer", msg: "Set timer for \(seconds) seconds", d1: String(seconds))
+        AppEventManager.sharedInstance.logAppEvent(
+            event: "set_timer", msg: "Set timer for \(seconds) seconds", d1: String(seconds))
     }
 }

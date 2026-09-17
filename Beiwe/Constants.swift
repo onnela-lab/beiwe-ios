@@ -38,9 +38,11 @@ struct Constants {
 
 let DEV_TIMEZONE = "America/New_York"
 
-let BACKGROUND_TASK_NAME_HEARTBEAT_BGREFRESH = "org.beiwe.heartbeat_bgrefresh"
-let BACKGROUND_TASK_NAME_HEARTBEAT_BGPROCESSING = "org.beiwe.heartbeat_bgprocessing"
-let BACKGROUND_TASK_NAME_HEARTBEAT_BGHEALTH = "org.beiwe.heartbeat_bghealth"
+let BG_TASK_NAME_BGREFRESH = "org.beiwe.heartbeat_bgrefresh"
+let BG_TASK_NAME_BGPROCESSING = "org.beiwe.heartbeat_bgprocessing"
+let BG_TASK_NAME_BGHEALTH = "org.beiwe.heartbeat_bghealth"
+// iOS 26+ continued processing task identifiers are required to be prefixed with the app's bundle id.
+let BG_TASK_NAME_CONTINUED = "\(Bundle.main.bundleIdentifier!).heartbeat_continued"
 
 // Dispatch Queue qos options are: default, background, utility, userInitiated, userInteractive, and unspecified.
 // TODO: document the difference between these.
@@ -48,6 +50,7 @@ let BACKGROUND_TASK_NAME_HEARTBEAT_BGHEALTH = "org.beiwe.heartbeat_bghealth"
 let GLOBAL_DEFAULT_QUEUE = DispatchQueue.global(qos: .default)
 let GLOBAL_BACKGROUND_QUEUE = DispatchQueue.global(qos: .background)
 let GLOBAL_UTILITY_QUEUE = DispatchQueue.global(qos: .utility)
+
 let HEARTBEAT_QUEUE = DispatchQueue(label: "org.beiwe.heartbeat_queue", qos: .userInitiated, attributes: [])
 let BACKGROUND_DEVICE_INFO_QUEUE = DispatchQueue(label: "org.beiwe.background_device_info_queue", qos: .background, attributes: [])
 let BACKGROUND_DEVICE_INFO_FAST_QUEUE = DispatchQueue(label: "org.beiwe.background_device_info_queue", qos: .userInteractive, attributes: [])
@@ -82,6 +85,3 @@ struct Ephemerals {
     
     static var lastHeartbeat = 0.0
 }
-
-
-

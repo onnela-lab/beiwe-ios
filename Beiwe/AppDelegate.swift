@@ -52,7 +52,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     //##############################################################################################
     
     /// The AppDelegate started function
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
         self.lastAppStart = Date()
         
         // runs operations that are part of ui setup, AppEventLog? - well that's a bug.
@@ -80,40 +83,50 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         return true
     }
     
-    /// Target(?) for background app refresh https://developer.apple.com/documentation/uikit/uiapplication/1623031-beginbackgroundtask
+    /// Target for background app refresh:
+    ///  https://developer.apple.com/documentation/uikit/uiapplication/1623031-beginbackgroundtask
     // """ A handler to be called shortly before the app’s remaining background time reaches 0. Use
     // this handler to clean up and mark the end of the background task. Failure to end the task
     // explicitly will result in the termination of the app. The system calls the handler
     // synchronously on the main thread, blocking the app’s suspension momentarily. """
-    func beginBackgroundTask(withName taskName: String?, expirationHandler handler: (() -> Void)? = nil) -> UIBackgroundTaskIdentifier {
+    func beginBackgroundTask(
+        withName taskName: String?, expirationHandler handler: (() -> Void)? = nil
+    ) -> UIBackgroundTaskIdentifier {
         StudyManager.sharedInstance.heartbeat("beginBackgroundTask")
         return UIBackgroundTaskIdentifier(rawValue: 0)
     }
-
-    // setMinimumBackgroundFetchInterval, application(_:performFetchWithCompletionHandler:)
-    // func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-    //     print("======= performFetchWithCompletionHandler")
-    //     completionHandler(.newData)
-    // }
     
-    // BY THE WAY background app refresh health tasts simply aren't functional as far as it is possible to tell, so we are just rawdogging at and logging everything
-    // up to the server inside the requests to the backend because the app isn't stable enough to be a reliable source of truth.
+    /// BGTasks _DO NOT WORK OR RUN_ when the debugger is attached to the process.
     func setupBackgroundAppRefresh() {
-        BGTaskScheduler.shared.register(forTaskWithIdentifier: BACKGROUND_TASK_NAME_HEARTBEAT_BGREFRESH, using: HEARTBEAT_QUEUE) { (task: BGTask) in
-            print("inside the register closure for \(BACKGROUND_TASK_NAME_HEARTBEAT_BGREFRESH)")
-            handleHeartbeatRefresh(task: task as! BGAppRefreshTask)
+        let tss = BGTaskScheduler.shared  // I assure you, this improves legibility
+        // the normal BG task
+        tss.register(forTaskWithIdentifier: BG_TASK_NAME_BGREFRESH, using: HEARTBEAT_QUEUE) {
+            (task: BGTask) in
+            handleBGRefresh(task: task as! BGAppRefreshTask)
         }
-        BGTaskScheduler.shared.register(forTaskWithIdentifier: BACKGROUND_TASK_NAME_HEARTBEAT_BGPROCESSING, using: HEARTBEAT_QUEUE) { (task: BGTask) in
-            print("inside the register closure for \(BACKGROUND_TASK_NAME_HEARTBEAT_BGPROCESSING)")
-            handleHeartbeatProcessing(task: task as! BGProcessingTask)
+        
+        // The BG _Processing_ task
+        tss.register(forTaskWithIdentifier: BG_TASK_NAME_BGPROCESSING, using: HEARTBEAT_QUEUE) {
+            (task: BGTask) in
+            handleBGPRefresh(task: task as! BGProcessingTask)
         }
-        // this appears to ... Just be broken? it doesn'n register a task, or maybe that task is not visible to getPendingBackgroundTasks in
-        if #available(iOS 17.0, *) {
-            BGTaskScheduler.shared.register(forTaskWithIdentifier: BACKGROUND_TASK_NAME_HEARTBEAT_BGHEALTH, using: HEARTBEAT_QUEUE) { (task: BGTask) in
-                print("inside the register closure for \(BACKGROUND_TASK_NAME_HEARTBEAT_BGHEALTH)")
-                handleHeartbeatHealth(task: task as! BGHealthResearchTask)
-            }
-        }
+        
+        // health tasks are not currently functional at all, claude may have fixed it, they still
+        // don't really work for our use case anyway
+        // if #available(iOS 17.0, *) {
+        //     tss.register(forTaskWithIdentifier: BG_TASK_NAME_BGHEALTH, using: HEARTBEAT_QUEUE) {
+        //         (task: BGTask) in
+        //         handleBGHRefresh(task: task as! BGHealthResearchTask)
+        //     }
+        // }
+        
+        // iOS 26+ continued processing task, not yet enabled - see BeiweBackgroundTasks.swift
+        // if #available(iOS 26.0, *) {
+        //     tss.register(forTaskWithIdentifier: BG_TASK_NAME_CONTINUED, using: HEARTBEAT_QUEUE) {
+        //         (task: BGTask) in
+        //         handleBGCRefresh(task: task as! BGContinuedProcessingTask)
+        //     }
+        // }
     }
     
     func appStartLog() {
@@ -301,7 +314,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         
         // Called as part of the transition from the background to the inactive (Eli does not know who wrote "inactive") state.
         // here you can undo many of the changes made on entering the background.
-        UNUserNotificationCenter.current().getDeliveredNotifications { (notifications: [UNNotification]) in
+        UNUserNotificationCenter.current().getDeliveredNotifications {
+            (notifications: [UNNotification]) in
             for notification in notifications {
                 self.handleSurveyNotification(notification.request.content.userInfo)
             }
@@ -311,12 +325,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         UNUserNotificationCenter.current().removeAllDeliveredNotifications()
         
         // logout timer check
-        if let timeEnteredBackground = timeEnteredBackground, let currentStudy = self.currentStudy, let studySettings = currentStudy.studySettings {
+        if let timeEnteredBackground = timeEnteredBackground,
+            let study = self.currentStudy,
+            let settings = study.studySettings
+        {
             if self.isLoggedIn {
-                let loginExpires = timeEnteredBackground.addingTimeInterval(Double(studySettings.secondsBeforeAutoLogout))
+                let loginExpires = timeEnteredBackground.addingTimeInterval(Double(settings.secondsBeforeAutoLogout))
                 // old incomprehensible code for identifying if the logout timer has passed. It works, just leave it
                 if loginExpires.compare(Date()) == ComparisonResult.orderedAscending {
-                    // print("expired.  Log 'em out")
                     self.isLoggedIn = false
                     self.transitionToLoadedAppState()
                 }
@@ -326,13 +342,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         }
     }
 
-    func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    func application(
+        _ application: UIApplication,
+        willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
         print("applicationWillFinishLaunchingWithOptions")
         return true
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
-        // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+        // Called when the application is about to terminate. Save data if appropriate. See also
+        // applicationDidEnterBackground:.
         print("applicationWillTerminate")
         if let study = self.currentStudy {
             study.lastApplicationWillTerminate = self.currentTimestamp
@@ -378,8 +398,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
-        // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
-        // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+        // Use this method to release shared resources, save user data, invalidate timers, and store
+        // enough application state information to restore your application to its current state in
+        // case it is terminated later. If your application supports background execution, this
+        // method is called instead of applicationWillTerminate: when the user quits.
         print("applicationDidEnterBackground")
         Ephemerals.lastApplicationDidEnterBackground = self.currentTimestamp
         self.timeEnteredBackground = Date()
@@ -465,16 +487,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     // called when receiving notification while app is in foreground
     /// If you are receiving a notification message while your app is in the background,
     /// this callback will not be fired until the user taps on the notification launching the application.
-    func application(_ application: UIApplication,
-                     didReceiveRemoteNotification messageInfo: [AnyHashable: Any],
-                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+    func application(
+        _ application: UIApplication,
+        didReceiveRemoteNotification messageInfo: [AnyHashable: Any],
+        fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
+    ) {
         print("Foreground push notification received func application")
         if let study = self.currentStudy {
             study.lastForegroundPushNotificationReceived = self.currentTimestamp
             Recline.shared.save(study)
         }
         
-        AppEventManager.sharedInstance.logAppEvent(event: "push_notification", msg: "Foreground push notification received")
+        AppEventManager.sharedInstance.logAppEvent(
+            event: "push_notification", msg: "Foreground push notification received")
         self.printMessageInfo(messageInfo)
 
         // if the notification is for a survey
@@ -616,7 +641,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     }
     
     func configureFirebase(studySettings: StudySettings) {
-        let options = FirebaseOptions(googleAppID: studySettings.googleAppID, gcmSenderID: studySettings.gcmSenderID)
+        let options = FirebaseOptions(
+            googleAppID: studySettings.googleAppID, gcmSenderID: studySettings.gcmSenderID)
         options.apiKey = studySettings.apiKey
         options.projectID = studySettings.projectID
         options.bundleID = studySettings.bundleID
@@ -829,9 +855,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
 extension AppDelegate: UNUserNotificationCenterDelegate {
     // Receive displayed notifications for iOS 10 devices.
     // THIS ONE is called when RECEIVING a notification while app is in FOREGROUND.
-    /// The method will be called on the delegate only if the application is in the foreground. If the method is not implemented or the handler is not called in a timely
-    /// manner then the notification will not be presented. The application can choose to have the notification presented as a sound, badge, alert and/or in the
-    /// notification list. This decision should be based on whether the information in the notification is otherwise visible to the user.
+    /// The method will be called on the delegate only if the application is in the foreground. If
+    /// the method is not implemented or the handler is not called in a timely manner then the
+    /// notification will not be presented. The application can choose to have the notification
+    /// presented as a sound, badge, alert and/or in the notification list. This decision should be
+    /// based on whether the information in the notification is otherwise visible to the user.
     func userNotificationCenter(
         _ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
@@ -843,8 +871,8 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     }
 
     // THIS ONE is called when TAPPING on notification when app is in BACKGROUND.
-    /// The method will be called on the delegate when the user responded to the notification by opening the application,
-    /// dismissing the notification, or choosing a UNNotificationAction.
+    /// The method will be called on the delegate when the user responded to the notification by
+    /// opening the application, dismissing the notification, or choosing a UNNotificationAction.
     func userNotificationCenter(
         _ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void
     ) {

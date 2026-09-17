@@ -123,7 +123,7 @@ class StudyManager {
         }
         
         if self.sensorsStartedEver {
-            self.timerManager.clearPollTimer()
+            self.timerManager.clearServicesTimer()
             self.timerManager.stop_all_services() // it's a little weird but the Timers actually holds the list of data services
             self.timerManager.clear()
         }
@@ -441,7 +441,9 @@ class StudyManager {
     
     //##############################################################################################
     //////////////////////////////////////// Timer Checks //////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
+    
+    let persistentTimerActionsLock = NSLock()
     
     /// TODO: move this over to TimerManager
     /// TODO: convert to store as doubles and use Dates in logic.
@@ -450,12 +452,16 @@ class StudyManager {
     /// the case of the app closing.
     /// (currently reverted to easier strategy would return a date with a reasonable next time for timer logic to check.)
     func persistentTimerActions(_ now_date: Date) {
+        // THIS IS A PERIODIC TIMER TASK AND IS NOT ALLOWED TO BLOCK
+        
         // fail early logic, get study settings and study.
         guard let currentStudy = currentStudy, let studySettings = currentStudy.studySettings else {
             return
         }
         
+        self.persistentTimerActionsLock.lock()
         let now_int: Int64 = Int64(now_date.timeIntervalSince1970)
+        var do_save = false
         
         // Todo - make these TimeIntervals (doubles)
         let nextSurvey = currentStudy.nextSurveyCheck ?? 0
@@ -466,12 +472,14 @@ class StudyManager {
         
         // logic for checking for surveys
         if now_int > nextSurvey {
+            do_save = true
             self.setNextSurveyTime()
             self.checkForNewSurveys() // asynchronous, returns ~immediately
         }
         
         // logic for running uploads code
         if now_int > nextUpload {
+            do_save = true
             self.setNextUploadTime()
             if studySettings.uploadOverCellular {
                 // case: we are allowed to upload over, so we upload.
@@ -488,12 +496,16 @@ class StudyManager {
         
         // logic for updating the study's device settings.
         if now_int > nextDeviceSettings {
+            do_save = true
             // print("Checking for updated device settings...")
             self.setNextDeviceSettingsTime()
             self.updateDeviceSettings() // asynchronous, returns ~immediately
         }
         
-        Recline.shared.save(currentStudy)
+        if do_save {
+            Recline.shared.save(currentStudy)
+        }
+        self.persistentTimerActionsLock.unlock()
     }
     
     // to reduce calls to save there is a single save call in persistentTimerActions
@@ -534,7 +546,7 @@ class StudyManager {
     /// some kind of reachability thing, calls periodicNetworkTransfers
     @objc func reachabilityChanged(_ notification: Notification) {
         // print("Reachability changed, running periodic network transfers.")
-        self.timerManager.pollServices()
+        self.timerManager.runTimerServices()
     }
     
     func heartbeat_on_dispatch_queue() {
