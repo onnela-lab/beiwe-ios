@@ -827,7 +827,7 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
     
     
     deinit {
-        self.surveyTimingsFile.reset()
+        self.surveyTimingsFile.reset()  // this does not appear to finalize the timings file correctly.
         self.the_continue_button = nil
         self.the_internal_continue_button = nil
     }

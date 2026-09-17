@@ -124,9 +124,9 @@ class GPSManager: NSObject, CLLocationManagerDelegate, DataServiceProtocol {
         AppEventManager.sharedInstance.logAppEvent(event: "gps stopped due to app termination")
     }
  
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
     ////////////////////////////////// Location Manager Functons ///////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
     
     /// records a single location datapoint (though in principal it could provide more)
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {

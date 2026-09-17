@@ -42,21 +42,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     // this is a weird location for an object, its used in powerstatemanager, unclear why this is here.
     let lockEvent = EmitterKit.Event<Bool>()
         
-    static func sharedInstance() -> AppDelegate {
-        return UIApplication.shared.delegate as! AppDelegate
-    }
+    // convenience handles
+    static func sharedInstance() -> AppDelegate { UIApplication.shared.delegate as! AppDelegate }
+    var currentTimestamp: String { timestampString() + " " + TimeZone.current.identifier }
+    var currentStudy: Study? { StudyManager.sharedInstance.currentStudy }
     
-    var currentTimestamp: String {
-        return timestampString() + " " + TimeZone.current.identifier
-    }
-    
-    var currentStudy: Study? {
-        return StudyManager.sharedInstance.currentStudy
-    }
-    
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
     ///////////////////////////////////////// APPLICATION SETUP ////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
     
     /// The AppDelegate started function
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
@@ -88,11 +81,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     }
     
     /// Target(?) for background app refresh https://developer.apple.com/documentation/uikit/uiapplication/1623031-beginbackgroundtask
-    // """ A handler to be called shortly before the app’s remaining background time
-    // reaches 0. Use this handler to clean up and mark the end of the background task.
-    // Failure to end the task explicitly will result in the termination of the app.
-    // The system calls the handler synchronously on the main thread, blocking the
-    // app’s suspension momentarily. """
+    // """ A handler to be called shortly before the app’s remaining background time reaches 0. Use
+    // this handler to clean up and mark the end of the background task. Failure to end the task
+    // explicitly will result in the termination of the app. The system calls the handler
+    // synchronously on the main thread, blocking the app’s suspension momentarily. """
     func beginBackgroundTask(withName taskName: String?, expirationHandler handler: (() -> Void)? = nil) -> UIBackgroundTaskIdentifier {
         StudyManager.sharedInstance.heartbeat("beginBackgroundTask")
         return UIBackgroundTaskIdentifier(rawValue: 0)
@@ -246,16 +238,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
             }
             
             if !self.isLoggedIn {
-                // Load up the login view - when the animation is working (it used to not work 🙄) the main screen is
-                // visible briefly.  This is fine? we aren't really protecting any data here.
+                // Login view - [when the animation works] the main screen is visible briefly. This
+                // is fine becausewe aren't really protecting any data here.
                 self.changeRootViewControllerWithIdentifier("login")
             } else {
-                // We are logged in, so if we've completed onboarding load main interface, Otherwise continue onboarding.
+                // We are logged in, have completed onboarding: load main interface
                 if currentStudy.participantConsented {
-                    // print("transitionToLoadedAppState - isLoggedIn True, setting to main view")
                     self.changeRootViewControllerWithIdentifier("mainView")
-                } else {
-                    // print("transitionToLoadedAppState - isLoggedIn True, setting to consent view")
+                } else { // otherwise load onboarding
                     self.changeRootViewController(ConsentManager().consentViewController)
                 }
             }
@@ -302,9 +292,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         return false
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
     ////////////////////////////////////// APPLICATION WILL X //////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
 
     func applicationWillEnterForeground(_ application: UIApplication) {
         print("applicationWillEnterForeground")
@@ -351,8 +341,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         
         AppEventManager.sharedInstance.logAppEvent(event: "terminate", msg: "Application terminating")
         
-        // StudyManager.stop() includes a call to TimerManager.stop(), which calls finishCollecting on
-        // data services, which always includes a call to DataStorage.reset(), which will FLUSH,
+        // StudyManager.stop() includes a call to TimerManager.stop(), which calls finishCollecting
+        // on data services, which always includes a call to DataStorage.reset(), which will FLUSH,
         // retire, and move live files to the upload folder.
         // Survey and SurveyTimings files - should be left in the folder to be moved on next app
         // launch to the uploads folders - but they don't have background writes so that's fine.
@@ -361,14 +351,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
-        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-        // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
+        // Sent when the application is about to move from active to inactive state. This can occur
+        // for certain types of temporary interruptions (such as an incoming phone call or SMS
+        // message) or when the user quits the application and it begins the transition to the
+        // background state. Use this method to pause ongoing tasks, disable timers, and throttle
+        // down OpenGL ES frame rates. Games should use this method to pause the game.
         print("applicationWillResignActive")
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
     /////////////////////////////////////// APPLICATION DID X //////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
 
     func applicationDidBecomeActive(_ application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
@@ -411,9 +404,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         AppEventManager.sharedInstance.logAppEvent(event: "locked", msg: "Phone/keystore locked")
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
     ///////////////////////////////////////////// PERMISSIONS //////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
 
     /// this function gets called when CLAuthorization status changes
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
@@ -443,9 +436,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
     /////////////////////////////////////// REAL NOTIFICATION CODE /////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         print("Failed to register for notifications: \(error.localizedDescription)")
@@ -587,9 +580,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         return survey_ids_to_notification_uuids
     }
     
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
     //////////////////////////////////////////// Firebase Stuff ////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
 
     func firebaseLoop() {
         // The app cannot register with firebase until it gets a token, which only occurs at registration time, and it needs access to the appDelegate.
@@ -696,9 +689,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         }
     }
     
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
     /////////////////////////////////////////////// STUFF //////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
 
     func initializeUI() {
         // set up colors for researchkit, set the launch screen view.
@@ -752,42 +745,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////// CRASHLYTICS STUFF ////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
     
-    // func setupCrashLytics() {
-    //     Fabric.with([Crashlytics.self])
-    //     let crashlyticsLogDestination = XCGCrashlyticsLogDestination(owner: log, identifier: "advancedlogger.crashlyticsDestination")
-    //     crashlyticsLogDestination.outputLevel = .debug
-    //     crashlyticsLogDestination.showLogIdentifier = true
-    //     crashlyticsLogDestination.showFunctionName = true
-    //     crashlyticsLogDestination.showThreadName = true
-    //     crashlyticsLogDestination.showLevel = true
-    //     crashlyticsLogDestination.showFileName = true
-    //     crashlyticsLogDestination.showLineNumber = true
-    //     crashlyticsLogDestination.showDate = true
-    //     // Add the destination to the logger
-    //     log.add(destination: crashlyticsLogDestination)
-    //     log.logAppDetails()
-    // }
-    //
-    // // completely disabled, does nothing
-    // func setDebuggingUser(_ username: String) {
-    //     // TODO: Use the current user's information
-    //     // You can call any combination of these three methods
-    //     // Crashlytics.sharedInstance().setUserEmail("user@fabric.io")
-    //     // Crashlytics.sharedInstance().setUserIdentifier(username)
-    //     // Crashlytics.sharedInstance().setUserName("Test User")
-    // }
-    //
-    // func crash() {
-    //     Crashlytics.sharedInstance().crash()
-    // }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
     //////////////////////////////////////// SENTRY STUFF //////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
     
     // loads sentry key, prints an error if it doesn't work.
     func setupSentry() {

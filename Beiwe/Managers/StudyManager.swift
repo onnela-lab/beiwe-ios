@@ -38,16 +38,12 @@ class StudyManager {
     
     // Common getters
     
-    /// The only reason that this object is optional is because we need to instantiate
-    /// a study and study manager before the participant hits the accept button to the
-    /// terms of the study / so that we don't ever write data outside of the participant
-    /// completing registration for a study.
+    /// the public key used to encrypt the encryption key
     func getSecKey() -> SecKey {
         if let keyRef = self.keyRef {
             return keyRef
-        } else {
-            fatalError("studymanager.keyRef was nil.")
         }
+        fatalError("studymanager.keyRef was nil.")
     }
     
     /// getters, mutators all the ids of active surveys - not used (anymore?
@@ -86,9 +82,9 @@ class StudyManager {
         Recline.shared.save(study)
     }
     
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
     ///////////////////////////////////// Setup and UnSetup ////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
     
     func loadDefaultStudy() {
         self.currentStudy = nil
@@ -183,9 +179,9 @@ class StudyManager {
         self.sensorsStartedEver = true
     }
     
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
     /////////////////////////////////// Active Survey State Logic //////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
     
     /// updates the list of surveys in the app ui based on the study timers,
     /// updates the badge count, submits completed surveys, and updates the relevant survey timer.
@@ -443,7 +439,7 @@ class StudyManager {
         UIApplication.shared.applicationIconBadgeNumber = bdgrCnt
     }
     
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
     //////////////////////////////////////// Timer Checks //////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////
     
@@ -531,9 +527,9 @@ class StudyManager {
         // if let t = study.nextDeviceSettingsCheck { print("updated study.nextDeviceSettingsCheck:", study.nextDeviceSettingsCheck!, Date(timeIntervalSince1970: Double(t))) }
     }
     
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
     //////////////////////////////////// Network Operations Kinda //////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
     
     /// some kind of reachability thing, calls periodicNetworkTransfers
     @objc func reachabilityChanged(_ notification: Notification) {
@@ -563,10 +559,7 @@ class StudyManager {
         
         // update the timer and send
         Ephemerals.lastHeartbeat = Date().timeIntervalSince1970
-        ApiManager.sharedInstance.extremelySimplePostRequest(
-            "/mobile-heartbeat/",
-            extra_parameters: ["message": message]
-        )
+        ApiManager.sharedInstance.extremelySimplePostRequest("/mobile-heartbeat/", extra_parameters: [:])
     }
     
     /// Runs the api call for downloading survey data, and _then_ adds any provided surveys to
@@ -576,11 +569,14 @@ class StudyManager {
     /// to update a survey and send the survey notification via the button on the Beiwe website.
     /// Also it is just safer to 99% of the time have all the relevant survey info.)
     func checkForNewSurveys(
-        surveyIds: [String] = [], sentTime: TimeInterval? = nil, survey_ids_to_notification_uuids: [String: [String]]? = nil
+        surveyIds: [String] = [],
+        sentTime: TimeInterval? = nil,
+        survey_ids_to_notification_uuids: [String: [String]]? = nil,
     ) {
         guard let study = currentStudy else {
             return
         }
+        
         let sentTime: TimeInterval = sentTime ?? 0
         printTimer("checkForNewSurveys")
                
@@ -632,9 +628,9 @@ class StudyManager {
         )
     }
     
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
     /////////////////////////////// UPDATE DEVICE SETTINGS /////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
     
     /// Queries the server for new study settings, hand off to completion handler
     func updateDeviceSettings() {
@@ -884,9 +880,9 @@ class StudyManager {
         }
     }
     
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
     //////////////////////////////////////// Data Upload ///////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
     ///
     /// Notes:
     ///
@@ -1076,9 +1072,9 @@ class StudyManager {
         // print("upload for \(filename) dispatched")
     }
     
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
     ////////////////////////////////////////// Registration ////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################
     
     /// sets the study as consented, sets api credentials
     func setConsented() {
@@ -1129,9 +1125,9 @@ class StudyManager {
         }
     }
     
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################///////////////////////
     /////////////////////////////////////////////// The Leave Study Code //////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //##############################################################################################///////////////////////
     
     // The reason this code is still present is because we need to handle the case of a user dismissing or exiting the
     // app during the registration or consent sections stage of registration.  We would probably be fine without it,

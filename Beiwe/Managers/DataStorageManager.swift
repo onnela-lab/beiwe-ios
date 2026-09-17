@@ -572,7 +572,7 @@ class DataStorage {
             throw DataStorageError.fileCreationError
         }
         self.conditionalApplog(event: "file_create", msg: message, d1: self.name)
-        print("created file '\(shortenPath(self.filename))'...")
+        // print("created file '\(shortenPath(self.filename))'...")
     }
     
     // reports an io error to sentry, prints the error too.
