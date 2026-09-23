@@ -29,6 +29,7 @@ class StudyManager {
     
     // State tracking variables
     var sensorsStartedEver = false
+    var heartbeatTimer: DispatchSourceTimer?
     let surveysUpdatedEvent: EmitterKit.Event<Int> = EmitterKit.Event<Int>() // I don't know what this is. sometimes we emit events, like when closing a survey
     static var real_study_loaded = false
     
@@ -112,7 +113,7 @@ class StudyManager {
         self.prepareDataServices() // prepareDataServices was 90% of the function body
         NotificationCenter.default.addObserver(self, selector: #selector(self.reachabilityChanged), name: .reachabilityChanged, object: nil)
         
-        self.heartbeat_on_dispatch_queue()
+        self.setupHeartbeatOnDispatchQueue()
     }
     
     /// ACTUAL initialization - initializes the weirdly complex self.gpsManager and everything else
@@ -549,13 +550,27 @@ class StudyManager {
         self.timerManager.runTimerServices()
     }
     
-    func heartbeat_on_dispatch_queue() {
-        // print("Scheduling dispatchqueue heartbeat...")
-        HEARTBEAT_QUEUE.asyncAfter(deadline: .now() + Constants.HEARTBEAT_INTERVAL, execute: {
-            printTimer("running heartbeat on dispatch queue \(Date())")
-            self.heartbeat("DispatchQueue")
-            self.heartbeat_on_dispatch_queue()
-        })
+    /// A repeating "heartbeat" timer that pings the backend, uses HEARTBEAT_QUEUE.
+    /// Must check if already exists because we create it under multiple conditions.
+    /// Testing indicates no loss of reliability when paired with GPS to run in the background.
+    func setupHeartbeatOnDispatchQueue() {
+        HEARTBEAT_QUEUE.async {
+            if self.heartbeatTimer != nil { return } // already running
+            
+            // print("Scheduling dispatchqueue heartbeat...")
+            let timer = DispatchSource.makeTimerSource(queue: HEARTBEAT_QUEUE)
+            timer.schedule(
+                deadline: .now() + Constants.HEARTBEAT_INTERVAL,
+                repeating: Constants.HEARTBEAT_INTERVAL,
+                leeway: .seconds(5)  // sure.
+            )
+            timer.setEventHandler { [weak self] in
+                printTimer("running heartbeat on dispatch queue \(Date())")
+                self?.trySendHeartbeat("DispatchQueue")
+            }
+            self.heartbeatTimer = timer
+            timer.resume()
+        }
     }
     
     /// dispatches and rate limits the heartbeat message to the server
@@ -565,9 +580,7 @@ class StudyManager {
         
         // we allow 1 second of earliness to account for the case of us being at 299.999 seconds
         // which would otherwise result in 1 2*HEARTBEAT_INTERVAL periodicity.
-        if seconds_since_prior < (Constants.HEARTBEAT_INTERVAL - 1) {
-            return
-        }
+        if seconds_since_prior < (Constants.HEARTBEAT_INTERVAL - 1) { return }
         
         // update the timer and send
         Ephemerals.lastHeartbeat = Date().timeIntervalSince1970

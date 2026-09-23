@@ -197,15 +197,15 @@ class TimerManager {
     /// (profiled on an iphone 15 pro max).
     @objc func runTimerServices() {
         
-        let t1 = Date().timeIntervalSince1970 - self.expected_wakeup.timeIntervalSince1970
-        if t1 > 0 {
-            // print("pollservices was late by \(String(format: "%.3f", t1.timeIntervalSince1970 - self.expected_wakeup.timeIntervalSince1970)) seconds")
-            print("pollservices was late by \(String(format: "%.3f", t1)) seconds")
-            
-        } else {
-            // print("pollservices was early by \(String(format: "%.3f", self.expected_wakeup.timeIntervalSince1970 - t1.timeIntervalSince1970)) seconds")
-            print("pollservices was early by \(String(format: "%.3f", t1)) seconds")
-        }
+        // let t1 = Date().timeIntervalSince1970 - self.expected_wakeup.timeIntervalSince1970
+        // if t1 > 0 {
+        //     // print("pollservices was late by \(String(format: "%.3f", t1.timeIntervalSince1970 - self.expected_wakeup.timeIntervalSince1970)) seconds")
+        //     print("pollservices was late by \(String(format: "%.3f", t1)) seconds")
+        //     
+        // } else {
+        //     // print("pollservices was early by \(String(format: "%.3f", self.expected_wakeup.timeIntervalSince1970 - t1.timeIntervalSince1970)) seconds")
+        //     print("pollservices was early by \(String(format: "%.3f", t1)) seconds")
+        // }
         
         let now = Date() // from before the network tasks execute
         
