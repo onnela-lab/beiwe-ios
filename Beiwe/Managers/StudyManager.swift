@@ -559,7 +559,7 @@ class StudyManager {
     }
     
     /// dispatches and rate limits the heartbeat message to the server
-    func heartbeat(_ message: String) {
+    func trySendHeartbeat(_ message: String) {
         let seconds_since_prior = Date().timeIntervalSince1970 - Ephemerals.lastHeartbeat
         // print("heartbeat - seconds since prior heartbeat: \(seconds_since_prior)")
         

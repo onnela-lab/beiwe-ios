@@ -92,7 +92,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     func beginBackgroundTask(
         withName taskName: String?, expirationHandler handler: (() -> Void)? = nil
     ) -> UIBackgroundTaskIdentifier {
-        StudyManager.sharedInstance.heartbeat("beginBackgroundTask")
+        StudyManager.sharedInstance.trySendHeartbeat("beginBackgroundTask")
         return UIBackgroundTaskIdentifier(rawValue: 0)
     }
     

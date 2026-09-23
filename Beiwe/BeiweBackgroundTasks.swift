@@ -126,7 +126,7 @@ func handleBGRefresh(task: BGAppRefreshTask) {
     task.expirationHandler = {
         expired = true
     }
-    StudyManager.sharedInstance.heartbeat("BGAppRefreshTask")
+    StudyManager.sharedInstance.trySendHeartbeat("BGAppRefreshTask")
     runAllBackgroundTasks()
     task.setTaskCompleted(success: !expired)
 }
@@ -137,7 +137,7 @@ func handleBGPRefresh(task: BGProcessingTask) {
     task.expirationHandler = {
         expired = true
     }
-    StudyManager.sharedInstance.heartbeat("BGProcessingTask")
+    StudyManager.sharedInstance.trySendHeartbeat("BGProcessingTask")
     runAllBackgroundTasks()
     task.setTaskCompleted(success: !expired)
 }
