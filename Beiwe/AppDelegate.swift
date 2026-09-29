@@ -171,7 +171,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         // initialize Sentry IMMEDIATELY
         self.setupSentry()
         self.setupLogging()
-        // setupCrashLytics()  // not currently using crashlytics
         // appStartLog()  // this is too verbose and usually unnecessary, uncomment if you want but don't commit.
         self.initializeUI()
         

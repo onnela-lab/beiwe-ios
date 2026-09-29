@@ -87,14 +87,6 @@ class TimerManager {
         self.timer = Timer() // clear out the old timer object, make a new one
     }
     
-    // func heartbeatTimerCheck(_ now: Date) -> Date {
-    //     if now > self.nextHeartbeat {
-    //         StudyManager.sharedInstance.heartbeat("Timer logic")
-    //         return Date(timeIntervalSince1970: now.timeIntervalSince1970 + Constants.HEARTBEAT_INTERVAL)
-    //     }
-    //     return self.nextHeartbeat
-    // }
-    
     func nextCreateNewFilesCheck(_ now: Date) {
         // THIS IS A PERIODIC TIMER TASK AND IS NOT ALLOWED TO BLOCK
         // FIXME: this one probably blocks a bit inside io tasks
