@@ -31,21 +31,27 @@ class ProximityManager: DataServiceProtocol {
 
     /// protocol function
     func startCollecting() {
-        // print("Turning \(self.storeType) collection on")
-        UIDevice.current.isProximityMonitoringEnabled = true
-        // register the observer
-        NotificationCenter.default.addObserver(
-            self, selector: #selector(self.proximityStateDidChange), name: UIDevice.proximityStateDidChangeNotification, object: nil
-        )
-        AppEventManager.sharedInstance.logAppEvent(event: "proximity_on", msg: "Proximity collection on")
+        // need to run this on the main thread
+        DispatchQueue.main.async {
+            // print("Turning \(self.storeType) collection on")
+            UIDevice.current.isProximityMonitoringEnabled = true
+            // register the observer
+            NotificationCenter.default.addObserver(
+                self, selector: #selector(self.proximityStateDidChange), name: UIDevice.proximityStateDidChangeNotification, object: nil
+            )
+            AppEventManager.sharedInstance.logAppEvent(event: "proximity_on", msg: "Proximity collection on")
+        }
     }
     
     /// protocol function
     func pauseCollecting() {
-        // print("Pausing \(self.storeType) collection")
-        // unregister the observer
-        NotificationCenter.default.removeObserver(self, name: UIDevice.proximityStateDidChangeNotification, object: nil)
-        AppEventManager.sharedInstance.logAppEvent(event: "proximity_off", msg: "Proximity collection off")
+        // enabling requires it be run on on the main thread, we'll assume pausing does too.
+        DispatchQueue.main.async {
+            // print("Pausing \(self.storeType) collection")
+            // unregister the observer
+            NotificationCenter.default.removeObserver(self, name: UIDevice.proximityStateDidChangeNotification, object: nil)
+            AppEventManager.sharedInstance.logAppEvent(event: "proximity_off", msg: "Proximity collection off")
+        }
     }
     
     /// protocol function
