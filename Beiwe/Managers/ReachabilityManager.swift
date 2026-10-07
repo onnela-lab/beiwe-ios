@@ -2,8 +2,6 @@ import Foundation
 import Network
 import SystemConfiguration.CaptiveNetwork
 
-let EXPLICIT_NETWORK_CHECK_INTERVAL: TimeInterval = 60.0 * 5
-
 let reachability_headers = [
     "timestamp",
     "event",

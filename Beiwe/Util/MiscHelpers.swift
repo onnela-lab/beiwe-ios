@@ -1,14 +1,14 @@
 import Foundation
 import ObjectMapper
 
-enum BWErrors: Error {
-    case ioError
-}
+// enum BWErrors: Error {
+//     case ioError
+// }
 
-func delay(_ delay: Double, closure: @escaping () -> Void) {
-    DispatchQueue.main.asyncAfter(
-        deadline: DispatchTime.now() + Double(Int64(delay * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC), execute: closure)
-}
+// func delay(_ delay: Double, closure: @escaping () -> Void) {
+//     DispatchQueue.main.asyncAfter(
+//         deadline: DispatchTime.now() + Double(Int64(delay * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC), execute: closure)
+// }
 
 func platform() -> String {
     var size: Int = 0 // as Ben Stahl noticed in his answer
@@ -47,23 +47,23 @@ let transformNSData = TransformOf<Data, String>(fromJSON: { encoded in
 })
 
 // not used, but appears to be a transform for notification information to json.
-let transformNotification = TransformOf<UILocalNotification, String>(fromJSON: { encoded -> UILocalNotification? in
-    // transform value from String? to Int?
-    if let str = encoded {
-        let data = Data(base64Encoded: str, options: [])
-        if let data = data {
-            return NSKeyedUnarchiver.unarchiveObject(with: data) as! UILocalNotification?
-        }
-    }
-    return nil
-}, toJSON: { value -> String? in
-    // transform value from Int? to String?
-    if let value = value {
-        let data = NSKeyedArchiver.archivedData(withRootObject: value)
-        return data.base64EncodedString(options: [])
-    }
-    return nil
-})
+// let transformNotification = TransformOf<UILocalNotification, String>(fromJSON: { encoded -> UILocalNotification? in
+//     // transform value from String? to Int?
+//     if let str = encoded {
+//         let data = Data(base64Encoded: str, options: [])
+//         if let data = data {
+//             return NSKeyedUnarchiver.unarchiveObject(with: data) as! UILocalNotification?
+//         }
+//     }
+//     return nil
+// }, toJSON: { value -> String? in
+//     // transform value from Int? to String?
+//     if let value = value {
+//         let data = NSKeyedArchiver.archivedData(withRootObject: value)
+//         return data.base64EncodedString(options: [])
+//     }
+//     return nil
+// })
 
 let transformJsonStringInt = TransformOf<Int, Any>(fromJSON: { (value: Any?) -> Int? in
     // transform value from String? to Int?

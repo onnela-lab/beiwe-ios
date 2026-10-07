@@ -18,7 +18,6 @@ struct Constants {
     
     static let DEFAULT_UNPOPULATED_APPINFO = "never_populated"
     
-    static let HEARTBEAT_INTERVAL = 300.0 // 5 minutes
     
     static var APP_VERSION: String {
         return Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
@@ -34,6 +33,9 @@ struct Constants {
     
     static let APP_INFO_TAG = "iOS Version: \(Constants.APP_VERSION) Build: \(Constants.APP_BUILD) Commit: \(Constants.APP_COMMIT)"
     static let APP_INFO_SHORT = "\(Constants.APP_VERSION) \(Constants.APP_BUILD) (\(Constants.APP_COMMIT))"
+
+
+    static let HEARTBEAT_INTERVAL = 300.0 // 5 minutes
 }
 
 let DEV_TIMEZONE = "America/New_York"
@@ -43,6 +45,13 @@ let BG_TASK_NAME_BGPROCESSING = "org.beiwe.heartbeat_bgprocessing"
 let BG_TASK_NAME_BGHEALTH = "org.beiwe.heartbeat_bghealth"
 // iOS 26+ continued processing task identifiers are required to be prefixed with the app's bundle id.
 let BG_TASK_NAME_CONTINUED = "\(Bundle.main.bundleIdentifier!).heartbeat_continued"
+
+let DEVICE_INFO_UPDATE_PERIOD: TimeInterval = 60
+let FCM_REFRESH_REQUEST_PERIOD: TimeInterval = 60 * 30
+let DEVICE_SETTINGS_INTERVAL: Int64 = 30 * 60 // hardcoded thirty minutes
+let DEFAULT_NEXT_STATE_CHECK_INTERVAL: TimeInterval = 5 * 60
+let DATA_COLLECTION_TIMER_INVERVAL: TimeInterval = 10 //= 10 * 60  // why on earth was this set to 10 minutes that's terrible, 10 seconds is reasonable
+let EXPLICIT_NETWORK_CHECK_INTERVAL: TimeInterval = 60.0 * 5  // unused?
 
 // Dispatch Queue qos options are: default, background, utility, userInitiated, userInteractive, and unspecified.
 // TODO: document the difference between these.

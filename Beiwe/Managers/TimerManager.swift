@@ -6,9 +6,6 @@ import Foundation
 // for the presense of some location service *stuff* over in AppEventManager), in which case my best guess for that old, _terrible_ factoring
 // is that Keary thought he would need to hook everything into those GPS details.
 
-let DEVICE_SETTINGS_INTERVAL: Int64 = 30 * 60 // hardcoded thirty minutes
-
-let DEFAULT_NEXT_STATE_CHECK_INTERVAL: TimeInterval = 5 * 60
 
 func default_interval_from_now() -> Date {
     return Date(timeIntervalSince1970: Date().timeIntervalSince1970 + DEFAULT_NEXT_STATE_CHECK_INTERVAL)
@@ -123,7 +120,7 @@ class TimerManager {
         
         // print("ToggleLogic")
         let now_interval = now.timeIntervalSince1970
-        var next_toggle_check = now_interval + (10 * 60) // default is a ten minute timer
+        var next_toggle_check = now_interval + DATA_COLLECTION_TIMER_INVERVAL
         
         // for every data service get its nextToggleTime, turn it on or off as appropriate,
         // set state as appropriate, update nextToggleTime.

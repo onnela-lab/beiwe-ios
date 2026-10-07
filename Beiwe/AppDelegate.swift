@@ -69,7 +69,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         
         // start some background looping for core app functionality
         self.firebaseLoop()
-        BACKGROUND_DEVICE_INFO_QUEUE.asyncAfter(deadline: .now() + 60, execute: self.deviceInfoUpdateLoop)
+        BACKGROUND_DEVICE_INFO_QUEUE.asyncAfter(deadline: .now() + DEVICE_INFO_UPDATE_PERIOD, execute: self.deviceInfoUpdateLoop)
                 
         // self.isLoggedIn = true // uncomment to auto log in
         
@@ -202,7 +202,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         self.transitionToLoadedAppState()
     }
     
-    /// Run this function once at app boot and it will rerun itself every minute, updating some stored values that are in turn reported to the server.
+    /// Run this function once at app boot and it will rerun itself every minute,
+    /// updating some stored values that are in turn reported to the server.
     func deviceInfoUpdateLoop() {
         Ephemerals.lastAppStart = self.currentTimestamp
         
@@ -235,7 +236,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         // print("UIApplication.shared.backgroundTimeRemaining:", UIApplication.shared.backgroundTimeRemaining)
         updateBackgroundTasksCount()
         
-        BACKGROUND_DEVICE_INFO_QUEUE.asyncAfter(deadline: .now() + 60, execute: self.deviceInfoUpdateLoop)
+        BACKGROUND_DEVICE_INFO_QUEUE.asyncAfter(deadline: .now() + DEVICE_INFO_UPDATE_PERIOD, execute: self.deviceInfoUpdateLoop)
     }
     
     /// anything that depends on app state at initialization time needs to go after this has run
@@ -710,7 +711,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
             AppEventManager.sharedInstance.logAppEvent(
                 event: "push_notification", msg: "Error registering FCM token: \(error_string)")
             GLOBAL_DEFAULT_QUEUE.asyncAfter(
-                deadline: .now() + 60 * 30, execute: { self.sendFCMToken(fcmToken: self.fcmToken) })
+                deadline: .now() + FCM_REFRESH_REQUEST_PERIOD, execute: { self.sendFCMToken(fcmToken: self.fcmToken) })
         }
     }
     

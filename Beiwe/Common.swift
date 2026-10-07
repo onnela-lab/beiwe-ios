@@ -15,24 +15,24 @@ let log = XCGLogger(identifier: "advancedLogger", includeDefaultDestinations: fa
 /////////////////////////////////// Class Extensions //////////////////////////////
 
 /// Extend the DispatchQueue to have a function called Background
-extension DispatchQueue {
-    // more or less from https://stackoverflow.com/questions/24056205/how-to-use-background-thread-in-swift
-    // the original names were not super descriptive
-    func background(_ background_task: @escaping (() -> Void), completion_task: (() -> Void)? = nil, completeion_delay: Double = 0.0) {
-        self.async {
-            // run the background task
-            background_task()
-            
-            // run completion task
-            if let completion_task = completion_task {
-                self.asyncAfter(deadline: .now() + completeion_delay, execute: { completion_task() })
-            }
-        }
-    }
-    
-    // in simplifying background_completion above I eventually worked out that you dispatch on background thread with a delay like this:
-    // queue.asyncAfter(deadline: .now() + delay, execute: { background_task() })
-}
+// extension DispatchQueue {
+//     // more or less from https://stackoverflow.com/questions/24056205/how-to-use-background-thread-in-swift
+//     // the original names were not super descriptive
+//     func background(_ background_task: @escaping (() -> Void), completion_task: (() -> Void)? = nil, completeion_delay: Double = 0.0) {
+//         self.async {
+//             // run the background task
+//             background_task()
+//             
+//             // run completion task
+//             if let completion_task = completion_task {
+//                 self.asyncAfter(deadline: .now() + completeion_delay, execute: { completion_task() })
+//             }
+//         }
+//     }
+//     
+//     // in simplifying background_completion above I eventually worked out that you dispatch on background thread with a delay like this:
+//     // queue.asyncAfter(deadline: .now() + delay, execute: { background_task() })
+// }
 
 /// Do not have the expertise to actually identify what the warning means
 extension String: LocalizedError {

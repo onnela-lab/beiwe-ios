@@ -573,6 +573,16 @@ class StudyManager {
         }
     }
     
+    // // this in literally just the old way we did this, part of debugging.
+    // func setupHeartbeatOnDispatchQueueOld() {
+    //     // print("Scheduling dispatchqueue heartbeat...")
+    //     HEARTBEAT_QUEUE.asyncAfter(deadline: .now() + Constants.HEARTBEAT_INTERVAL, execute: {
+    //         // printTimer("running heartbeat on dispatch queue \(Date())")
+    //         self.trySendHeartbeat("DispatchQueue")
+    //         self.setupHeartbeatOnDispatchQueueOld()
+    //     })
+    // }
+    
     /// dispatches and rate limits the heartbeat message to the server
     func trySendHeartbeat(_ message: String) {
         let seconds_since_prior = Date().timeIntervalSince1970 - Ephemerals.lastHeartbeat
