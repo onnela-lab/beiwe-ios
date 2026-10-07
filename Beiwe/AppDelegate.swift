@@ -113,12 +113,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         
         // health tasks are not currently functional at all, claude may have fixed it, they still
         // don't really work for our use case anyway
-        // if #available(iOS 17.0, *) {
-        //     tss.register(forTaskWithIdentifier: BG_TASK_NAME_BGHEALTH, using: HEARTBEAT_QUEUE) {
-        //         (task: BGTask) in
-        //         handleBGHRefresh(task: task as! BGHealthResearchTask)
-        //     }
-        // }
+        if #available(iOS 17.0, *) {
+            tss.register(forTaskWithIdentifier: BG_TASK_NAME_BGHEALTH, using: HEARTBEAT_QUEUE) {
+                (task: BGTask) in
+                handleBGHRefresh(task: task as! BGHealthResearchTask)
+            }
+        }
         
         // iOS 26+ continued processing task, not yet enabled - see BeiweBackgroundTasks.swift
         // if #available(iOS 26.0, *) {

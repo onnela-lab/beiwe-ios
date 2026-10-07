@@ -50,32 +50,32 @@ func scheduleProcessingHeartbeat() {
     }
 }
 
-// @available(iOS 17.0, *)
-// func scheduleHealthHeartbeat() {
-//     // print("background - scheduling health heartbeat")
-//     let request = BGHealthResearchTaskRequest(identifier: BG_TASK_NAME_BGHEALTH)
-//     request.earliestBeginDate = Date(timeIntervalSinceNow: 30)
-//     request.requiresExternalPower = false
-//     request.requiresNetworkConnectivity = true
-//     request.protectionTypeOfRequiredData = "junk"
-//     do {
-//         try BGTaskScheduler.shared.submit(request)
-//     } catch {
-//         // capture and report this error to sentry.
-//         SentrySDK.capture(message: "not a crash - scheduling health heartbeat: \(error)") { (scope: Scope) in
-//             scope.setEnvironment(Constants.APP_INFO_TAG)
-//             scope.setLevel(.error)
-//         }
-//     }
-// }
+@available(iOS 17.0, *)
+func scheduleHealthHeartbeat() {
+    // print("background - scheduling health heartbeat")
+    let request = BGHealthResearchTaskRequest(identifier: BG_TASK_NAME_BGHEALTH)
+    request.earliestBeginDate = Date(timeIntervalSinceNow: 30)
+    request.requiresExternalPower = false
+    request.requiresNetworkConnectivity = true
+    request.protectionTypeOfRequiredData = "junk"
+    do {
+        try BGTaskScheduler.shared.submit(request)
+    } catch {
+        // capture and report this error to sentry.
+        SentrySDK.capture(message: "not a crash - scheduling health heartbeat: \(error)") { (scope: Scope) in
+            scope.setEnvironment(Constants.APP_INFO_TAG)
+            scope.setLevel(.error)
+        }
+    }
+}
 
 func scheduleAllHeartbeats() {
     print("background - scheduling all heartbeats")
     scheduleRefreshHeartbeat()
     scheduleProcessingHeartbeat()
-    // if #available(iOS 17.0, *) {
-    //     scheduleHealthHeartbeat()
-    // }
+    if #available(iOS 17.0, *) {
+        scheduleHealthHeartbeat()
+    }
     // continued processing tasks can only be submitted from the foreground
     // if #available(iOS 26.0, *) {
     //     submitContinuedProcessingHeartbeat()
@@ -101,12 +101,12 @@ func updateBackgroundTasksCount() {
             }
             // the background health tasks DO NOT SHOW UP. This is not a version-gating bug, I tested it THOROUGHLY,
             // it's either another bug or they are hidden and are not visible to the getPendingTaskRequests function.
-            // if #available(iOS 17.0, *) {
-            //     if let health_task_request = request as? BGHealthResearchTaskRequest {
-            //         // print("background - \t BGHealthResearchTaskRequest - ", request.identifier, request.earliestBeginDate!)
-            //         info.append("BGHealthResearchTaskRequest \(request.identifier):\(request.earliestBeginDate!)")
-            //     }
-            // }
+            if #available(iOS 17.0, *) {
+                if let health_task_request = request as? BGHealthResearchTaskRequest {
+                    // print("background - \t BGHealthResearchTaskRequest - ", request.identifier, request.earliestBeginDate!)
+                    info.append("BGHealthResearchTaskRequest \(request.identifier):\(request.earliestBeginDate!)")
+                }
+            }
         }
         Ephemerals.background_task_count = info.joined(separator: ",")
         // print(Ephemerals.background_task_count)
@@ -140,6 +140,15 @@ func handleBGPRefresh(task: BGProcessingTask) {
     StudyManager.sharedInstance.trySendHeartbeat("BGProcessingTask")
     runAllBackgroundTasks()
     task.setTaskCompleted(success: !expired)
+}
+
+@available(iOS 17.0, *)
+func handleBGHRefresh(task: BGHealthResearchTask) {
+    print("background - handle health...")
+    scheduleHealthHeartbeat()
+    // print("background - BGHealthResearchTask - the handler is getting called \(dateFormatLocal(Date()))")
+    StudyManager.sharedInstance.trySendHeartbeat("BGHealthResearchTask")
+    runAllBackgroundTasks()
 }
 
 // Claude (Fable 5.1):
@@ -191,14 +200,6 @@ func handleBGPRefresh(task: BGProcessingTask) {
 //     task.setTaskCompleted(success: !expired)
 // }
 
-// @available(iOS 17.0, *)
-// func handleBGHRefresh(task: BGHealthResearchTask) {
-//     print("background - handle health...")
-//     scheduleHealthHeartbeat()
-//     // print("background - BGHealthResearchTask - the handler is getting called \(dateFormatLocal(Date()))")
-//     StudyManager.sharedInstance.heartbeat("BGHealthResearchTask")
-//     runAllBackgroundTasks()
-// }
 
 func runAllBackgroundTasks() {
     // return without anything if study is not started
