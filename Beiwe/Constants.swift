@@ -38,6 +38,27 @@ struct Constants {
     static let HEARTBEAT_INTERVAL = 300.0 // 5 minutes
 }
 
+struct Ephemerals {
+    // device info statuses
+    static var notification_permission = "not populated, this is an app bug"
+    static var locationServicesEnabledDescription = "not populated, this is an app bug"
+    static var significantLocationChangeMonitoringAvailable = "not populated, this is an app bug"
+    static var backgroundRefreshStatus = "not populated, this is an app bug"
+    static var transition_count = 0
+    static var background_task_count = "(not populated yet?)"
+    static var start_last_upload = "not populated"
+    static var end_last_upload = "not populated"
+    
+    static var lastAppStart = Constants.DEFAULT_UNPOPULATED_APPINFO
+    static var lastApplicationDidBecomeActive = Constants.DEFAULT_UNPOPULATED_APPINFO
+    static var lastApplicationDidEnterBackground = Constants.DEFAULT_UNPOPULATED_APPINFO
+    static var lastApplicationDidReceiveMemoryWarning = Constants.DEFAULT_UNPOPULATED_APPINFO
+    static var lastSuccessfulLogin = Constants.DEFAULT_UNPOPULATED_APPINFO
+    
+    static var lastHeartbeat = 0.0
+}
+
+
 let DEV_TIMEZONE = "America/New_York"
 
 let BG_TASK_NAME_BGREFRESH = "org.beiwe.heartbeat_bgrefresh"
@@ -63,8 +84,8 @@ let GLOBAL_UTILITY_QUEUE = DispatchQueue.global(qos: .utility)
 let HEARTBEAT_QUEUE = DispatchQueue(label: "org.beiwe.heartbeat_queue", qos: .userInitiated, attributes: [])
 let BACKGROUND_DEVICE_INFO_QUEUE = DispatchQueue(label: "org.beiwe.background_device_info_queue", qos: .background, attributes: [])
 let BACKGROUND_DEVICE_INFO_FAST_QUEUE = DispatchQueue(label: "org.beiwe.background_device_info_queue", qos: .userInteractive, attributes: [])
-let TIMER_QUEUE = DispatchQueue(label: "org.beiwe.timer_queue", attributes: [])
-let INNER_RECLINE_QUEUE = DispatchQueue(label: "org.beiwe.recline_queue_1", qos: .userInteractive, attributes: []) // setting high on this queue because it is the database.
+// let TIMER_QUEUE = DispatchQueue(label: "org.beiwe.timer_queue", attributes: [])
+// let INNER_RECLINE_QUEUE = DispatchQueue(label: "org.beiwe.recline_queue_1", qos: .userInteractive, attributes: []) // setting high on this queue because it is the database.
 let OUTER_RECLINE_QUEUE = DispatchQueue(label: "org.beiwe.recline_queue_2", qos: .userInteractive, attributes: []) // setting high on this queue because it is the database.
 let POST_UPLOAD_QUEUE = DispatchQueue(label: "org.beiwe.postupload_queue", qos: .default, attributes: [])
 let UPLOAD_DISPATCH_QUEUE = DispatchQueue(label: "org.beiwe.run_upload_queue", qos: .background, attributes: [])
@@ -75,22 +96,3 @@ let GPS_CACHE_SIZE = 100
 let GYRO_CACHE_SIZE = 100
 let MAGNETOMETER_CACHE_SIZE = 100
 
-struct Ephemerals {
-    // device info statuses
-    static var notification_permission = "not populated, this is an app bug"
-    static var locationServicesEnabledDescription = "not populated, this is an app bug"
-    static var significantLocationChangeMonitoringAvailable = "not populated, this is an app bug"
-    static var backgroundRefreshStatus = "not populated, this is an app bug"
-    static var transition_count = 0
-    static var background_task_count = "(not populated yet?)"
-    static var start_last_upload = "not populated"
-    static var end_last_upload = "not populated"
-    
-    static var lastAppStart = Constants.DEFAULT_UNPOPULATED_APPINFO
-    static var lastApplicationDidBecomeActive = Constants.DEFAULT_UNPOPULATED_APPINFO
-    static var lastApplicationDidEnterBackground = Constants.DEFAULT_UNPOPULATED_APPINFO
-    static var lastApplicationDidReceiveMemoryWarning = Constants.DEFAULT_UNPOPULATED_APPINFO
-    static var lastSuccessfulLogin = Constants.DEFAULT_UNPOPULATED_APPINFO
-    
-    static var lastHeartbeat = 0.0
-}

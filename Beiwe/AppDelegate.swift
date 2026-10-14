@@ -23,7 +23,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     let gcmMessageIDKey = "gcm.message_id"
     
     // ui stuff
-    var window: UIWindow? // this needs to be present according to docs
+    var window: UIWindow? // set by SceneDelegate
+    var pendingRootViewController: UIViewController? // root view requested before the scene connected
     var storyboard: UIStoryboard?
     var currentRootView: String? = "launchScreen"
     
@@ -725,10 +726,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         rkAppearance.tintColor = AppColors.tintColor
         // set core ui to load launch screen - this is only called at app-open, don't wrap in DispatchQueue.main.async
         self.storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
-        self.window = UIWindow(frame: UIScreen.main.bounds)
-        self.window?.rootViewController = UIStoryboard(
-            name: "LaunchScreen", bundle: Bundle.main).instantiateViewController(withIdentifier: "launchScreen")
-        self.window!.makeKeyAndVisible()
+        // the window is created by SceneDelegate, see sceneDidCreateWindow.
+    }
+    
+    // required starting is xcode 27
+    /// Called by SceneDelegate when the window exists (after application(_:didFinishLaunchingWithOptions:)).
+    func sceneDidCreateWindow(_ window: UIWindow) {
+        if let pending = self.pendingRootViewController {
+            // a transition was requested before the window existed, honor it instead of the launch screen.
+            self.pendingRootViewController = nil
+            window.rootViewController = pending
+        } else {
+            window.rootViewController = UIStoryboard(
+                name: "LaunchScreen", bundle: Bundle.main).instantiateViewController(withIdentifier: "launchScreen")
+        }
+        window.makeKeyAndVisible()
     }
 
     /// Helper function for setting root view controller by name
@@ -758,9 +770,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         //   proximate cause / source of the thing I'm going to continue to call a race condition.
         DispatchQueue.main.async {
             self.currentRootView = identifier
-            let snapshot: UIView = (self.window?.snapshotView(afterScreenUpdates: true))!
+            // the scene may not have connected yet, SceneDelegate will apply this once the window exists.
+            // required starting is xcode 27
+            guard let window = self.window else {
+                self.pendingRootViewController = desiredViewController
+                return
+            }
+            let snapshot: UIView = window.snapshotView(afterScreenUpdates: true)!
             desiredViewController.view.addSubview(snapshot)
-            self.window?.rootViewController = desiredViewController
+            window.rootViewController = desiredViewController
             // simple zoom animation for transitions
             UIView.animate(withDuration: 0.3, animations: { () in
                 snapshot.layer.opacity = 0

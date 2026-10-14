@@ -86,6 +86,7 @@
 		AA9EE0CE2BEBD96E00F53756 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA9EE0CD2BEBD96E00F53756 /* PrivacyInfo.xcprivacy */; };
 		AAA8A3912B63C22400D20000 /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA8A3902B63C22400D20000 /* Common.swift */; };
 		AAEA006E2B7150B2008DDDC7 /* BeiweBackgroundTasks.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAEA006D2B7150B2008DDDC7 /* BeiweBackgroundTasks.swift */; };
+		AAEA00A02B7150B2008DDDC7 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAEA00A12B7150B2008DDDC7 /* SceneDelegate.swift */; };
 		ED3081F77ECC8C876F5EF53A /* Pods_Beiwe.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A42DC84D7FED35C57E1B1EE0 /* Pods_Beiwe.framework */; };
 /* End PBXBuildFile section */
 
@@ -193,6 +194,7 @@
 		AA9EE0CD2BEBD96E00F53756 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		AAA8A3902B63C22400D20000 /* Common.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Common.swift; sourceTree = "<group>"; };
 		AAEA006D2B7150B2008DDDC7 /* BeiweBackgroundTasks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeiweBackgroundTasks.swift; sourceTree = "<group>"; };
+		AAEA00A12B7150B2008DDDC7 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		B58A34E5862CE908C83EB133 /* Pods-Beiwe.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Beiwe.release.xcconfig"; path = "Target Support Files/Pods-Beiwe/Pods-Beiwe.release.xcconfig"; sourceTree = "<group>"; };
 		C222DB6B2786C1ED00ACB3EC /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		E949EF7428480E59009E183F /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Main.strings; sourceTree = "<group>"; };
@@ -444,6 +446,7 @@
 				83AF20DB1CA3537200D3DF02 /* Constants.swift */,
 				AAA8A3902B63C22400D20000 /* Common.swift */,
 				AAEA006D2B7150B2008DDDC7 /* BeiweBackgroundTasks.swift */,
+				AAEA00A12B7150B2008DDDC7 /* SceneDelegate.swift */,
 			);
 			path = Beiwe;
 			sourceTree = "<group>";
@@ -749,6 +752,7 @@
 				832FFC2F1CC9C30E00F2E1EF /* BWXLAction.swift in Sources */,
 				83AF04271CADA02A00A37225 /* AccelerometerManager.swift in Sources */,
 				AAEA006E2B7150B2008DDDC7 /* BeiweBackgroundTasks.swift in Sources */,
+				AAEA00A02B7150B2008DDDC7 /* SceneDelegate.swift in Sources */,
 				832FFC321CC9C3CD00F2E1EF /* ActionData.swift in Sources */,
 				832FFC351CCED80200F2E1EF /* AudioQuestionViewController.swift in Sources */,
 				83F98C3A1C923C3600E0B64B /* AppDelegate.swift in Sources */,
@@ -848,7 +852,7 @@
 					"$(inherited)",
 					recursive,
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_WARN_DUPLICATE_LIBRARIES = YES;
 				LLVM_LTO = YES;
 				MARKETING_VERSION = 1.8.0;
@@ -875,7 +879,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2026.14;
+				CURRENT_PROJECT_VERSION = 2026.16;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 6M52R5C7FT;
 				ENABLE_BITCODE = NO;
@@ -955,7 +959,7 @@
 					"$(inherited)",
 					recursive,
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_WARN_DUPLICATE_LIBRARIES = YES;
 				LLVM_LTO = YES;
 				MARKETING_VERSION = 1.8.0;
@@ -981,7 +985,7 @@
 				CODE_SIGN_ENTITLEMENTS = Beiwe/Beiwe2Release2.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2026.14;
+				CURRENT_PROJECT_VERSION = 2026.16;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 6M52R5C7FT;
 				ENABLE_BITCODE = NO;
@@ -1063,7 +1067,7 @@
 					"$(inherited)",
 					recursive,
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_WARN_DUPLICATE_LIBRARIES = YES;
 				LLVM_LTO = YES;
 				MARKETING_VERSION = 1.8.0;
@@ -1131,7 +1135,7 @@
 					"$(inherited)",
 					recursive,
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_WARN_DUPLICATE_LIBRARIES = YES;
 				LLVM_LTO = YES;
 				MARKETING_VERSION = 1.8.0;
@@ -1159,7 +1163,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2026.14;
+				CURRENT_PROJECT_VERSION = 2026.16;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 6M52R5C7FT;
 				ENABLE_BITCODE = NO;
@@ -1197,7 +1201,7 @@
 				CODE_SIGN_ENTITLEMENTS = Beiwe/Beiwe2Release.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2026.14;
+				CURRENT_PROJECT_VERSION = 2026.16;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
