@@ -64,7 +64,6 @@
 		83C7D37A1CB4E30C00BC7285 /* UploadRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C7D3791CB4E30C00BC7285 /* UploadRequest.swift */; };
 		83C7D3831CB5943B00BC7285 /* BWBorderedButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 83C7D3801CB5943B00BC7285 /* BWBorderedButton.m */; };
 		83C7D3841CB5943B00BC7285 /* BWTextButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 83C7D3821CB5943B00BC7285 /* BWTextButton.m */; };
-		83C7D3891CB5F43400BC7285 /* TaskListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C7D3881CB5F43400BC7285 /* TaskListViewController.swift */; };
 		83E3DE731CA37F7600EB5349 /* MiscHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E3DE721CA37F7600EB5349 /* MiscHelpers.swift */; };
 		83E3DE761CA3967A00EB5349 /* StudySettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E3DE751CA3967A00EB5349 /* StudySettings.swift */; };
 		83E3DE8C1CA4600500EB5349 /* RegisterStudyRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E3DE8B1CA4600500EB5349 /* RegisterStudyRequest.swift */; };
@@ -162,7 +161,6 @@
 		83C7D3801CB5943B00BC7285 /* BWBorderedButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BWBorderedButton.m; sourceTree = "<group>"; };
 		83C7D3811CB5943B00BC7285 /* BWTextButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BWTextButton.h; sourceTree = "<group>"; };
 		83C7D3821CB5943B00BC7285 /* BWTextButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BWTextButton.m; sourceTree = "<group>"; };
-		83C7D3881CB5F43400BC7285 /* TaskListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TaskListViewController.swift; sourceTree = "<group>"; };
 		83E3DE721CA37F7600EB5349 /* MiscHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MiscHelpers.swift; sourceTree = "<group>"; };
 		83E3DE751CA3967A00EB5349 /* StudySettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StudySettings.swift; sourceTree = "<group>"; };
 		83E3DE7B1CA3A37E00EB5349 /* Config-Dbg.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Config-Dbg.plist"; sourceTree = "<group>"; };
@@ -388,7 +386,6 @@
 				83AF043C1CB35D2000A37225 /* LoginViewController.swift */,
 				83AF04201CACC1C900A37225 /* MainViewController.swift */,
 				833482F61CA2EF7E00A37B35 /* RegisterViewController.swift */,
-				83C7D3881CB5F43400BC7285 /* TaskListViewController.swift */,
 				83FDCFD71CBC8E4700AFF716 /* TrackingSurveyPresenter.swift */,
 			);
 			path = Controllers;
@@ -728,7 +725,6 @@
 				83B4D6721CA8DBB2001BF283 /* Study.swift in Sources */,
 				AA63EFB729C2E0FE0074F735 /* DataService.swift in Sources */,
 				833482F71CA2EF7E00A37B35 /* RegisterViewController.swift in Sources */,
-				83C7D3891CB5F43400BC7285 /* TaskListViewController.swift in Sources */,
 				AA92FB6729D5D1800009F620 /* TimerManager.swift in Sources */,
 				83914CAD1D00DA1100B01C82 /* ForgotPasswordHeaderView.swift in Sources */,
 				83B4D6771CAA05E0001BF283 /* Recline.swift in Sources */,
@@ -879,7 +875,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2026.16;
+				CURRENT_PROJECT_VERSION = 2026.20;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 6M52R5C7FT;
 				ENABLE_BITCODE = NO;
@@ -985,7 +981,7 @@
 				CODE_SIGN_ENTITLEMENTS = Beiwe/Beiwe2Release2.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2026.16;
+				CURRENT_PROJECT_VERSION = 2026.20;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 6M52R5C7FT;
 				ENABLE_BITCODE = NO;
@@ -1163,7 +1159,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2026.16;
+				CURRENT_PROJECT_VERSION = 2026.20;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 6M52R5C7FT;
 				ENABLE_BITCODE = NO;
@@ -1201,7 +1197,7 @@
 				CODE_SIGN_ENTITLEMENTS = Beiwe/Beiwe2Release.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2026.16;
+				CURRENT_PROJECT_VERSION = 2026.20;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;

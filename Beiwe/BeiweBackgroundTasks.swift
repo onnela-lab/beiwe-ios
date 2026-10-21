@@ -127,7 +127,8 @@ func handleBGRefresh(task: BGAppRefreshTask) {
         expired = true
     }
     StudyManager.sharedInstance.trySendHeartbeat("BGAppRefreshTask")
-    runAllBackgroundTasks()
+    // disabled after substantial long term data quantity reduction
+    // runAllBackgroundTasks()
     task.setTaskCompleted(success: !expired)
 }
 
@@ -138,7 +139,8 @@ func handleBGPRefresh(task: BGProcessingTask) {
         expired = true
     }
     StudyManager.sharedInstance.trySendHeartbeat("BGProcessingTask")
-    runAllBackgroundTasks()
+    // disabled after substantial long term data quantity reduction
+    // runAllBackgroundTasks()
     task.setTaskCompleted(success: !expired)
 }
 
