@@ -776,7 +776,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
                 self.pendingRootViewController = desiredViewController
                 return
             }
-            let snapshot: UIView = window.snapshotView(afterScreenUpdates: true)!
+            // snapshotView returns nil when the window hasn't been rendered (seen in the wild right at launch), in
+            // which case there is nothing to animate, just swap the root.
+            guard let snapshot: UIView = window.snapshotView(afterScreenUpdates: true) else {
+                window.rootViewController = desiredViewController
+                return
+            }
             desiredViewController.view.addSubview(snapshot)
             window.rootViewController = desiredViewController
             // simple zoom animation for transitions
