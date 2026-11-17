@@ -179,6 +179,20 @@ func isoStringToTimeInterval(timeString: String?) -> TimeInterval {
 }
 // END isoStringToTimeInterval
 
+// BEGIN leftBehindFiles (copied into tests/, keep Foundation-only)
+/// entries are absolute paths, the listing is relative names, so compare last path components
+func leftBehindFilesToMove(entries: [String], directoryListing: [String]) -> [String] {
+    let names = Set(entries.map { ($0 as NSString).lastPathComponent })
+    return directoryListing.filter { names.contains(($0 as NSString).lastPathComponent) }
+}
+
+/// entries whose file is still in the directory, ie the move failed
+func leftBehindEntriesToKeep(entries: [String], directoryListing: [String]) -> [String] {
+    let present = Set(directoryListing.map { ($0 as NSString).lastPathComponent })
+    return entries.filter { present.contains(($0 as NSString).lastPathComponent) }
+}
+// END leftBehindFiles
+
 //////////////////////////////// CONVENIENCE JSON FUNCTIONS ///////////////////////////////////
 //////////////////////////////// CONVENIENCE JSON FUNCTIONS ///////////////////////////////////
 //////////////////////////////// CONVENIENCE JSON FUNCTIONS ///////////////////////////////////

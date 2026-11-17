@@ -7,6 +7,7 @@
 cp Beiwe/RK/surveyQuestionDisplayLogic.swift tests/Sources/SurveyQuestionDisplayLogic/surveyQuestionDisplayLogic.swift 
 
 { echo "import Foundation"; sed -n '/^\/\/ BEGIN isoStringToTimeInterval/,/^\/\/ END isoStringToTimeInterval/p' Beiwe/Common.swift; } > tests/Sources/SurveyQuestionDisplayLogic/isoStringToTimeInterval.swift
+{ echo "import Foundation"; sed -n '/^\/\/ BEGIN leftBehindFiles/,/^\/\/ END leftBehindFiles/p' Beiwe/Common.swift; } > tests/Sources/SurveyQuestionDisplayLogic/leftBehindFiles.swift
 mkdir -p tests/Sources/SurveyQuestionDisplayLogic/Models
 cp Beiwe/Models/*.swift tests/Sources/SurveyQuestionDisplayLogic/Models/
 { echo "import Foundation"; echo "import ObjectMapper"; sed -n "/^\\/\\/ BEGIN modelTransforms/,/^\\/\\/ END modelTransforms/p" Beiwe/Util/MiscHelpers.swift; } > tests/Sources/SurveyQuestionDisplayLogic/Models/ModelTransforms.swift

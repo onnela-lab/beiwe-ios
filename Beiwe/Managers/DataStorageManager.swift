@@ -202,27 +202,31 @@ class DataStorageManager {
     
     /// Moves any left behinde files in the data directory. Called just before upload.
     func moveLeftBehindFilesToUpload() {
-        // safely get reference so that it can't be cleared or updated out from under us
+        // don't clear the list yet, failed moves must retry next upload
         LEFT_BEHIND_FILES_LOCK.lock()
         let left_behind_files = LEFT_BEHIND_FILES
-        LEFT_BEHIND_FILES = []
         LEFT_BEHIND_FILES_LOCK.unlock()
+        if left_behind_files.isEmpty { return }
         
-        var filesToMove: [String] = []
-        if let enumerator = FileManager.default.enumerator(atPath: DataStorageManager.currentDataDirectory().path) {
-            // for each file check its file type and add to list
-            while let filename = enumerator.nextObject() as? String {
-                if left_behind_files.contains(filename) {
-                    filesToMove.append(filename)
-                    print("found left behind file \(filename) to move to uploads.")
-                }
-            }
+        let current_dir = DataStorageManager.currentDataDirectory()
+        func listing() -> [String] {
+            return (FileManager.default.enumerator(atPath: current_dir.path)?.allObjects as? [String]) ?? []
         }
-        for filename in filesToMove {
-            self.moveFile(DataStorageManager.currentDataDirectory().appendingPathComponent(filename),
+        
+        for filename in leftBehindFilesToMove(entries: left_behind_files, directoryListing: listing()) {
+            print("found left behind file \(filename) to move to uploads.")
+            self.moveFile(current_dir.appendingPathComponent(filename),
                           dst: DataStorageManager.uploadDataDirectory().appendingPathComponent(filename))
             print("Moved left behind file \(shortenPath(filename)) to upload directory.")
         }
+        
+        // moveFile swallows failures, so check the directory
+        let keep = leftBehindEntriesToKeep(entries: left_behind_files, directoryListing: listing())
+        LEFT_BEHIND_FILES_LOCK.lock()
+        // only remove the snapshot, other threads may have appended
+        LEFT_BEHIND_FILES.removeAll { left_behind_files.contains($0) }
+        LEFT_BEHIND_FILES.append(contentsOf: keep)
+        LEFT_BEHIND_FILES_LOCK.unlock()
     }
     
     /// called at app start, moves any uploadable files that were never moved to upload to upload folder
