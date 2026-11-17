@@ -150,16 +150,31 @@ func timestampString() -> String {
     return dateFormat(Date())
 }
 
-/// converts the iso time string format to a TimeInterval (integer)
+/// Converts an ISO-style time string to a TimeInterval (seconds since 1970).
+/// Used in one place where the was a DST gap that could cause a crash.
+/// Forces utc on instances where there is no timezone indicator.
 func isoStringToTimeInterval(timeString: String?) -> TimeInterval {
-    guard  let timeString = timeString  else {
+    guard let timeString = timeString else {
         return 0
     }
-    let dateFormatter = DateFormatter()
-    dateFormatter.locale = Locale(identifier: "en_US_POSIX") // set locale to reliable US_POSIX
-    dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-    let sentTime = dateFormatter.date(from: timeString)!
-    return sentTime.timeIntervalSince1970
+    let formatter = DateFormatter()
+    formatter.locale = Locale(identifier: "en_US_POSIX") // reliable, calendar independent parsing
+    // Formats with an explicit zone, with and without fractional seconds. XXXXX accepts Z, +HH:MM and +HHMM.
+    for format in ["yyyy-MM-dd'T'HH:mm:ssXXXXX", "yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX"] {
+        formatter.dateFormat = format
+        if let date = formatter.date(from: timeString) {
+            return date.timeIntervalSince1970
+        }
+    }
+    // No zone designator: the server sends UTC.
+    formatter.timeZone = TimeZone(identifier: "UTC")
+    for format in ["yyyy-MM-dd'T'HH:mm:ss", "yyyy-MM-dd'T'HH:mm:ss.SSS"] {
+        formatter.dateFormat = format
+        if let date = formatter.date(from: timeString) {
+            return date.timeIntervalSince1970
+        }
+    }
+    return 0
 }
 
 //////////////////////////////// CONVENIENCE JSON FUNCTIONS ///////////////////////////////////

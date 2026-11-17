@@ -404,7 +404,7 @@ class StudyManager {
         for survey in study.surveys {
             if surveyIds.contains(survey.surveyId!) {
                 let activeSurvey = ActiveSurvey(survey: survey)
-                activeSurvey.received = sentTime // used to sort surveys on the main screen.
+                activeSurvey.received = sentTime // the push's sent_time, stored as received; not used for sorting.
                 
                 // update the survey notification
                 if let notification_uuids = survey_ids_to_notification_uuids?[survey.surveyId!] {

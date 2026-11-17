@@ -553,7 +553,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         // activate received notifications
         StudyManager.sharedInstance.checkForNewSurveys(
             surveyIds: surveyIds,
-            sentTime: isoStringToTimeInterval(timeString: sentTimeString),  //  used to order surveys
+            sentTime: isoStringToTimeInterval(timeString: sentTimeString),  // stored as ActiveSurvey.received
             survey_ids_to_notification_uuids: survey_ids_to_notification_uuids
         )
     }
