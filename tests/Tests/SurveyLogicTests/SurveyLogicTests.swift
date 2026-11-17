@@ -338,77 +338,77 @@ class EvaluateSingleLogicPairTests: UnbufferedTestCase {
 
     // MARK: numeric dispatch
 
-    func testNumericEqualsTrue() {
+    func testNumericEqualsTrue() throws {
         let task = makeTask("q1", choiceAnswers: [3])
-        XCTAssertTrue(evaluateSingleLogicPair("==", numericPayload("q1", 3), task))
+        XCTAssertTrue(try evaluateSingleLogicPair("==", numericPayload("q1", 3), task))
     }
 
-    func testNumericEqualsFalse() {
+    func testNumericEqualsFalse() throws {
         let task = makeTask("q1", choiceAnswers: [4])
-        XCTAssertFalse(evaluateSingleLogicPair("==", numericPayload("q1", 3), task))
+        XCTAssertFalse(try evaluateSingleLogicPair("==", numericPayload("q1", 3), task))
     }
 
-    func testNumericLessThan() {
+    func testNumericLessThan() throws {
         let task = makeTask("q1", choiceAnswers: [2])
-        XCTAssertTrue(evaluateSingleLogicPair("<", numericPayload("q1", 5), task))
+        XCTAssertTrue(try evaluateSingleLogicPair("<", numericPayload("q1", 5), task))
     }
 
-    func testNumericGreaterThan() {
+    func testNumericGreaterThan() throws {
         let task = makeTask("q1", choiceAnswers: [7])
-        XCTAssertTrue(evaluateSingleLogicPair(">", numericPayload("q1", 5), task))
+        XCTAssertTrue(try evaluateSingleLogicPair(">", numericPayload("q1", 5), task))
     }
 
     // MARK: and
 
-    func testAndAllConditionsTrue() {
+    func testAndAllConditionsTrue() throws {
         let task = makeTask("q1", choiceAnswers: [3])
         task.addStepResult(StepRes(results: [ChoiceRes(choiceAnswers: [7])]), forIdentifier: "q2")
         let payload = logicList([("==", "q1", 3), ("==", "q2", 7)])
-        XCTAssertTrue(evaluateSingleLogicPair("and", payload, task))
+        XCTAssertTrue(try evaluateSingleLogicPair("and", payload, task))
     }
 
-    func testAndOneConditionFalse() {
+    func testAndOneConditionFalse() throws {
         let task = makeTask("q1", choiceAnswers: [3])
         task.addStepResult(StepRes(results: [ChoiceRes(choiceAnswers: [9])]), forIdentifier: "q2")
         let payload = logicList([("==", "q1", 3), ("==", "q2", 7)])  // q2 is 9, not 7
-        XCTAssertFalse(evaluateSingleLogicPair("and", payload, task))
+        XCTAssertFalse(try evaluateSingleLogicPair("and", payload, task))
     }
 
     // MARK: or
 
-    func testOrFirstConditionTrue() {
+    func testOrFirstConditionTrue() throws {
         let task = makeTask("q1", choiceAnswers: [3])
         task.addStepResult(StepRes(results: [ChoiceRes(choiceAnswers: [9])]), forIdentifier: "q2")
         let payload = logicList([("==", "q1", 3), ("==", "q2", 7)])  // q1 matches, q2 doesn't
-        XCTAssertTrue(evaluateSingleLogicPair("or", payload, task))
+        XCTAssertTrue(try evaluateSingleLogicPair("or", payload, task))
     }
 
-    func testOrAllConditionsFalse() {
+    func testOrAllConditionsFalse() throws {
         let task = makeTask("q1", choiceAnswers: [0])
         task.addStepResult(StepRes(results: [ChoiceRes(choiceAnswers: [0])]), forIdentifier: "q2")
         let payload = logicList([("==", "q1", 3), ("==", "q2", 7)])  // neither matches
-        XCTAssertFalse(evaluateSingleLogicPair("or", payload, task))
+        XCTAssertFalse(try evaluateSingleLogicPair("or", payload, task))
     }
 
     // MARK: not
 
-    func testNotInvertsTrue() {
+    func testNotInvertsTrue() throws {
         let task = makeTask("q1", choiceAnswers: [3])
         // q1 == 3 is true, not should flip it to false
         let payload = NSDictionary(dictionary: ["==": numericPayload("q1", 3)])
-        XCTAssertFalse(evaluateSingleLogicPair("not", payload, task))
+        XCTAssertFalse(try evaluateSingleLogicPair("not", payload, task))
     }
 
-    func testNotInvertsFalse() {
+    func testNotInvertsFalse() throws {
         let task = makeTask("q1", choiceAnswers: [0])
         // q1 == 3 is false, not should flip it to true
         let payload = NSDictionary(dictionary: ["==": numericPayload("q1", 3)])
-        XCTAssertTrue(evaluateSingleLogicPair("not", payload, task))
+        XCTAssertTrue(try evaluateSingleLogicPair("not", payload, task))
     }
 
     // MARK: nested
 
-    func testOrContainingAnd() {
+    func testOrContainingAnd() throws {
         // or(and(q1==3, q2==7), q1==99) — q1 is 3, q2 is 7 → and is true → or is true
         let task = makeTask("q1", choiceAnswers: [3])
         task.addStepResult(StepRes(results: [ChoiceRes(choiceAnswers: [7])]), forIdentifier: "q2")
@@ -417,7 +417,7 @@ class EvaluateSingleLogicPairTests: UnbufferedTestCase {
             NSDictionary(dictionary: ["and": andPayload]),
             NSDictionary(dictionary: ["==": numericPayload("q1", 99)]),
         ])
-        XCTAssertTrue(evaluateSingleLogicPair("or", orPayload, task))
+        XCTAssertTrue(try evaluateSingleLogicPair("or", orPayload, task))
     }
 
 }
@@ -445,7 +445,7 @@ class NestedLogicTests: UnbufferedTestCase {
 
     // MARK: and containing or
 
-    func testAndContainingOrAllTrue() {
+    func testAndContainingOrAllTrue() throws {
         // and(or(q1==3, q1==5), q2==7) — q1=3 satisfies or, q2=7 satisfies and → true
         let task = makeTask(["q1": [3], "q2": [7]])
         let orPayload = NSArray(array: [entry("==", "q1", 3), entry("==", "q1", 5)])
@@ -453,10 +453,10 @@ class NestedLogicTests: UnbufferedTestCase {
             NSDictionary(dictionary: ["or": orPayload]),
             entry("==", "q2", 7),
         ])
-        XCTAssertTrue(evaluateSingleLogicPair("and", andPayload, task))
+        XCTAssertTrue(try evaluateSingleLogicPair("and", andPayload, task))
     }
 
-    func testAndContainingOrInnerFails() {
+    func testAndContainingOrInnerFails() throws {
         // and(or(q1==3, q1==5), q2==7) — q1=0 fails or → and is false
         let task = makeTask(["q1": [0], "q2": [7]])
         let orPayload = NSArray(array: [entry("==", "q1", 3), entry("==", "q1", 5)])
@@ -464,10 +464,10 @@ class NestedLogicTests: UnbufferedTestCase {
             NSDictionary(dictionary: ["or": orPayload]),
             entry("==", "q2", 7),
         ])
-        XCTAssertFalse(evaluateSingleLogicPair("and", andPayload, task))
+        XCTAssertFalse(try evaluateSingleLogicPair("and", andPayload, task))
     }
 
-    func testAndContainingOrOuterFails() {
+    func testAndContainingOrOuterFails() throws {
         // and(or(q1==3, q1==5), q2==7) — or passes but q2=0 fails and → false
         let task = makeTask(["q1": [3], "q2": [0]])
         let orPayload = NSArray(array: [entry("==", "q1", 3), entry("==", "q1", 5)])
@@ -475,12 +475,12 @@ class NestedLogicTests: UnbufferedTestCase {
             NSDictionary(dictionary: ["or": orPayload]),
             entry("==", "q2", 7),
         ])
-        XCTAssertFalse(evaluateSingleLogicPair("and", andPayload, task))
+        XCTAssertFalse(try evaluateSingleLogicPair("and", andPayload, task))
     }
 
     // MARK: or containing and
 
-    func testOrContainingAndSecondBranchTrue() {
+    func testOrContainingAndSecondBranchTrue() throws {
         // or(q1==99, and(q1==3, q2==7)) — first branch fails, second passes → true
         let task = makeTask(["q1": [3], "q2": [7]])
         let andPayload = NSArray(array: [entry("==", "q1", 3), entry("==", "q2", 7)])
@@ -488,10 +488,10 @@ class NestedLogicTests: UnbufferedTestCase {
             entry("==", "q1", 99),
             NSDictionary(dictionary: ["and": andPayload]),
         ])
-        XCTAssertTrue(evaluateSingleLogicPair("or", orPayload, task))
+        XCTAssertTrue(try evaluateSingleLogicPair("or", orPayload, task))
     }
 
-    func testOrContainingAndBothFail() {
+    func testOrContainingAndBothFail() throws {
         // or(q1==99, and(q1==3, q2==7)) — q1=0, q2=0 → both branches false → false
         let task = makeTask(["q1": [0], "q2": [0]])
         let andPayload = NSArray(array: [entry("==", "q1", 3), entry("==", "q2", 7)])
@@ -499,92 +499,92 @@ class NestedLogicTests: UnbufferedTestCase {
             entry("==", "q1", 99),
             NSDictionary(dictionary: ["and": andPayload]),
         ])
-        XCTAssertFalse(evaluateSingleLogicPair("or", orPayload, task))
+        XCTAssertFalse(try evaluateSingleLogicPair("or", orPayload, task))
     }
 
     // MARK: not wrapping and/or
     // (not wrapping not crashes — known bug in dispatch_negation, separate from this)
 
-    func testNotWrappingAndTrue() {
+    func testNotWrappingAndTrue() throws {
         // not(and(q1==3, q2==7)) — both match so and=true → not flips to false
         let task = makeTask(["q1": [3], "q2": [7]])
         let andPayload = NSArray(array: [entry("==", "q1", 3), entry("==", "q2", 7)])
-        XCTAssertFalse(evaluateSingleLogicPair("not", NSDictionary(dictionary: ["and": andPayload]), task))
+        XCTAssertFalse(try evaluateSingleLogicPair("not", NSDictionary(dictionary: ["and": andPayload]), task))
     }
 
-    func testNotWrappingAndFalse() {
+    func testNotWrappingAndFalse() throws {
         // not(and(q1==3, q2==7)) — q2=0 so and=false → not flips to true
         let task = makeTask(["q1": [3], "q2": [0]])
         let andPayload = NSArray(array: [entry("==", "q1", 3), entry("==", "q2", 7)])
-        XCTAssertTrue(evaluateSingleLogicPair("not", NSDictionary(dictionary: ["and": andPayload]), task))
+        XCTAssertTrue(try evaluateSingleLogicPair("not", NSDictionary(dictionary: ["and": andPayload]), task))
     }
 
-    func testNotWrappingOrTrue() {
+    func testNotWrappingOrTrue() throws {
         // not(or(q1==3, q2==7)) — q1=3 so or=true → not flips to false
         let task = makeTask(["q1": [3], "q2": [0]])
         let orPayload = NSArray(array: [entry("==", "q1", 3), entry("==", "q2", 7)])
-        XCTAssertFalse(evaluateSingleLogicPair("not", NSDictionary(dictionary: ["or": orPayload]), task))
+        XCTAssertFalse(try evaluateSingleLogicPair("not", NSDictionary(dictionary: ["or": orPayload]), task))
     }
 
-    func testNotWrappingOrFalse() {
+    func testNotWrappingOrFalse() throws {
         // not(or(q1==3, q2==7)) — neither matches so or=false → not flips to true
         let task = makeTask(["q1": [0], "q2": [0]])
         let orPayload = NSArray(array: [entry("==", "q1", 3), entry("==", "q2", 7)])
-        XCTAssertTrue(evaluateSingleLogicPair("not", NSDictionary(dictionary: ["or": orPayload]), task))
+        XCTAssertTrue(try evaluateSingleLogicPair("not", NSDictionary(dictionary: ["or": orPayload]), task))
     }
 
     // MARK: three-condition and/or
 
-    func testThreeConditionAndAllTrue() {
+    func testThreeConditionAndAllTrue() throws {
         let task = makeTask(["q1": [1], "q2": [2], "q3": [3]])
         let payload = NSArray(array: [entry("==", "q1", 1), entry("==", "q2", 2), entry("==", "q3", 3)])
-        XCTAssertTrue(evaluateSingleLogicPair("and", payload, task))
+        XCTAssertTrue(try evaluateSingleLogicPair("and", payload, task))
     }
 
-    func testThreeConditionAndMiddleFails() {
+    func testThreeConditionAndMiddleFails() throws {
         let task = makeTask(["q1": [1], "q2": [9], "q3": [3]])
         let payload = NSArray(array: [entry("==", "q1", 1), entry("==", "q2", 2), entry("==", "q3", 3)])
-        XCTAssertFalse(evaluateSingleLogicPair("and", payload, task))
+        XCTAssertFalse(try evaluateSingleLogicPair("and", payload, task))
     }
 
-    func testThreeConditionOrOnlyLastTrue() {
+    func testThreeConditionOrOnlyLastTrue() throws {
         let task = makeTask(["q1": [0], "q2": [0], "q3": [3]])
         let payload = NSArray(array: [entry("==", "q1", 1), entry("==", "q2", 2), entry("==", "q3", 3)])
-        XCTAssertTrue(evaluateSingleLogicPair("or", payload, task))
+        XCTAssertTrue(try evaluateSingleLogicPair("or", payload, task))
     }
 
-    func testThreeConditionOrAllFalse() {
+    func testThreeConditionOrAllFalse() throws {
         let task = makeTask(["q1": [0], "q2": [0], "q3": [0]])
         let payload = NSArray(array: [entry("==", "q1", 1), entry("==", "q2", 2), entry("==", "q3", 3)])
-        XCTAssertFalse(evaluateSingleLogicPair("or", payload, task))
+        XCTAssertFalse(try evaluateSingleLogicPair("or", payload, task))
     }
 
     // MARK: unanswered questions
 
-    func testAndWithUnansweredQuestionFails() {
+    func testAndWithUnansweredQuestionFails() throws {
         // q2 absent — unanswered question cannot satisfy any condition, so and fails
         let task = makeTask(["q1": [3]])
         let payload = NSArray(array: [entry("==", "q1", 3), entry("==", "q2", 7)])
-        XCTAssertFalse(evaluateSingleLogicPair("and", payload, task))
+        XCTAssertFalse(try evaluateSingleLogicPair("and", payload, task))
     }
 
-    func testOrWithAllUnansweredFails() {
+    func testOrWithAllUnansweredFails() throws {
         // only q1 answered but neither condition matches → false
         let task = makeTask(["q1": [0]])
         let payload = NSArray(array: [entry("==", "q1", 3), entry("==", "q2", 7)])
-        XCTAssertFalse(evaluateSingleLogicPair("or", payload, task))
+        XCTAssertFalse(try evaluateSingleLogicPair("or", payload, task))
     }
 
-    func testOrWithUnansweredButOtherMatches() {
+    func testOrWithUnansweredButOtherMatches() throws {
         // q2 absent but q1 matches → or is true
         let task = makeTask(["q1": [3]])
         let payload = NSArray(array: [entry("==", "q1", 3), entry("==", "q2", 7)])
-        XCTAssertTrue(evaluateSingleLogicPair("or", payload, task))
+        XCTAssertTrue(try evaluateSingleLogicPair("or", payload, task))
     }
 
     // MARK: not inside containers was broken and caused a crash.
 
-    func testAndContainingNot() {
+    func testAndContainingNot() throws {
         // and(q1==3, not(q2==7)) — q1=3, q2=9 → should be true
         let task = makeTask(["q1": [3], "q2": [9]])
         let notPayload = NSDictionary(dictionary: ["==": numericPayload("q2", 7)])
@@ -592,10 +592,10 @@ class NestedLogicTests: UnbufferedTestCase {
             entry("==", "q1", 3),
             NSDictionary(dictionary: ["not": notPayload]),
         ])
-        XCTAssertTrue(evaluateSingleLogicPair("and", andPayload, task))
+        XCTAssertTrue(try evaluateSingleLogicPair("and", andPayload, task))
     }
 
-    func testOrContainingNot() {
+    func testOrContainingNot() throws {
         // or(not(q1==3), q2==7) — q1=0 so not is true → should be true
         let task = makeTask(["q1": [0], "q2": [0]])
         let notPayload = NSDictionary(dictionary: ["==": numericPayload("q1", 3)])
@@ -603,20 +603,20 @@ class NestedLogicTests: UnbufferedTestCase {
             NSDictionary(dictionary: ["not": notPayload]),
             entry("==", "q2", 7),
         ])
-        XCTAssertTrue(evaluateSingleLogicPair("or", orPayload, task))
+        XCTAssertTrue(try evaluateSingleLogicPair("or", orPayload, task))
     }
 
-    func testNotWrappingNot() {
+    func testNotWrappingNot() throws {
         // not(not(q1==3)) — double negation, q1=3 → should be true
         let task = makeTask(["q1": [3]])
         let innerNot = NSDictionary(dictionary: ["==": numericPayload("q1", 3)])
         let outerNot = NSDictionary(dictionary: ["not": innerNot])
-        XCTAssertTrue(evaluateSingleLogicPair("not", outerNot, task))
+        XCTAssertTrue(try evaluateSingleLogicPair("not", outerNot, task))
     }
 
     // MARK: failure paths for not inside containers
 
-    func testAndContainingNotWhereFails() {
+    func testAndContainingNotWhereFails() throws {
         // and(q1==3, not(q2==7)) — q1=3 but q2=7 so not is false → and fails
         let task = makeTask(["q1": [3], "q2": [7]])
         let notPayload = NSDictionary(dictionary: ["==": numericPayload("q2", 7)])
@@ -624,10 +624,10 @@ class NestedLogicTests: UnbufferedTestCase {
             entry("==", "q1", 3),
             NSDictionary(dictionary: ["not": notPayload]),
         ])
-        XCTAssertFalse(evaluateSingleLogicPair("and", andPayload, task))
+        XCTAssertFalse(try evaluateSingleLogicPair("and", andPayload, task))
     }
 
-    func testOrContainingNotWhereBothFail() {
+    func testOrContainingNotWhereBothFail() throws {
         // or(not(q1==3), q2==7) — q1=3 so not is false, q2=0 so q2==7 is false → or fails
         let task = makeTask(["q1": [3], "q2": [0]])
         let notPayload = NSDictionary(dictionary: ["==": numericPayload("q1", 3)])
@@ -635,7 +635,134 @@ class NestedLogicTests: UnbufferedTestCase {
             NSDictionary(dictionary: ["not": notPayload]),
             entry("==", "q2", 7),
         ])
-        XCTAssertFalse(evaluateSingleLogicPair("or", orPayload, task))
+        XCTAssertFalse(try evaluateSingleLogicPair("or", orPayload, task))
     }
 
+}
+
+// MARK: - != operator (BS9)
+
+class NotEqualTests: UnbufferedTestCase {
+
+    func choiceTask(_ answers: [NSNumber]) -> TaskRes {
+        return TaskRes(stepResults: ["q1": StepRes(results: [ChoiceRes(choiceAnswers: answers)])])
+    }
+
+    func numericTask(_ answer: String) -> TaskRes {
+        return TaskRes(stepResults: ["q1": StepRes(results: [QuestionRes(answer: answer)])])
+    }
+
+    func testNumericNotEqual() {
+        XCTAssertTrue(numeric_logic("!=", "q1", 10, numericTask("5.5")))
+        XCTAssertFalse(numeric_logic("!=", "q1", 5.5, numericTask("5.5")))
+    }
+
+    func testRadioNotEqual() {
+        XCTAssertTrue(numeric_logic("!=", "q1", 3, choiceTask([2])))
+        XCTAssertFalse(numeric_logic("!=", "q1", 2, choiceTask([2])))
+    }
+
+    func testCheckboxNotEqualMeansNotIn() {
+        XCTAssertFalse(numeric_logic("!=", "q1", 2, choiceTask([0, 1, 2])))
+        XCTAssertTrue(numeric_logic("!=", "q1", 3, choiceTask([0, 1, 2])))
+    }
+
+    func testCheckboxNotEqualIsNegationOfEqual() {
+        for compare in 0...4 {
+            let task = choiceTask([0, 2, 3])
+            XCTAssertNotEqual(numeric_logic("!=", "q1", NSNumber(value: compare), task),
+                              numeric_logic("==", "q1", NSNumber(value: compare), task))
+        }
+    }
+
+    func testUnansweredTargetIsFalseForNotEqual() {
+        // no step result at all
+        XCTAssertFalse(numeric_logic("!=", "q1", 3, TaskRes(stepResults: [:])))
+        // step result with no answer: empty checkbox, empty numeric, no results
+        XCTAssertFalse(numeric_logic("!=", "q1", 3, choiceTask([])))
+        XCTAssertFalse(numeric_logic("!=", "q1", 3, numericTask("not a number")))
+        XCTAssertFalse(numeric_logic("!=", "q1", 3, TaskRes(stepResults: ["q1": StepRes(results: [])])))
+        XCTAssertFalse(double_comparisons("!=", 5.0, []))
+        XCTAssertFalse(int_comparisons("!=", 5, []))
+    }
+
+    func testNotEqualViaShouldQuestionDisplay() {
+        let payload = NSArray(array: ["q1", 3])
+        XCTAssertTrue(shouldQuestionDisplay(["!=": payload], choiceTask([2])))
+        XCTAssertFalse(shouldQuestionDisplay(["!=": payload], choiceTask([3])))
+        XCTAssertFalse(shouldQuestionDisplay(["!=": payload], TaskRes(stepResults: [:])))
+    }
+
+    func testNotEqualInsideNot() throws {
+        // not(q1 != 3) with q1 unanswered: inner is false, so not is true
+        let payload = NSDictionary(dictionary: ["!=": NSArray(array: ["q1", 3])])
+        XCTAssertTrue(try evaluateSingleLogicPair("not", payload, TaskRes(stepResults: [:])))
+    }
+}
+
+// MARK: - malformed display logic (BS9)
+
+class MalformedLogicTests: UnbufferedTestCase {
+
+    func fixtureTask() -> TaskRes {
+        let answers = (loadFixture("bs9_null_comparison") as! [String: Any])["answers"] as! [String: [NSNumber]]
+        return TaskRes(stepResults: answers.mapValues { StepRes(results: [ChoiceRes(choiceAnswers: $0)]) })
+    }
+
+    func testFixtureCasesShowQuestionAndReport() {
+        let cases = (loadFixture("bs9_null_comparison") as! [String: Any])["cases"] as! [[String: Any]]
+        XCTAssertEqual(cases.count, 12)
+        for c in cases {
+            var errors = [DisplayLogicError]()
+            let got = shouldQuestionDisplay(c["display_if"] as! [String: AnyObject], fixtureTask()) { errors.append($0) }
+            XCTAssertEqual(got, c["display"] as! Bool, c["name"] as! String)
+            XCTAssertEqual(errors.count, 1, c["name"] as! String)
+        }
+    }
+
+    func testNullComparisonShowsQuestion() {
+        let displayIf: [String: AnyObject] = ["==": NSArray(array: ["q1", NSNull()])]
+        XCTAssertTrue(shouldQuestionDisplay(displayIf, fixtureTask()))
+    }
+
+    func testNullComparisonThrowsFromEvaluate() {
+        XCTAssertThrowsError(try evaluateSingleLogicPair("==", NSArray(array: ["q1", NSNull()]), fixtureTask()))
+    }
+
+    func testUnknownOperatorShowsQuestion() {
+        let displayIf: [String: AnyObject] = ["~=": NSArray(array: ["q1", 1])]
+        XCTAssertTrue(shouldQuestionDisplay(displayIf, fixtureTask()))
+        XCTAssertThrowsError(try evaluateSingleLogicPair("~=", NSArray(array: ["q1", 1]), fixtureTask()))
+    }
+
+    func testNullInsideAndOrNotShowsQuestion() {
+        let bad = NSDictionary(dictionary: ["==": NSArray(array: ["q2", NSNull()])])
+        // each of these would be false without the bad leaf (q1 is 1, not 9)
+        let never = NSDictionary(dictionary: ["==": NSArray(array: ["q1", 9])])
+        XCTAssertTrue(shouldQuestionDisplay(["and": NSArray(array: [never, bad])], fixtureTask()))
+        XCTAssertTrue(shouldQuestionDisplay(["or": NSArray(array: [never, bad])], fixtureTask()))
+        XCTAssertTrue(shouldQuestionDisplay(["not": bad], fixtureTask()))
+    }
+
+    func testBadLeafAfterTrueOrIsStillReported() {
+        // no short-circuit, same as Android
+        let good = NSDictionary(dictionary: ["==": NSArray(array: ["q1", 1])])
+        let bad = NSDictionary(dictionary: ["==": NSArray(array: ["q2", NSNull()])])
+        var reported = 0
+        _ = shouldQuestionDisplay(["or": NSArray(array: [good, bad])], fixtureTask()) { _ in reported += 1 }
+        XCTAssertEqual(reported, 1)
+    }
+
+    func testValidLogicIsNotReportedAndStillHides() {
+        var reported = 0
+        let displayIf: [String: AnyObject] = ["==": NSArray(array: ["q1", 9])]
+        XCTAssertFalse(shouldQuestionDisplay(displayIf, fixtureTask()) { _ in reported += 1 })
+        XCTAssertEqual(reported, 0)
+    }
+
+    func testEmptyLogicShowsQuestion() {
+        var reported = 0
+        XCTAssertTrue(shouldQuestionDisplay([:], fixtureTask()) { _ in reported += 1 })
+        XCTAssertEqual(reported, 0)
+    }
 }

@@ -16,22 +16,48 @@ public func printQuestionLogic(_ items: Any..., separator: String = " ", termina
 }
 
 
+/// Malformed display logic; the caller shows the question rather than crashing (same as Android).
+public struct DisplayLogicError: Error, CustomStringConvertible {
+    public let description: String
+    init(_ description: String) { self.description = description }
+}
+
+
+/// Top-level entry point. Malformed logic anywhere in the tree shows the question and ignores all of it.
+public func shouldQuestionDisplay(_ displayIf: [String: AnyObject], _ taskResult: ORKTaskResult, onError: ((DisplayLogicError) -> Void)? = nil) -> Bool {
+    if displayIf.isEmpty {
+        return true
+    }
+    do {
+        guard displayIf.count == 1, let key = displayIf.keys.first, let value = displayIf.values.first else {
+            throw DisplayLogicError("Encountered invalid size of outermost displayIf dictionary: \(displayIf.count)")
+        }
+        return try evaluateSingleLogicPair(key, value, taskResult)
+    } catch let error as DisplayLogicError {
+        onError?(error)
+        return true
+    } catch {
+        return true // unreachable, only DisplayLogicError is thrown
+    }
+}
+
+
 /// The negation code is very verbose for the error messages, it gets its own function.
-func dispatch_negation(_ payload: AnyObject, _ taskResult: ORKTaskResult) -> Bool {
+func dispatch_negation(_ payload: AnyObject, _ taskResult: ORKTaskResult) throws -> Bool {
     
     printQuestionLogic("\tdispatch_negation: payload: \(payload), taskResult: \(taskResult)")
     
     // for these operators the payload will be a list of other logic pairs, assert that the
     // class is as expected
     guard let payload_dict = payload as? NSDictionary else {
-        fatalError("Encountered invalid type of payload dict: \(payload.classForCoder)")
+        throw DisplayLogicError("Encountered invalid type of payload dict: \(payload.classForCoder)")
     }
     // assert that these values are not nil (might have redundant checks here, don't care.)
     if payload_dict.allKeys.first == nil || payload_dict.allValues.first == nil {
-        fatalError("Encountered invalid contents of a payload dict: \(payload.classForCoder), key 1:\(payload_dict.allKeys.first), value 1:\(payload_dict.allValues.first)")
+        throw DisplayLogicError("Encountered invalid contents of a payload dict: \(payload.classForCoder), key 1:\(payload_dict.allKeys.first), value 1:\(payload_dict.allValues.first)")
     }
     guard let first_key = payload_dict.allKeys.first as? String else {
-        fatalError("bad first key \(payload_dict.allKeys.first)")
+        throw DisplayLogicError("bad first key \(payload_dict.allKeys.first)")
     }
     // guard let first_value = payload_dict.allValues.first as? NSArray else {
     //     fatalError("bad first value \(payload_dict.allValues.first)")
@@ -44,137 +70,101 @@ func dispatch_negation(_ payload: AnyObject, _ taskResult: ORKTaskResult) -> Boo
         first_value = v
     }
     else {
-        fatalError("bad first value \(payload_dict.allValues.first)")
+        throw DisplayLogicError("bad first value \(payload_dict.allValues.first)")
     }
     
     // paylaod is a list of length 1
     if payload_dict.count != 1 {
-        fatalError("Encountered invalid size of payload_dict for inversion: \(payload_dict.count)")
+        throw DisplayLogicError("Encountered invalid size of payload_dict for inversion: \(payload_dict.count)")
     }
-    return !evaluateSingleLogicPair(first_key, first_value, taskResult)
+    return try !evaluateSingleLogicPair(first_key, first_value, taskResult)
 }
 
 
 /// `and` and `or` are very fiddly and have error messages, they get their own function.
-func dispatch_and_or(_ operation: String, _ payload: AnyObject, _ taskResult: ORKTaskResult) -> Bool {
+func dispatch_and_or(_ operation: String, _ payload: AnyObject, _ taskResult: ORKTaskResult) throws -> Bool {
     
     printQuestionLogic("\tdispatch_and_or - operation: `\(operation)`")
     
     // its an array of any number of NSDictionaries
     guard let payload_list = payload as? NSArray else {
-        fatalError("Encountered invalid type 1 of payload dict: \(payload.classForCoder), \(payload)")
+        throw DisplayLogicError("Encountered invalid type 1 of payload dict: \(payload.classForCoder), \(payload)")
     }
     
     // validate the list of dicts and throw useful errors
     for dict in payload_list {
         if let dict = dict as? NSDictionary {
             if let _ = dict.allKeys.first as? String {} else {
-                fatalError("Encountered invalid type 2 in payload_list for and/or: \((dict.allKeys.first as AnyObject).classForCoder)")
+                throw DisplayLogicError("Encountered invalid type 2 in payload_list for and/or: \((dict.allKeys.first as AnyObject).classForCoder)")
             }
             if let _ = dict.allValues.first as? NSDictionary {
                 // this path executes when there is a NOT inside an AND
                 
             } else if let _ = dict.allValues.first as? NSArray {} else {
-                fatalError("Encountered invalid type 3 in payload_list for and/or: \((dict.allValues.first as AnyObject).classForCoder)")
+                throw DisplayLogicError("Encountered invalid type 3 in payload_list for and/or: \((dict.allValues.first as AnyObject).classForCoder)")
             }
         } else {
-            fatalError("Encountered invalid type 4 in payload_list for and/or: \((dict as AnyObject).classForCoder)")
+            throw DisplayLogicError("Encountered invalid type 4 in payload_list for and/or: \((dict as AnyObject).classForCoder)")
         }
     }
     
-    // 'and' and 'or' should work fine on any size payload_list - and the NSDictionary cast has
-    // already been tested above so we don't need to catch it.
+    // evaluate every child before combining (no short-circuit) so bad logic anywhere throws, like Android
+    var results = [Bool]()
+    for dict in payload_list {
+        if let dict = dict as? NSDictionary {
+            let key = dict.allKeys.first as! String // validated above
+            if let an_array = dict.allValues.first as? NSArray {
+                results.append(try evaluateSingleLogicPair(key, an_array, taskResult))
+            } else if let an_dict = dict.allValues.first as? NSDictionary {
+                results.append(try evaluateSingleLogicPair(key, an_dict, taskResult))
+            }
+        }
+    }
     if operation == "or" {
-        for dict in payload_list {
-            if let dict = dict as? NSDictionary {
-                
-                if let an_array = dict.allValues.first as? NSArray {
-                    if evaluateSingleLogicPair(dict.allKeys.first as! String, an_array, taskResult) {
-                        return true
-                    }
-                } else if let an_dict = dict.allValues.first as? NSDictionary {
-                    if evaluateSingleLogicPair(dict.allKeys.first as! String, an_dict, taskResult) {
-                        return true
-                    }
-                } else {
-                    fatalError("Encountered invalid type 5 in payload_list for and/or: \((dict.allValues.first as AnyObject).classForCoder)")
-                }
-                
-                // if evaluateSingleLogicPair(dict.allKeys.first as! String, dict.allValues.first as! NSArray, taskResult) {
-                //     return true
-                // }
-            }
-        }
-        return false // only after everything has returned false do we return false
+        return results.contains(true)
     }
-    
     if operation == "and" {
-        // if there are any falses return false, otherwise return true
-        for dict in payload_list {
-            if let dict = dict as? NSDictionary {
-                
-                if let an_array = dict.allValues.first as? NSArray {
-                    if !evaluateSingleLogicPair(dict.allKeys.first as! String, an_array, taskResult) {
-                        return false
-                    }
-                }
-                else if let an_dict = dict.allValues.first as? NSDictionary {
-                    if !evaluateSingleLogicPair(dict.allKeys.first as! String, an_dict, taskResult) {
-                        return false
-                    }
-                }
-                else {
-                    fatalError("Encountered invalid type 6 in payload_list for and/or: \((dict.allValues.first as AnyObject).classForCoder)")
-                }
-                
-                // if !evaluateSingleLogicPair(
-                //     dict.allKeys.first as! String, dict.allValues.first as! NSArray, taskResult)
-                // {
-                //     return false
-                // }
-            }
-        }
-        return true // nothing failed, so it passed!
+        return !results.contains(false)
     }
     
-    fatalError("unknown operation '\(operation)' inside and/or -- really should be unreachable")
+    throw DisplayLogicError("unknown operation '\(operation)' inside and/or -- really should be unreachable")
 }
 
 
 
 /// Takes our logical and data primitive and calls the appropriate logic evaluation function.
 /// A logic pair is one logic operation as a string, and one payload.
-public func evaluateSingleLogicPair(_ operation: String, _ payload: AnyObject, _ taskResult: ORKTaskResult) -> Bool {
+public func evaluateSingleLogicPair(_ operation: String, _ payload: AnyObject, _ taskResult: ORKTaskResult) throws -> Bool {
     printQuestionLogic("\tevaluateSingleLogicPair start - operation: `\(operation)`")
     
     if operation == "not" {
-        return dispatch_negation(payload, taskResult)
+        return try dispatch_negation(payload, taskResult)
     }
     
     if ["or", "and"].contains(operation) {
-        return dispatch_and_or(operation, payload, taskResult)
+        return try dispatch_and_or(operation, payload, taskResult)
     }
     
     // numerical oporation dispatch with USEFUL ERROR MESSAGES.
-    if ["==", "<", "<=", ">", ">="].contains(operation) {
+    if ["==", "!=", "<", "<=", ">", ">="].contains(operation) {
         // payload in this case is a list of  two elements, a string (question id) and a numeric value
         guard let payload_list = payload as? [AnyObject] else {
-            fatalError("Encountered invalid type for payload list: \(payload.classForCoder)")
+            throw DisplayLogicError("Encountered invalid type for payload list: \(payload.classForCoder)")
         }
         guard payload_list.count == 2 else {
-            fatalError("Encountered invalid size of payload list: \(payload_list.count), \(payload_list)")
+            throw DisplayLogicError("Encountered invalid size of payload list: \(payload_list.count), \(payload_list)")
         }
         guard let target = payload_list[0] as? String else {
-            fatalError("Encountered invalid type for questiion id target: \(payload_list[0].classForCoder)")
+            throw DisplayLogicError("Encountered invalid type for questiion id target: \(payload_list[0].classForCoder)")
         }
         guard let compare_me = payload_list[1] as? NSNumber else {
-            fatalError("Encountered invalid type for comparison value: \(payload_list[1].classForCoder)")
+            throw DisplayLogicError("Encountered invalid type for comparison value: \(payload_list[1].classForCoder)")
         }
         return numeric_logic(operation, target, compare_me, taskResult)
     }
     
-    // should be unreachable
-    fatalError("Encountered invalid operation: \(operation)")
+    // unknown operator
+    throw DisplayLogicError("Encountered invalid operation: \(operation)")
 }
 
 
@@ -299,6 +289,9 @@ public func double_comparisons(_ operation: String, _ compare_me: Double, _ numb
                 return true
             }
         }
+    } else if operation == "!=" {
+        // "not in" for multiselect; unanswered stays false
+        return !answer_numbers.isEmpty && !answer_numbers.contains(compare_me)
     } else if operation == "<" {
         for num in answer_numbers {
             if num < compare_me {
@@ -348,6 +341,9 @@ public func int_comparisons(_ operation: String, _ compare_me: Int, _ numbers: [
                 return true
             }
         }
+    } else if operation == "!=" {
+        // "not in" for multiselect; unanswered stays false
+        return !answer_numbers.isEmpty && !answer_numbers.contains(compare_me)
     } else if operation == "<" {
         for num in answer_numbers {
             printQuestionLogic("\tif \(num) < \(compare_me)")

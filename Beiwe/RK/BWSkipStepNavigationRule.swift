@@ -29,6 +29,7 @@ class BWSkipStepNavigationRule: ORKSkipStepNavigationRule {
     let DOUBLE = "double" // must be equal to DOUBEL in surveyQuestionDisplayLogic
     let INT = "int" // must be equal to INT in surveyQuestionDisplayLogic
     var displayIf: [String: AnyObject] = [:] // it gets reassigned
+    var reportedError = false
     
     // convenience init with the nscoder populated - I don't know what its for but it was here before me.
     required init(coder: NSCoder) {
@@ -48,17 +49,12 @@ class BWSkipStepNavigationRule: ORKSkipStepNavigationRule {
         
         // printQuestionLogic("\tstepShouldSkip: taskResult: \(taskResult), displayIf: \(self.displayIf)")
         
-        if self.displayIf.isEmpty {
-            // printQuestionLogic("\t\nQUESTION WITHOUT SKIP LOGIC\n")
-            return false
+        // skip is the inverse of display; malformed logic shows the question
+        let x = !shouldQuestionDisplay(self.displayIf, taskResult) { error in
+            if self.reportedError { return } // this runs constantly, report once
+            self.reportedError = true
+            sentry_warning("bad display logic", "\(error)", "\(self.displayIf)", crash: false)
         }
-        
-        if self.displayIf.count != 1 {
-            fatalError("Encountered invalid size of outermost displayIf dictionary: \(self.displayIf.count)")
-        }
-        
-        // evaluate - the logic returns true if there is a match, which means we need to invert the output of the logic, lol...
-        let x = !evaluateSingleLogicPair(self.displayIf.keys.first!, self.displayIf.values.first!, taskResult)
         printQuestionLogic("stepShouldSkip - returning `\(x)`")
         return x
     }

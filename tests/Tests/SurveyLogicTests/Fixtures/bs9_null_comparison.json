@@ -1,7 +1,18 @@
 {
-  "_comment": "BS9: the server can send a display_if numeric comparison whose value is null. evaluateSingleLogicPair hits fatalError('Encountered invalid type for comparison value') because NSNull is not an NSNumber. These inputs crash the process today, so the tests skip.",
+  "_comment": "BS9: malformed display_if logic must not crash. Android catches it, logs, and shows the question (whole logic tree ignored), so every case expects display=true. Answers: q1 = choice [1], q2 = choice [2]. Cases with a valid false branch first check that nothing short-circuits past the bad part.",
+  "answers": {"q1": [1], "q2": [2]},
   "cases": [
-    {"name": "eq_null", "display_if": {"==": ["q1", null]}},
-    {"name": "neq_null", "display_if": {"!=": ["q1", null]}}
+    {"name": "eq_null", "display_if": {"==": ["q1", null]}, "display": true},
+    {"name": "neq_null", "display_if": {"!=": ["q1", null]}, "display": true},
+    {"name": "lt_null", "display_if": {"<": ["q1", null]}, "display": true},
+    {"name": "unknown_operator", "display_if": {"~=": ["q1", 1]}, "display": true},
+    {"name": "bad_target_type", "display_if": {"==": [5, 1]}, "display": true},
+    {"name": "bad_payload_size", "display_if": {"==": ["q1"]}, "display": true},
+    {"name": "and_null_after_false", "display_if": {"and": [{"==": ["q1", 9]}, {"==": ["q2", null]}]}, "display": true},
+    {"name": "or_null_after_true", "display_if": {"or": [{"==": ["q1", 1]}, {"==": ["q2", null]}]}, "display": true},
+    {"name": "not_null", "display_if": {"not": {"==": ["q1", null]}}, "display": true},
+    {"name": "not_inside_and_null", "display_if": {"and": [{"==": ["q1", 1]}, {"not": {"==": ["q2", null]}}]}, "display": true},
+    {"name": "or_inside_and_unknown_operator", "display_if": {"and": [{"==": ["q1", 9]}, {"or": [{"??": ["q2", 2]}]}]}, "display": true},
+    {"name": "two_keys_at_top", "display_if": {"==": ["q1", 1], "!=": ["q2", 1]}, "display": true}
   ]
 }
