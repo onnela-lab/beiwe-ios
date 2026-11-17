@@ -1,0 +1,17 @@
+{
+  "_comment": "BS15: choice and slider (scale) questions are compared as ints; the survey's comparison value AND the slider answer are truncated toward zero (NSNumber.intValue). Numeric free-response uses doubles and is not truncated. expected_today is what the app does now; correct_answer is what a decimal-aware comparison would give (null when same). Shape: kind = choice | scale | numeric; answer = number (scale), list of numbers (choice), string (numeric); logic = [op, question id, compare value].",
+  "cases": [
+    {"name": "choice_eq_truncated_compare_matches", "kind": "choice", "answer": [2], "op": "==", "compare": 2.9, "expected_today": true, "correct_answer": false},
+    {"name": "choice_eq_exact_control", "kind": "choice", "answer": [2], "op": "==", "compare": 2.0, "expected_today": true, "correct_answer": null},
+    {"name": "choice_lt_fraction_above_is_false", "kind": "choice", "answer": [3], "op": "<", "compare": 3.5, "expected_today": false, "correct_answer": true},
+    {"name": "choice_gte_fraction_above_is_true", "kind": "choice", "answer": [2], "op": ">=", "compare": 2.9, "expected_today": true, "correct_answer": false},
+    {"name": "choice_gt_fraction_below_is_false", "kind": "choice", "answer": [2], "op": ">", "compare": 1.5, "expected_today": true, "correct_answer": null},
+    {"name": "choice_negative_compare_truncates_toward_zero", "kind": "choice", "answer": [0], "op": "==", "compare": -0.5, "expected_today": true, "correct_answer": false},
+    {"name": "scale_answer_truncated_eq", "kind": "scale", "answer": 2.7, "op": "==", "compare": 2, "expected_today": true, "correct_answer": false},
+    {"name": "scale_gt_both_truncated_is_false", "kind": "scale", "answer": 4.5, "op": ">", "compare": 4.2, "expected_today": false, "correct_answer": true},
+    {"name": "scale_negative_answer_truncates_toward_zero", "kind": "scale", "answer": -0.5, "op": "==", "compare": 0, "expected_today": true, "correct_answer": false},
+    {"name": "numeric_eq_decimal_control_not_truncated", "kind": "numeric", "answer": "2.5", "op": "==", "compare": 2.5, "expected_today": true, "correct_answer": null},
+    {"name": "numeric_gt_decimal_control_not_truncated", "kind": "numeric", "answer": "4.5", "op": ">", "compare": 4.2, "expected_today": true, "correct_answer": null},
+    {"name": "numeric_eq_2_0_vs_2_9_not_truncated", "kind": "numeric", "answer": "2.0", "op": "==", "compare": 2.9, "expected_today": false, "correct_answer": null}
+  ]
+}

@@ -1,0 +1,39 @@
+[
+  {
+    "_id": "aaaaaaaaaaaaaaaaaaaaaaa1",
+    "name": "Invented daily mood",
+    "survey_type": "tracking_survey",
+    "timings": [[], [32400], [32400], [], [], [], [3600, 7200]],
+    "settings": {
+      "trigger_on_first_download": true,
+      "always_available": false,
+      "randomize": true,
+      "number_of_random_questions": 2,
+      "randomize_with_memory": true
+    },
+    "content": [
+      {"question_id": "11111111-0000-0000-0000-000000000001", "question_text": "How do you feel?", "question_type": "slider", "min": "1", "max": "10", "required": true},
+      {"question_id": "11111111-0000-0000-0000-000000000002", "question_text": "Pick one", "question_type": "radio_button", "answers": [{"text": "red"}, {"text": "blue"}]},
+      {"question_id": "11111111-0000-0000-0000-000000000003", "question_text": "Number of cups", "question_type": "free_response", "text_field_type": "NUMERIC", "min": "", "max": "",
+       "display_if": {"and": [{">": ["11111111-0000-0000-0000-000000000001", 3]}, {"==": ["11111111-0000-0000-0000-000000000002", 1]}]}}
+    ]
+  },
+  {
+    "_id": "aaaaaaaaaaaaaaaaaaaaaaa2",
+    "name": "Invented voice note",
+    "survey_type": "audio_survey",
+    "timings": [[], [], [], [], [], [], []],
+    "settings": {"audio_survey_type": "raw", "sample_rate": 22050, "bit_rate": 32000},
+    "content": [{"prompt": "Say something."}]
+  },
+  {
+    "_id": "aaaaaaaaaaaaaaaaaaaaaaa3",
+    "name": "Invented negative random count",
+    "survey_type": "tracking_survey",
+    "timings": [[], [], [], [], [], [], []],
+    "settings": {"randomize": true, "number_of_random_questions": -3, "always_available": true},
+    "content": [
+      {"question_id": "22222222-0000-0000-0000-000000000001", "question_text": "Only question", "question_type": "info_text_box"}
+    ]
+  }
+]

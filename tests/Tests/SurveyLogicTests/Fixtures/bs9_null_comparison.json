@@ -1,0 +1,7 @@
+{
+  "_comment": "BS9: the server can send a display_if numeric comparison whose value is null. evaluateSingleLogicPair hits fatalError('Encountered invalid type for comparison value') because NSNull is not an NSNumber. These inputs crash the process today, so the tests skip.",
+  "cases": [
+    {"name": "eq_null", "display_if": {"==": ["q1", null]}},
+    {"name": "neq_null", "display_if": {"!=": ["q1", null]}}
+  ]
+}

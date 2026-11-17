@@ -150,6 +150,7 @@ func timestampString() -> String {
     return dateFormat(Date())
 }
 
+// BEGIN isoStringToTimeInterval (copied into tests/, keep Foundation-only)
 /// Converts an ISO-style time string to a TimeInterval (seconds since 1970).
 /// Used in one place where the was a DST gap that could cause a crash.
 /// Forces utc on instances where there is no timezone indicator.
@@ -176,6 +177,7 @@ func isoStringToTimeInterval(timeString: String?) -> TimeInterval {
     }
     return 0
 }
+// END isoStringToTimeInterval
 
 //////////////////////////////// CONVENIENCE JSON FUNCTIONS ///////////////////////////////////
 //////////////////////////////// CONVENIENCE JSON FUNCTIONS ///////////////////////////////////

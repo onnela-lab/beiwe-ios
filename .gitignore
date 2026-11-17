@@ -4,6 +4,11 @@ UserInterfaceState.xcuserstate
 xcuserdata/
 #Podfile.lock
 Pods/
+tests/Sources/SurveyQuestionDisplayLogic/Models/
+tests/Sources/SurveyQuestionDisplayLogic/ModelTransforms.swift
+tests/Sources/SurveyQuestionDisplayLogic/isoStringToTimeInterval.swift
+tests/Sources/SurveyQuestionDisplayLogic/leftBehindFiles.swift
+tests/Sources/SurveyQuestionDisplayLogic/fileCountCache.swift
 Private/*
 
 # Firebase Cloud Messaging credentials & configuration file

@@ -18,6 +18,7 @@ func platform() -> String {
     return String(cString: machine)
 }
 
+// BEGIN modelTransforms (copied into tests/, keep Foundation+ObjectMapper only)
 // used to shuffle questions in a survey for randomized questions
 func shuffle<C: MutableCollection>(_ list: inout C) -> C where C.Index == Int {
     if list.count < 2 { return list }
@@ -78,6 +79,7 @@ let transformJsonStringInt = TransformOf<Int, Any>(fromJSON: { (value: Any?) -> 
     // transform value from Int? to String?
     value
 })
+// END modelTransforms
 
 /// This is horrendously named.
 /// Bounce refers to user-input "bouncing", the name comes from keyboard keys "bouncing" and triggering multiple inputs even though
