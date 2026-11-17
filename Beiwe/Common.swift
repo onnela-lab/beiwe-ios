@@ -193,6 +193,15 @@ func leftBehindEntriesToKeep(entries: [String], directoryListing: [String]) -> [
 }
 // END leftBehindFiles
 
+// BEGIN fileCountCache (copied into tests/, keep Foundation-only)
+/// false if never computed, expired, or the clock went backwards
+func fileCountCacheIsFresh(computedAt: TimeInterval?, now: TimeInterval, interval: TimeInterval) -> Bool {
+    guard let computedAt = computedAt else { return false }
+    let age = now - computedAt
+    return age >= 0 && age < interval
+}
+// END fileCountCache
+
 //////////////////////////////// CONVENIENCE JSON FUNCTIONS ///////////////////////////////////
 //////////////////////////////// CONVENIENCE JSON FUNCTIONS ///////////////////////////////////
 //////////////////////////////// CONVENIENCE JSON FUNCTIONS ///////////////////////////////////

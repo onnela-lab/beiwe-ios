@@ -149,8 +149,9 @@ class ApiManager {
             // This could be extremely verbose... let's do a count?
             // device_status_report["list_current_data_files"] = easyJSON(get_current_data_files_list())
             // device_status_report["list_upload_files"] = easyJSON(get_upload_files_list())
-            device_status_report["count_current_data_files"] = String(count_current_data_files())
-            device_status_report["count_upload_files_count"] = String(count_upload_files())
+            let counts = cachedFileCounts()
+            device_status_report["count_current_data_files"] = String(counts.current)
+            device_status_report["count_upload_files_count"] = String(counts.upload)
             
             // neither of these can fail
             parameters["notification_uuids"] = easyJSON(study.surveyPushNotificationUUIDs)
@@ -166,6 +167,31 @@ class ApiManager {
         parameters["device_status_report"] = easyJSON(device_status_report)
     }
     
+    // diagnostics only, but each count walks a whole directory and every request asks (one per file in an upload pass)
+    private static let FILE_COUNT_CACHE_INTERVAL: TimeInterval = 60
+    private static let fileCountLock = NSLock()
+    private static var fileCountComputedAt: TimeInterval?
+    private static var cachedCurrentCount = 0
+    private static var cachedUploadCount = 0
+
+    private func cachedFileCounts() -> (current: Int, upload: Int) {
+        let now = ProcessInfo.processInfo.systemUptime  // not wall clock
+        Self.fileCountLock.lock()
+        let fresh = fileCountCacheIsFresh(computedAt: Self.fileCountComputedAt, now: now, interval: Self.FILE_COUNT_CACHE_INTERVAL)
+        let cached = (current: Self.cachedCurrentCount, upload: Self.cachedUploadCount)
+        Self.fileCountLock.unlock()
+        if fresh { return cached }
+
+        let current = count_current_data_files()
+        let upload = count_upload_files()
+        Self.fileCountLock.lock()
+        Self.cachedCurrentCount = current
+        Self.cachedUploadCount = upload
+        Self.fileCountComputedAt = now
+        Self.fileCountLock.unlock()
+        return (current, upload)
+    }
+
     /// This looks like it does literally nothing?
     static func serialErr() -> NSError {
         return NSError(domain: "com.beiwe.studies", code: 2, userInfo: nil)
