@@ -238,8 +238,9 @@ class GPSManager: NSObject, CLLocationManagerDelegate, DataServiceProtocol {
         // print("Finishing \(self.storeType) collection")
         self.pauseCollecting()
         self.isCollectingGps = false
-        self.dataStorage = nil
+        // flush before dropping dataStorage or cached points are lost
         self.createNewFile() // we have lazy new file creation
+        self.dataStorage = nil
     }
     
     func createNewFile() {
