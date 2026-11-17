@@ -257,8 +257,8 @@ public func print(_ items: Any..., separator: String = " ", terminator: String =
     // we can't build a list and pass it through, that causes it to _print a list_,
     // so we do 2 print statements of the separator and then the terminator at the very end.
     for item in items {
-        if item is Date || item is Date? {
-            let d = item as! Date
+        // as? skips nil optionals, the old `is Date?` matched them and `as!` crashed
+        if let d = item as? Date {
             // convert Date object to be in America/New_York time
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "y-MM-dd HH:mm:ss.SS" // its a custom format specifically for printing

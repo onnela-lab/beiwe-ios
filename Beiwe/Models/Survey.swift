@@ -55,19 +55,19 @@ struct Survey: Mappable, Equatable {
         let audioBitrate_unchanged = lhs.audioBitrate == rhs.audioBitrate
         let alwaysAvailable_unchanged = lhs.alwaysAvailable == rhs.alwaysAvailable
         
-        if !surveyId_unchanged { print(lhs.surveyId, "!=", rhs.surveyId) }
-        if !surveyType_unchanged { print(lhs.surveyType, "!=", rhs.surveyType) }
-        if !name_unchanged { print(lhs.name, "!=", rhs.name) }
-        if !timings_unchanged { print(lhs.timings, "!=", rhs.timings) }
-        if !triggerOnFirstDownload_unchanged { print(lhs.triggerOnFirstDownload, "!=", rhs.triggerOnFirstDownload) }
-        if !randomize_unchanged { print(lhs.randomize, "!=", rhs.randomize) }
-        if !numberOfRandomQuestions_unchanged { print(lhs.numberOfRandomQuestions, "!=", rhs.numberOfRandomQuestions) }
-        if !randomizeWithMemory_unchanged { print(lhs.randomizeWithMemory, "!=", rhs.randomizeWithMemory) }
-        if !questions_unchanged { print(lhs.questions, "!=", rhs.questions) }
-        if !audioSurveyType_unchanged { print(lhs.audioSurveyType, "!=", rhs.audioSurveyType) }
-        if !audioSampleRate_unchanged { print(lhs.audioSampleRate, "!=", rhs.audioSampleRate) }
-        if !audioBitrate_unchanged { print(lhs.audioBitrate, "!=", rhs.audioBitrate) }
-        if !alwaysAvailable_unchanged { print(lhs.alwaysAvailable, "!=", rhs.alwaysAvailable) }
+        // if !surveyId_unchanged { print(lhs.surveyId, "!=", rhs.surveyId) }
+        // if !surveyType_unchanged { print(lhs.surveyType, "!=", rhs.surveyType) }
+        // if !name_unchanged { print(lhs.name, "!=", rhs.name) }
+        // if !timings_unchanged { print(lhs.timings, "!=", rhs.timings) }
+        // if !triggerOnFirstDownload_unchanged { print(lhs.triggerOnFirstDownload, "!=", rhs.triggerOnFirstDownload) }
+        // if !randomize_unchanged { print(lhs.randomize, "!=", rhs.randomize) }
+        // if !numberOfRandomQuestions_unchanged { print(lhs.numberOfRandomQuestions, "!=", rhs.numberOfRandomQuestions) }
+        // if !randomizeWithMemory_unchanged { print(lhs.randomizeWithMemory, "!=", rhs.randomizeWithMemory) }
+        // if !questions_unchanged { print(lhs.questions, "!=", rhs.questions) }
+        // if !audioSurveyType_unchanged { print(lhs.audioSurveyType, "!=", rhs.audioSurveyType) }
+        // if !audioSampleRate_unchanged { print(lhs.audioSampleRate, "!=", rhs.audioSampleRate) }
+        // if !audioBitrate_unchanged { print(lhs.audioBitrate, "!=", rhs.audioBitrate) }
+        // if !alwaysAvailable_unchanged { print(lhs.alwaysAvailable, "!=", rhs.alwaysAvailable) }
         
         return surveyId_unchanged &&
             surveyType_unchanged &&
