@@ -19,3 +19,5 @@ GoogleService-Info.plist
 .python-version
 
 build
+.build
+llm
