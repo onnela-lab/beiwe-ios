@@ -88,6 +88,7 @@ class StudyManager {
     //##############################################################################################
     
     func loadDefaultStudy() {
+        defer { AppDelegate.sharedInstance().setupSentryTags() } // tags don't survive relaunch
         self.currentStudy = nil
         self.gpsManager = nil // this seems like a bug waiting to happen
         let studies: [Study] = Recline.shared.queryAll() // its a list of studies
@@ -1092,9 +1093,9 @@ class StudyManager {
                     SentrySDK.capture(message: "Encountered encoding error while uploading file") { (scope: Scope) in
                         // grab the snapshot of the stack trace, add the extras, send
                         scope.setExtras([
-                            "\(error)": "error",
-                            filename: "filename",
-                            self.currentStudy!.patientId!: "user_id",
+                            "error": "\(error)",
+                            "filename": filename,
+                            "user_id": self.currentStudy?.patientId ?? "nil",
                         ])
                     }
                     self.files_with_encoding_errors.append(filename)
@@ -1217,6 +1218,8 @@ class StudyManager {
         
         // clear the study, patient id
         self.currentStudy = nil // self.isStudyLoaded will now fail
+        StudyManager.real_study_loaded = false
+        AppDelegate.sharedInstance().setupSentryTags() // don't keep naming the old participant
         ApiManager.sharedInstance.patientId = ""
     }
     
@@ -1248,5 +1251,6 @@ class StudyManager {
         // but it was only called in applicationWillTerminate, so we can just run it on the main thread?
         self.currentStudy = nil
         StudyManager.real_study_loaded = false
+        AppDelegate.sharedInstance().setupSentryTags()
     }
 }
