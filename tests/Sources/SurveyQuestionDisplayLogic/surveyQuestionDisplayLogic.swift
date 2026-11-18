@@ -157,7 +157,14 @@ public func evaluateSingleLogicPair(_ operation: String, _ payload: AnyObject, _
         guard let target = payload_list[0] as? String else {
             throw DisplayLogicError("Encountered invalid type for questiion id target: \(payload_list[0].classForCoder)")
         }
-        guard let compare_me = payload_list[1] as? NSNumber else {
+        // Android's getInt/getDouble coerce numeric strings, so "3" must behave like 3.
+        let compare_me: NSNumber
+        if let number = payload_list[1] as? NSNumber {
+            compare_me = number
+        } else if let text = payload_list[1] as? String,
+                  let parsed = Double(text.trimmingCharacters(in: .whitespaces)), parsed.isFinite {
+            compare_me = parsed as NSNumber
+        } else {
             throw DisplayLogicError("Encountered invalid type for comparison value: \(payload_list[1].classForCoder)")
         }
         return numeric_logic(operation, target, compare_me, taskResult)

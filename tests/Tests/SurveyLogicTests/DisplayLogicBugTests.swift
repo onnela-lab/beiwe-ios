@@ -38,3 +38,31 @@ class DisplayLogicBugTests: UnbufferedTestCase {
         }
     }
 }
+
+/// Android coerces numeric strings in display-logic payloads (getInt/getDouble); non-numeric strings error.
+class StringComparisonValueTests: UnbufferedTestCase {
+    private func task(choice: NSNumber) -> TaskRes {
+        TaskRes(stepResults: ["q1": StepRes(results: [ChoiceRes(choiceAnswers: [choice])])])
+    }
+
+    private func eval(_ op: String, _ value: AnyObject, answer: NSNumber) throws -> Bool {
+        try evaluateSingleLogicPair(op, ["q1" as NSString, value] as NSArray, task(choice: answer))
+    }
+
+    func testNumericStringBehavesLikeNumber() throws {
+        for op in ["==", "!=", "<", "<=", ">", ">="] {
+            for answer in [2, 3, 4] as [NSNumber] {
+                XCTAssertEqual(try eval(op, "3" as NSString, answer: answer), try eval(op, 3 as NSNumber, answer: answer), "\(op) \(answer)")
+            }
+        }
+    }
+
+    func testDecimalStringParses() throws {
+        // choice answers compare as ints, so 3.5 truncates to 3
+        XCTAssertTrue(try eval("==", "3.5" as NSString, answer: 3))
+    }
+
+    func testNonNumericStringThrows() {
+        XCTAssertThrowsError(try eval("==", "abc" as NSString, answer: 3))
+    }
+}
