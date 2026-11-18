@@ -592,16 +592,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
             [String: [String]].self, from: Data(notificationIdsJsonListString.utf8)
         )
         
-        // weird but this is the appropriate location to initialize it.
-        if self.currentStudy!.surveyPushNotificationUUIDs == nil {
-            self.currentStudy!.surveyPushNotificationUUIDs = [String]()
-        }
-        
-        // the historical list is sent to the backend, the backend only needs the notification uuid.
-        self.currentStudy!.surveyPushNotificationUUIDs!.append(dateFormatLocalWithMs(Date()))
-        for (_survey_id, notification_uuids) in survey_ids_to_notification_uuids {
-            self.currentStudy!.surveyPushNotificationUUIDs!.append(contentsOf: notification_uuids)
+        let study = self.currentStudy!
+        let receivedAt = dateFormatLocalWithMs(Date())
+        SurveyLock.with {  // getDeliveredNotifications callbacks land here off main
+            // weird but this is the appropriate location to initialize it.
+            if study.surveyPushNotificationUUIDs == nil {
+                study.surveyPushNotificationUUIDs = [String]()
+            }
             
+            // the historical list is sent to the backend, the backend only needs the notification uuid.
+            study.surveyPushNotificationUUIDs!.append(receivedAt)
+            for (_survey_id, notification_uuids) in survey_ids_to_notification_uuids {
+                study.surveyPushNotificationUUIDs!.append(contentsOf: notification_uuids)
+                
+            }
         }
         return survey_ids_to_notification_uuids
     }

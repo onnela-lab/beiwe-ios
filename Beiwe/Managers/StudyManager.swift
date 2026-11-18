@@ -53,6 +53,7 @@ class StudyManager {
             return []
         }
         // completed active surveys are not "actually active"
+        SurveyLock.lock(); defer { SurveyLock.unlock() }  // setDefaultParameters calls this off main
         var activeSurveyIds: [String] = []
         for (survey_id, active_survey) in study.activeSurveys where active_survey.isComplete == false {
             activeSurveyIds.append(survey_id)
@@ -66,6 +67,7 @@ class StudyManager {
             return []
         }
         var allSurveyIds: [String] = []
+        SurveyLock.lock(); defer { SurveyLock.unlock() }
         for survey in study.surveys where survey.surveyId != nil { // this comes from a mappable in RecLine
             allSurveyIds.append(survey.surveyId!)
         }
@@ -214,6 +216,7 @@ class StudyManager {
             return false
         }
         printTimer("clear_out_completed_surveys")
+        SurveyLock.lock(); defer { SurveyLock.unlock() }
         // For all active surveys that aren't complete, but have expired, submit them. (id is a string)
         var surveyDataModified = false
         var surveys_to_remove = [String]()
@@ -258,6 +261,7 @@ class StudyManager {
             return false
         }
         printTimer("remove_deleted_surveys")
+        SurveyLock.lock(); defer { SurveyLock.unlock() }
         var surveyDataModified = false
         let allSurveyIds = self.getAllSurveyIds() // from the database
         for (surveyId, activeSurvey) in study.activeSurveys {
@@ -281,6 +285,7 @@ class StudyManager {
             return false
         }
         printTimer("ensure_always_and_trigger_surveys")
+        SurveyLock.lock(); defer { SurveyLock.unlock() }
         
         var surveyDataModified = false
         // for each survey, check on its availability, insert (and forcibly overwrite data)
@@ -338,6 +343,7 @@ class StudyManager {
         }
         var any_surveys_updated = false
         printTimer("update_any_changed_active_surveys")
+        SurveyLock.lock(); defer { SurveyLock.unlock() }
         
         for target_survey in study.surveys {
             if target_survey.surveyId == nil {
@@ -402,20 +408,22 @@ class StudyManager {
         // of not having a survey but receiving that notification is virtually zero.)
         // (this loop is weird, whatever.)
         var updated_survey_state = false
-        for survey in study.surveys {
-            if surveyIds.contains(survey.surveyId!) {
-                let activeSurvey = ActiveSurvey(survey: survey)
-                activeSurvey.received = sentTime // the push's sent_time, stored as received; not used for sorting.
-                
-                // update the survey notification
-                if let notification_uuids = survey_ids_to_notification_uuids?[survey.surveyId!] {
-                    // print("\nupdating notification_uuids on survey \(survey.surveyId!) to \(notification_uuids.joined(separator: ","))\n")
-                    activeSurvey.mostRecentNotificationUUIDs = notification_uuids.joined(separator: ",")
+        SurveyLock.with {  // released before the emit and save below
+            for survey in study.surveys {
+                if surveyIds.contains(survey.surveyId!) {
+                    let activeSurvey = ActiveSurvey(survey: survey)
+                    activeSurvey.received = sentTime // the push's sent_time, stored as received; not used for sorting.
+                    
+                    // update the survey notification
+                    if let notification_uuids = survey_ids_to_notification_uuids?[survey.surveyId!] {
+                        // print("\nupdating notification_uuids on survey \(survey.surveyId!) to \(notification_uuids.joined(separator: ","))\n")
+                        activeSurvey.mostRecentNotificationUUIDs = notification_uuids.joined(separator: ",")
+                    }
+                    
+                    // this action clears out the prior state of the survey.
+                    study.activeSurveys[survey.surveyId!] = activeSurvey
+                    updated_survey_state = true
                 }
-                
-                // this action clears out the prior state of the survey.
-                study.activeSurveys[survey.surveyId!] = activeSurvey
-                updated_survey_state = true
             }
         }
         
@@ -431,10 +439,12 @@ class StudyManager {
         }
         
         var bdgrCnt = 0
-        for activeSurvey in study.activeSurveys.values where activeSurvey.survey != nil {
-            // if survey is not complete and the survey is not an always available survey
-            if !activeSurvey.isComplete && !activeSurvey.survey!.alwaysAvailable {
-                bdgrCnt += 1
+        SurveyLock.with {  // not held while touching UIApplication
+            for activeSurvey in study.activeSurveys.values where activeSurvey.survey != nil {
+                // if survey is not complete and the survey is not an always available survey
+                if !activeSurvey.isComplete && !activeSurvey.survey!.alwaysAvailable {
+                    bdgrCnt += 1
+                }
             }
         }
         // print("updateBadgerCount - Setting badge count to: \(bdgrCnt)")
@@ -628,7 +638,7 @@ class StudyManager {
                             if let body_string = body_response.body {
                                 if let newSurveys: [Survey] = Mapper<Survey>().mapArray(JSONString: body_string) {
                                     // we have survey data!
-                                    study.surveys = newSurveys
+                                    SurveyLock.with { study.surveys = newSurveys }  // save below must run unlocked
                                     Recline.shared.save(study)
                                 } else {
                                     error_message = "download surveys: \(response) - but body was nil"

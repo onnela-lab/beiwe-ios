@@ -64,9 +64,10 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
         
         // if for some reason step order does not exist, we generate an order of 0..<(number of questions),
         // and also set the active survey's step order.
-        self.stepOrder = activeSurvey.stepOrder ?? Array(0..<survey.questions.count)
+        let stepOrder = activeSurvey.stepOrder ?? Array(0..<survey.questions.count)
+        self.stepOrder = stepOrder
         if activeSurvey.stepOrder == nil {
-            activeSurvey.stepOrder = self.stepOrder
+            SurveyLock.with { activeSurvey.stepOrder = stepOrder }  // the heartbeat save can be serializing this object
         }
         
         // make a question id lookup dict of question types, we need it for question logic
@@ -348,7 +349,7 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
         if answersString == "" || answersString == "[]" {
             answersString = NO_ANSWER_SELECTED
         }
-        self.activeSurvey.bwAnswers[identifier] = answersString
+        SurveyLock.with { self.activeSurvey.bwAnswers[identifier] = answersString }
     }
     
     // extracts the answer out of a question object, returns a tuple of objects required for use in writing to a csv
@@ -577,7 +578,7 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
         
         self.dismissCurrentQuestion()
         if !self.isComplete {
-            self.activeSurvey.rkAnswers = taskViewController.restorationData
+            SurveyLock.with { self.activeSurvey.rkAnswers = taskViewController.restorationData }
             if let study = StudyManager.sharedInstance.currentStudy {
                 Recline.shared.save(study)
                 log.info("Tracking survey state saved.")
@@ -684,8 +685,10 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
                 self.finalizeSurveyAnswers() // Submit.
                 
                 // why do we save restorationData right after a submit?
-                self.activeSurvey.rkAnswers = taskViewController.restorationData
-                self.activeSurvey.isComplete = true
+                SurveyLock.with {
+                    self.activeSurvey.rkAnswers = taskViewController.restorationData
+                    self.activeSurvey.isComplete = true
+                }
                 self.isComplete = true
                 StudyManager.sharedInstance.updateActiveSurveys(true)
                 
@@ -704,8 +707,10 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
                 if let question = questionIdToQuestion[identifier] {
                     // print("loading next question, with identifier \(identifier)")
                     self.currentQuestion = question
-                    if self.activeSurvey.bwAnswers[identifier] == nil {
-                        self.activeSurvey.bwAnswers[identifier] = ""
+                    SurveyLock.with {
+                        if self.activeSurvey.bwAnswers[identifier] == nil {
+                            self.activeSurvey.bwAnswers[identifier] = ""
+                        }
                     }
                     
                     // populate any existing question

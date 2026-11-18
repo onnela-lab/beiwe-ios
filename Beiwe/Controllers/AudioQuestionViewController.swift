@@ -59,7 +59,7 @@ class AudioQuestionViewController: UIViewController, AVAudioRecorderDelegate, AV
 
         if let study = StudyManager.sharedInstance.currentStudy {
             // Just need to put any old answer in here...
-            self.activeSurvey.bwAnswers["A"] = "A"
+            SurveyLock.with { self.activeSurvey.bwAnswers["A"] = "A" }  // the heartbeat save could be serializing this object
             Recline.shared.save(study)
             log.info("Saved.")
         }
@@ -265,7 +265,7 @@ class AudioQuestionViewController: UIViewController, AVAudioRecorderDelegate, AV
         // this used to be in a promise structure with a catch clause, now it is syncronous code and doesn't actually have throw clauses
         do {
             self.saveEncryptedAudio()
-            self.activeSurvey.isComplete = true
+            SurveyLock.with { self.activeSurvey.isComplete = true }
             StudyManager.sharedInstance.updateActiveSurveys(true)
             HUD.flash(.success, delay: 0.5)
             StudyManager.sharedInstance.currentStudy?.submittedAudioSurveys =

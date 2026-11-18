@@ -154,7 +154,7 @@ class ApiManager {
             device_status_report["count_upload_files_count"] = String(counts.upload)
             
             // neither of these can fail
-            parameters["notification_uuids"] = easyJSON(study.surveyPushNotificationUUIDs)
+            parameters["notification_uuids"] = easyJSON(SurveyLock.with { study.surveyPushNotificationUUIDs })  // copy under the lock, encode outside
             parameters["active_survey_ids"] = easyJSON(StudyManager.sharedInstance.getActuallyActiveSurveyIds())
             
             device_status_report["total_tracking_surveys_submitted_count"] = "\(study.submittedTrackingSurveys)"

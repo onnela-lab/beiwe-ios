@@ -1,6 +1,18 @@
 import Foundation
 import ObjectMapper
 
+// survey state is hit from main, network and heartbeat threads. recursive; never hold it across IO, UI or queue.sync
+enum SurveyLock {
+    private static let mutex = NSRecursiveLock()
+    static func lock() { mutex.lock() }
+    static func unlock() { mutex.unlock() }
+    static func with<T>(_ body: () throws -> T) rethrows -> T {
+        mutex.lock()
+        defer { mutex.unlock() }
+        return try body()
+    }
+}
+
 class Study: ReclineObject {
     // StudySettings is (probably?) saved recursively as it is a mappable - if that's how Recline works
     var studySettings: StudySettings?
@@ -49,6 +61,7 @@ class Study: ReclineObject {
 
     // Mappable
     override func mapping(map: Map) {
+        SurveyLock.lock(); defer { SurveyLock.unlock() }  // <- is inout even when saving, so serializing writes too
         super.mapping(map: map)
         self.patientPhoneNumber <- map["phoneNumber"]
         self.studySettings <- map["studySettings"]
@@ -76,6 +89,7 @@ class Study: ReclineObject {
     }
 
     func surveyExists(surveyId: String?) -> Bool {
+        SurveyLock.lock(); defer { SurveyLock.unlock() }
         for survey in self.surveys {
             if survey.surveyId == surveyId {
                 return true
@@ -85,6 +99,7 @@ class Study: ReclineObject {
     }
 
     func getSurvey(surveyId: String?) -> Survey? {
+        SurveyLock.lock(); defer { SurveyLock.unlock() }
         for survey in self.surveys {
             if survey.surveyId == surveyId {
                 return survey

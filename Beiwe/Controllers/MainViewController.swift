@@ -81,7 +81,7 @@ class MainViewController: UIViewController {
         var triggered_unnamed: [(String, ActiveSurvey)] = []
         
         // populate
-        if let activeSurveys = StudyManager.sharedInstance.currentStudy?.activeSurveys {
+        if let activeSurveys = SurveyLock.with({ StudyManager.sharedInstance.currentStudy?.activeSurveys }) {  // copy, background queues mutate it
             for (survey_id, active) in activeSurveys {
                 if active.survey!.alwaysAvailable {
                     if let name = active.survey?.name, !name.isEmpty, name != ""  {
@@ -115,7 +115,7 @@ class MainViewController: UIViewController {
         self.hakuba.insert(Section(), atIndex: 0).bump()
 
         var active_survey_count = 0
-        if let activeSurveys = StudyManager.sharedInstance.currentStudy?.activeSurveys {
+        if let activeSurveys = SurveyLock.with({ StudyManager.sharedInstance.currentStudy?.activeSurveys }) {
             let sortedSurveys = getActiveSurveySorted()
             
             // because surveys do not have their state cleared when the done button is pressed, the buttons retain
@@ -155,7 +155,7 @@ class MainViewController: UIViewController {
     
     func presentSurvey(_ surveyId: String) {
         // confirm everything necessary is present for the survey button to work
-        guard let activeSurvey = StudyManager.sharedInstance.currentStudy?.activeSurveys[surveyId],
+        guard let activeSurvey = SurveyLock.with({ StudyManager.sharedInstance.currentStudy?.activeSurveys[surveyId] }),
               let survey = activeSurvey.survey,
               let surveyType = survey.surveyType
         else {

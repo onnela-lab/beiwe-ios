@@ -15,4 +15,8 @@ cp Beiwe/Models/*.swift tests/Sources/SurveyQuestionDisplayLogic/Models/
 { echo "import Foundation"; cat Beiwe/Models/GenericSurveyQuestion.swift; } > tests/Sources/SurveyQuestionDisplayLogic/Models/GenericSurveyQuestion.swift  # needs Foundation under SwiftPM
 
 cd tests
-swift test -v
+if [ "${1-}" = "--tsan" ]; then
+    swift test --sanitize=thread  # BS12: proves survey state isn't raced; BS12_RACE_DEMO=1 adds the unlocked demo
+else
+    swift test -v
+fi
