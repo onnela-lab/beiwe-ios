@@ -71,8 +71,16 @@ let transformJsonStringInt = TransformOf<Int, Any>(fromJSON: { (value: Any?) -> 
     if let value = value as? Int {
         return value
     }
+    // Android getInt truncates ("1.5" and 1.5 -> 1)
+    func truncated(_ d: Double) -> Int? {
+        d.isFinite && abs(d) < 1e15 ? Int(d) : nil
+    }
+    if let value = value as? Double {
+        return truncated(value)
+    }
     if let value = value as? String {
-        return Int(value)
+        if let i = Int(value) { return i }
+        return Double(value.trimmingCharacters(in: .whitespaces)).flatMap(truncated)
     }
     return nil
 }, toJSON: { (value: Int?) -> Int? in

@@ -238,3 +238,28 @@ class StudyRoundTripTests: UnbufferedTestCase {
         XCTAssertEqual(study.nextSurveyCheck, 111)
     }
 }
+
+/// Android getInt truncates decimals and coerces numeric strings; slider bounds depend on it.
+class JsonStringIntTransformTests: UnbufferedTestCase {
+    private func t(_ v: Any?) -> Int? { transformJsonStringInt.transformFromJSON(v) }
+
+    func testIntegerForms() {
+        XCTAssertEqual(t(5), 5)
+        XCTAssertEqual(t("5"), 5)
+    }
+
+    func testDecimalsTruncate() {
+        XCTAssertEqual(t("1.5"), 1)
+        XCTAssertEqual(t("5.5"), 5)
+        XCTAssertEqual(t(5.5), 5)
+        XCTAssertEqual(t(-1.5), -1)
+    }
+
+    func testUnparseableIsNil() {
+        XCTAssertNil(t(""))
+        XCTAssertNil(t("abc"))
+        XCTAssertNil(t("nan"))
+        XCTAssertNil(t("1e400"))
+        XCTAssertNil(t(nil))
+    }
+}
