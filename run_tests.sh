@@ -10,6 +10,7 @@ cp Beiwe/RK/surveyQuestionDisplayLogic.swift tests/Sources/SurveyQuestionDisplay
 { echo "import Foundation"; sed -n '/^\/\/ BEGIN leftBehindFiles/,/^\/\/ END leftBehindFiles/p' Beiwe/Common.swift; } > tests/Sources/SurveyQuestionDisplayLogic/leftBehindFiles.swift
 { echo "import Foundation"; sed -n '/^\/\/ BEGIN fileCountCache/,/^\/\/ END fileCountCache/p' Beiwe/Common.swift; } > tests/Sources/SurveyQuestionDisplayLogic/fileCountCache.swift
 { echo "import Foundation"; sed -n '/^\/\/ BEGIN activeSurveyReplacement/,/^\/\/ END activeSurveyReplacement/p' Beiwe/Common.swift; } > tests/Sources/SurveyQuestionDisplayLogic/activeSurveyReplacement.swift
+{ echo "import Foundation"; sed -n '/^\/\/ BEGIN gpsFuzz/,/^\/\/ END gpsFuzz/p' Beiwe/Util/MiscHelpers.swift; } > tests/Sources/SurveyQuestionDisplayLogic/gpsFuzz.swift
 mkdir -p tests/Sources/SurveyQuestionDisplayLogic/Models
 cp Beiwe/Models/*.swift tests/Sources/SurveyQuestionDisplayLogic/Models/
 { echo "import Foundation"; echo "import ObjectMapper"; sed -n "/^\\/\\/ BEGIN modelTransforms/,/^\\/\\/ END modelTransforms/p" Beiwe/Util/MiscHelpers.swift; } > tests/Sources/SurveyQuestionDisplayLogic/Models/ModelTransforms.swift

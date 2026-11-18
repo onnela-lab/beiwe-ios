@@ -423,8 +423,8 @@ class RegisterViewController: FormViewController {
         
         // fuzzgps
         if studySettings.fuzzGps {
-            study.fuzzGpsLatitudeOffset = self.generateLatitudeOffset()
-            study.fuzzGpsLongitudeOffset = self.generateLongitudeOffset()
+            study.fuzzGpsLatitudeOffset = generateGpsLatitudeOffset()
+            study.fuzzGpsLongitudeOffset = generateGpsLongitudeOffset()
         }
         
         // Call purge studies to ensure there is no weird data present from possible partial study registrations.
@@ -454,23 +454,5 @@ class RegisterViewController: FormViewController {
     /// this doesn't do anything....
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning() // Dispose of any resources that can be recreated.
-    }
-    
-    /// Generates a random offset between -1 and 1 (thats not between -0.2 and 0.2)
-    func generateLatitudeOffset() -> Double {
-        var ran = Double.random(in: -1 ... 1)
-        while ran <= 0.2 && ran >= -0.2 {
-            ran = Double.random(in: -1 ... 1)
-        }
-        return ran
-    }
-    
-    /// Generates a random offset between -180 and 180 (thats not between -10 and 10)
-    func generateLongitudeOffset() -> Double {
-        var ran = Double.random(in: -180 ... 180)
-        while ran <= 10 && ran >= -10 {
-            ran = Double.random(in: -180 ... 180)
-        }
-        return ran
     }
 }

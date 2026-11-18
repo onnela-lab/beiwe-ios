@@ -119,6 +119,19 @@ class StudyManager {
         self.setupHeartbeatOnDispatchQueue()
     }
     
+    /// Offsets are made lazily so fuzzing turned on after registration still fuzzes; also runs on a settings change
+    private func applyGpsFuzzOffsets(fuzzOn: Bool) {
+        guard let study = self.currentStudy else { return }
+        let offsets = ensureGpsFuzzOffsets(lat: study.fuzzGpsLatitudeOffset, lng: study.fuzzGpsLongitudeOffset, fuzzOn: fuzzOn)
+        if offsets.generated {
+            study.fuzzGpsLatitudeOffset = offsets.lat
+            study.fuzzGpsLongitudeOffset = offsets.lng
+            Recline.shared.save(study)
+        }
+        self.gpsManager?.fuzzGpsLatitudeOffset = offsets.lat
+        self.gpsManager?.fuzzGpsLongitudeOffset = offsets.lng
+    }
+    
     /// ACTUAL initialization - initializes the weirdly complex self.gpsManager and everything else
     private func prepareDataServices() {
         // current study and study settings are null of course
@@ -146,8 +159,7 @@ class StudyManager {
         // GPS, Check if gps fuzzing is enabled for currentStudy
         self.gpsManager = GPSManager()
         self.gpsManager?.enableGpsFuzzing = studySettings.fuzzGps ? true : false
-        self.gpsManager?.fuzzGpsLatitudeOffset = (self.currentStudy?.fuzzGpsLatitudeOffset)!
-        self.gpsManager?.fuzzGpsLongitudeOffset = (self.currentStudy?.fuzzGpsLongitudeOffset)!
+        self.applyGpsFuzzOffsets(fuzzOn: studySettings.fuzzGps)
         
         // iOS Log (app events)
         self.timerManager.addDataService(AppEventManager.sharedInstance)

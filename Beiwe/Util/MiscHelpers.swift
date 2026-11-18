@@ -141,3 +141,49 @@ func confirmAndCallClinician(_ presenter: UIViewController, callAssistant: Bool 
         }
     }
 }
+
+// BEGIN gpsFuzz (copied into tests/, keep Foundation-only)
+/// Random source is injectable so tests can seed it.
+typealias GpsFuzzRandom = (ClosedRange<Double>) -> Double
+let systemGpsFuzzRandom: GpsFuzzRandom = { Double.random(in: $0) }
+
+/// Random offset in -1...1, never in -0.2...0.2 (a near-zero offset would barely hide anything).
+func generateGpsLatitudeOffset(random: GpsFuzzRandom = systemGpsFuzzRandom) -> Double {
+    var ran = random(-1 ... 1)
+    while ran <= 0.2 && ran >= -0.2 {
+        ran = random(-1 ... 1)
+    }
+    return ran
+}
+
+/// Random offset in -180...180, never in -10...10.
+func generateGpsLongitudeOffset(random: GpsFuzzRandom = systemGpsFuzzRandom) -> Double {
+    var ran = random(-180 ... 180)
+    while ran <= 10 && ran >= -10 {
+        ran = random(-180 ... 180)
+    }
+    return ran
+}
+
+/// Generated offsets are never 0, so 0.0 means "unset". Fills unset offsets when fuzzing is on (matches Android's lazy
+/// generation); set offsets are kept, including across fuzzing being turned off and on again.
+struct GpsFuzzOffsets {
+    var lat: Double
+    var lng: Double
+    var generated: Bool
+}
+
+func ensureGpsFuzzOffsets(lat: Double, lng: Double, fuzzOn: Bool, random: GpsFuzzRandom = systemGpsFuzzRandom) -> GpsFuzzOffsets {
+    guard fuzzOn else { return GpsFuzzOffsets(lat: lat, lng: lng, generated: false) }
+    let newLat = lat == 0.0 ? generateGpsLatitudeOffset(random: random) : lat
+    let newLng = lng == 0.0 ? generateGpsLongitudeOffset(random: random) : lng
+    return GpsFuzzOffsets(lat: newLat, lng: newLng, generated: newLat != lat || newLng != lng)
+}
+
+/// Latitude is shifted as-is (can leave +-90). The longitude range for highly negative numbers (up to -360.0) creates
+/// out-of-range output, the fix is to add multiple of 360 + 180 so that the truncating remainder is always a positive
+/// value, and then at the end account for the negative range by subtracting 180. (1260 = 360*3 + 180)
+func applyGpsFuzz(lat: Double, lng: Double, latOffset: Double, lngOffset: Double) -> (lat: Double, lng: Double) {
+    return (lat + latOffset, ((lng + lngOffset + 1260.0).truncatingRemainder(dividingBy: 360.0)) - 180.0)
+}
+// END gpsFuzz
