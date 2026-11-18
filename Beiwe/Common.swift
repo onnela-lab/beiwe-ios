@@ -286,6 +286,7 @@ public func printTimer(_ items: Any..., separator: String = " ", terminator: Str
 ////////////////////////////////////// SENTRY //////////////////////////////////////////
 ////////////////////////////////////// SENTRY //////////////////////////////////////////
 
+// The title is Sentry's grouping key: keep it fixed, put variable parts in extras.
 func sentry_warning(
     _ title: String, _ extra1: String? = nil, _ extra2: String? = nil, _ extra3: String? = nil, crash: Bool
 ) {
@@ -303,9 +304,26 @@ func sentry_warning(
         extras["user_id"] = patient_id
     }
     
-    SentrySDK.capture(message: "not a crash - Error moving file 1") { (scope: Scope) in
+    SentrySDK.capture(message: "not a crash - \(title)") { (scope: Scope) in
         scope.setEnvironment(Constants.APP_INFO_TAG)
         scope.setExtras(extras)
+        scope.setLevel(.warning)
+    }
+}
+
+// The errorCase is Sentry's grouping key: keep it fixed, put the file name in the tag.
+func sentry_file_warning(_ errorCase: String, _ file: String) {
+    var extras = [String: Any]()
+    if let patient_id = StudyManager.sharedInstance.currentStudy?.patientId {
+        extras["user_id"] = patient_id
+    }
+    // tag values are capped at 200 chars and can't hold newlines
+    let tag = String(file.replacingOccurrences(of: "\n", with: " ").prefix(200))
+    
+    SentrySDK.capture(message: "file warning - \(errorCase)") { (scope: Scope) in
+        scope.setEnvironment(Constants.APP_INFO_TAG)
+        scope.setExtras(extras)
+        scope.setTag(value: tag, key: "file")
         scope.setLevel(.warning)
     }
 }

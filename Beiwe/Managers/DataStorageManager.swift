@@ -302,17 +302,17 @@ class DataStorageManager {
             try FileManager.default.moveItem(at: src, to: dst)
         } catch CocoaError.fileNoSuchFile {
             print("File not found (for moving)? \(shortenPath(src))")
-            sentry_warning("File not found (for moving).", shortenPath(src), crash: false)
+            sentry_file_warning("not found (moving)", shortenPath(src))
         } catch CocoaError.fileWriteFileExists {
             // print("File already exists (for moving) \(shortenPath(dst)), giving up for now because that's crazy?")
             // we are getting a huge number of these reported, so throttle by 10x?
             FILE_WRITE_FILE_EXISTS_COUNTER += 1
             if FILE_WRITE_FILE_EXISTS_COUNTER % 10 == 0 {
-                sentry_warning("File already exists (for moving).", shortenPath(dst), crash: false)
+                sentry_file_warning("already exists (moving)", shortenPath(dst))
             }
         } catch CocoaError.fileWriteOutOfSpace {
             // print("Out of space (for moving) \(shortenPath(dst))")
-            // sentry_warning("Out of space (for moving).", shortenPath(dst)) // never report out of space like this.
+            // sentry_file_warning("out of space (moving)", shortenPath(dst)) // never report out of space, on purpose.
         } catch {
             // known and not handling: fileWriteVolumeReadOnly, fileWriteInvalidFileName
             // print("moving file \(shortenPath(src)) to \(shortenPath(dst))")
