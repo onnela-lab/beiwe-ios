@@ -98,7 +98,8 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
             
             // go through questions in step order
             let question: GenericSurveyQuestion = questions[self.stepOrder[i]]
-            if let _ = question.displayIf {
+            // the first question always displays (matches Android), so its logic doesn't count
+            if i > 0, let _ = question.displayIf {
                 self.hasOptionalQuestionSteps = true
             }
             
@@ -215,7 +216,7 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
             // Create a BWNavigatableTask, hand it the steps (ORKSteps).
             // attach a skip rule if the the question has skip logic.
             let navTask = BWNavigatableTask(identifier: "SurveyTask", steps: questionSteps)
-            for step in questionSteps {
+            for step in questionSteps.dropFirst() {
                 let question = self.questionIdToQuestion[step.identifier]
                 if let displayIf = question?.displayIf {
                     let navRule = BWSkipStepNavigationRule(displayIf: displayIf)
