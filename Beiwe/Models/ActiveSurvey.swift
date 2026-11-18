@@ -112,5 +112,8 @@ func displayedQuestionCount(survey: Survey, stepOrder: [Int]) -> Int {
         let n = survey.numberOfRandomQuestions ?? 0
         return n > 0 ? min(stepOrder.count, n) : stepOrder.count
     }
-    return survey.randomize ? min(survey.questions.count, survey.numberOfRandomQuestions ?? 999) : survey.questions.count
+    guard survey.randomize else { return survey.questions.count }
+    // 0 means all, like Android's shuffleJSONArray; negative left as is (BS16)
+    let n = survey.numberOfRandomQuestions ?? 0
+    return n == 0 ? survey.questions.count : min(survey.questions.count, n)
 }

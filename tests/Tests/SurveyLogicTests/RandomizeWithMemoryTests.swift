@@ -174,9 +174,12 @@ class RandomizeWithMemoryTests: XCTestCase {
         XCTAssertEqual(questionOrderOnOpen(activeSurvey: active, survey: survey, study: study), stored)
         XCTAssertEqual(displayedQuestionCount(survey: survey, stepOrder: stored), 2)
         XCTAssertTrue(study.surveyQuestionMemory.isEmpty)
-        // count nil -> all; 0 -> none (pre-existing iOS behavior, Android shows all)
-        XCTAssertEqual(displayedQuestionCount(survey: makeSurvey(ids: ["a", "b"], randomize: true, memory: false, count: nil), stepOrder: [1, 0]), 2)
-        XCTAssertEqual(displayedQuestionCount(survey: makeSurvey(ids: ["a", "b"], randomize: true, memory: false, count: 0), stepOrder: [1, 0]), 0)
+        // count nil or 0 -> all (Android rule); 9 of 5 -> 5
+        for count in [nil, 0] as [Int?] {
+            XCTAssertEqual(displayedQuestionCount(survey: makeSurvey(ids: ["a", "b"], randomize: true, memory: false, count: count), stepOrder: [1, 0]), 2)
+        }
+        let five = makeSurvey(ids: (1 ... 5).map { "q\($0)" }, randomize: true, memory: false, count: 9)
+        XCTAssertEqual(displayedQuestionCount(survey: five, stepOrder: [4, 3, 2, 1, 0]), 5)
     }
 
     func testNotRandomizedUnchanged() {
