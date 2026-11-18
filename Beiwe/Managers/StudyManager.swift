@@ -298,37 +298,11 @@ class StudyManager {
                     continue
                 }
                 
-                // study.activeSurveys has non-optional keys, nil means the key is not present.
-                // If it is in the list then it _might but may not be_ visible (I think).
-                let on_the_main_screen = study.activeSurveys[survey_id] != nil
-                
-                if !on_the_main_screen {
-                    // case: new trigger or always available survey, add it.
-                    // printTimer("ensure_always_and_trigger_surveys - adding survey '\(survey.name)'")
-                    study.activeSurveys[survey_id] = ActiveSurvey(survey: survey)
+                // nil means unchanged (or not a case we handle); otherwise store the replacement.
+                // Trigger-only surveys that are complete stay complete, see activeSurveyReplacement.
+                if let replacement = activeSurveyReplacement(existing: study.activeSurveys[survey_id], downloaded: survey) {
+                    study.activeSurveys[survey_id] = replacement
                     surveyDataModified = true
-                } else {
-                    // case: Survey is already loaded
-                    if study.activeSurveys[survey_id]!.survey == survey {
-                        // case: old survey was _not_ updated and was already present.
-                        // Nothin to be done here, move on.
-                        // printTimer("ensure_always_and_trigger_surveys - survey '\(survey.name)' is unchanged, skipping.")
-                        continue
-                    }
-                    
-                    // case: old survey was updated. (for future debugging clarity retin these two cases)
-                    // This will cause any partially completed surveys to have state cleared. If the
-                    // surveys are identical. A final else clause should be unreachable because we test
-                    // for that at the top of the loop.
-                    if survey.alwaysAvailable {
-                        // printTimer("ensure_always_and_trigger_surveys - alwaysAvailable survey changed '\(survey.name)'.")
-                        study.activeSurveys[survey_id] = ActiveSurvey(survey: survey)
-                        surveyDataModified = true
-                    } else if survey.triggerOnFirstDownload {
-                        // printTimer("ensure_always_and_trigger_surveys - trigger survey changed, '\(survey.name)'.")
-                        study.activeSurveys[survey_id] = ActiveSurvey(survey: survey)
-                        surveyDataModified = true
-                    }
                 }
             }
         }

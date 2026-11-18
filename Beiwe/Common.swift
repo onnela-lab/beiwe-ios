@@ -202,6 +202,22 @@ func fileCountCacheIsFresh(computedAt: TimeInterval?, now: TimeInterval, interva
 }
 // END fileCountCache
 
+// BEGIN activeSurveyReplacement (copied into tests/, models only)
+/// The ActiveSurvey to store for a trigger/always-available survey, nil to leave the stored one alone.
+/// A completed trigger-only survey stays complete (hidden) when its definition changes; only a push brings it back.
+func activeSurveyReplacement(existing: ActiveSurvey?, downloaded: Survey) -> ActiveSurvey? {
+    guard let existing = existing else { return ActiveSurvey(survey: downloaded) }
+    if existing.survey == downloaded { return nil }
+    if downloaded.alwaysAvailable { return ActiveSurvey(survey: downloaded) }
+    if downloaded.triggerOnFirstDownload {
+        let replacement = ActiveSurvey(survey: downloaded)
+        replacement.isComplete = existing.isComplete
+        return replacement
+    }
+    return nil
+}
+// END activeSurveyReplacement
+
 //////////////////////////////// CONVENIENCE JSON FUNCTIONS ///////////////////////////////////
 //////////////////////////////// CONVENIENCE JSON FUNCTIONS ///////////////////////////////////
 //////////////////////////////// CONVENIENCE JSON FUNCTIONS ///////////////////////////////////
