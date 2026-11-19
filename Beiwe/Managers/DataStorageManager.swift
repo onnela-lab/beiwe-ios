@@ -5,11 +5,6 @@ import Sentry
 
 var FILE_WRITE_FILE_EXISTS_COUNTER = 0
 
-enum DataStorageErrors: Error {
-    case cantCreateFile
-    case notInitialized
-}
-
 enum DataStorageError: Error {
     case fileCreationError
 }

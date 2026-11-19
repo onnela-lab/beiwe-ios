@@ -97,14 +97,4 @@ class Study: ReclineObject {
         }
         return false
     }
-
-    func getSurvey(surveyId: String?) -> Survey? {
-        SurveyLock.lock(); defer { SurveyLock.unlock() }
-        for survey in self.surveys {
-            if survey.surveyId == surveyId {
-                return survey
-            }
-        }
-        return nil
-    }
 }
