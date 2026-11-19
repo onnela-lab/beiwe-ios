@@ -774,7 +774,7 @@ class EncryptedStorage {
             // log.info("write_actual case 1")
             // Need to encrypt data
             let encryptLen = self.stream_cryptor.getOutputLength(inputByteCount: writeLen)
-            let bufferOut = UnsafeMutablePointer<Void>.allocate(capacity: encryptLen)
+            let bufferOut = UnsafeMutableRawPointer.allocate(byteCount: encryptLen, alignment: 1)
             var byteCount: Int = 0
             let bufferIn = UnsafeMutableRawPointer(mutating: data!.bytes)
             self.stream_cryptor.update(
@@ -792,7 +792,7 @@ class EncryptedStorage {
         if encryptLen > 0 {
             // log.info("write_actual case 2")
             // mostly setup of these obscure pointers to an array of data (there must be a better way to do this...)
-            let bufferOut = UnsafeMutablePointer<Void>.allocate(capacity: encryptLen)
+            let bufferOut = UnsafeMutableRawPointer.allocate(byteCount: encryptLen, alignment: 1)
             var byteCount: Int = 0
             self.stream_cryptor.final(bufferOut: bufferOut, byteCapacityOut: encryptLen, byteCountOut: &byteCount)
             // setup to write an array of appropriate length

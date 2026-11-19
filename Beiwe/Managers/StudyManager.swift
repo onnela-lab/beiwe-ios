@@ -1165,7 +1165,7 @@ class StudyManager {
         
         // kill notifications
         NotificationCenter.default.removeObserver(self, name: .reachabilityChanged, object: nil)
-        UIApplication.shared.cancelAllLocalNotifications()
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
         
         // clear out remaining active study objects
         self.gpsManager = nil

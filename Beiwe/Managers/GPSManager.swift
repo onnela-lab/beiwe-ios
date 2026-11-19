@@ -93,7 +93,7 @@ class GPSManager: NSObject, CLLocationManagerDelegate, DataServiceProtocol {
     /// checks gps permission - IDE warning about UI unresponsiveness appears to never be an issue.
     func gpsAllowed() -> Bool {
         return CLLocationManager.locationServicesEnabled()
-            && CLLocationManager.authorizationStatus() == .authorizedAlways
+            && self.locationManager.authorizationStatus == .authorizedAlways
     }
     
     /// starts GPS - enrolls app (rather, this class) in the LocationManager updates loop.

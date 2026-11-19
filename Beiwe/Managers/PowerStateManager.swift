@@ -35,6 +35,8 @@ class PowerStateManager: DataServiceProtocol {
             state = "Unplugged"
         case .unknown:
             state = "PowerUnknown"
+        @unknown default:
+            state = "PowerUnknown"
         }
         data.append(state)
         data.append(String(UIDevice.current.batteryLevel))
