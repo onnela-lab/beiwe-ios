@@ -494,6 +494,7 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
     }
     
     // function that sets up necessary state for implementing required questions
+    @discardableResult
     func handleRequiredQuestion(_ stepViewController: ORKStepViewController, _ identifier: String) -> Bool {
         // the isEnabled and isHidden properties for the continue and skip buttons are both os version blocked
         // (16 and 15, respectively) .... and isenabled doesn't do anything?

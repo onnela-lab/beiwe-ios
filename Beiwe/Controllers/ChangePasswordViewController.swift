@@ -40,7 +40,7 @@ class ChangePasswordViewController: FormViewController {
                     // height and and I can't work out how to fix it
                     // headerView.patientId.text = StudyManager.sharedInstance.currentStudy?.patientId ?? ""
                     headerView.patientId2.text = "Patient ID: " +
-                        (StudyManager.sharedInstance.currentStudy?.patientId ?? "")!
+                        (StudyManager.sharedInstance.currentStudy?.patientId ?? "")
 
                     // add the call button, but hide it if it's disabled in the study settings
                     headerView.callButton.addTarget(self, action: #selector(ChangePasswordViewController.callAssistant(_:)), for: UIControl.Event.touchUpInside)
@@ -138,7 +138,6 @@ class ChangePasswordViewController: FormViewController {
         guard let the_proposed_password = self.the_proposed_password else {
             log.error("self.the_proposed_password is nil")
             fatalError("self.the_proposed_password is nil")
-            return
         }
         self.the_proposed_password = nil // immediately clear
         
@@ -151,7 +150,6 @@ class ChangePasswordViewController: FormViewController {
             if let statusCode = response.response?.statusCode {
                 // real success, 200 class status codes
                 if statusCode >= 200 && statusCode < 300 {
-                    var error_message = ""
                     hud_error_message = self.fake_hud_error
                 }
                 // rejected errors (400 class)

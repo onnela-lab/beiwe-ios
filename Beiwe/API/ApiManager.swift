@@ -288,7 +288,7 @@ class ApiManager {
                     }
                 // and for the success case... we use the same architecture as makePostRequest,
                 // Provide A Completion Handler That Takes a DataResponse<String> object.
-                case let .success(uploadRequest, _streamingFromDisk, _streamFileURL): // UploadRequest, Bool, URL?
+                case let .success(uploadRequest, _, _): // UploadRequest, Bool, URL?
                     uploadRequest.responseString(
                         queue: completionQueue,
                         completionHandler: httpSuccessCompletionHandler

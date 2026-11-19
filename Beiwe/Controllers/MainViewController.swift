@@ -115,7 +115,7 @@ class MainViewController: UIViewController {
         self.hakuba.insert(Section(), atIndex: 0).bump()
 
         var active_survey_count = 0
-        if let activeSurveys = SurveyLock.with({ StudyManager.sharedInstance.currentStudy?.activeSurveys }) {
+        if SurveyLock.with({ StudyManager.sharedInstance.currentStudy?.activeSurveys }) != nil {
             let sortedSurveys = getActiveSurveySorted()
             
             // because surveys do not have their state cleared when the done button is pressed, the buttons retain

@@ -64,7 +64,7 @@ open class _SVFieldCell<T>: _FieldCell<T> where T: Equatable, T: InputTypeInitia
         contentView.addSubview(self.validationLabel)
 
         let sameLeading: NSLayoutConstraint = NSLayoutConstraint(item: self.contentView, attribute: .leading, relatedBy: .equal, toItem: self.validationLabel, attribute: .leading, multiplier: 1, constant: -20)
-        let sameTrailing: NSLayoutConstraint = NSLayoutConstraint(item: self.textField, attribute: .trailing, relatedBy: .equal, toItem: self.validationLabel, attribute: .trailing, multiplier: 1, constant: 0)
+        let sameTrailing: NSLayoutConstraint = NSLayoutConstraint(item: self.textField as Any, attribute: .trailing, relatedBy: .equal, toItem: self.validationLabel, attribute: .trailing, multiplier: 1, constant: 0)
         let sameBottom: NSLayoutConstraint = NSLayoutConstraint(item: self.contentView, attribute: .bottom, relatedBy: .equal, toItem: self.validationLabel, attribute: .bottom, multiplier: 1, constant: 4)
         let all: [NSLayoutConstraint] = [sameLeading, sameTrailing, sameBottom]
 

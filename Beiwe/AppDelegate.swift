@@ -602,7 +602,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
             
             // the historical list is sent to the backend, the backend only needs the notification uuid.
             study.surveyPushNotificationUUIDs!.append(receivedAt)
-            for (_survey_id, notification_uuids) in survey_ids_to_notification_uuids {
+            for notification_uuids in survey_ids_to_notification_uuids.values {
                 study.surveyPushNotificationUUIDs!.append(contentsOf: notification_uuids)
                 
             }

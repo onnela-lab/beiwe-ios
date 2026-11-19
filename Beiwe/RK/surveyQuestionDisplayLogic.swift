@@ -50,14 +50,14 @@ func dispatch_negation(_ payload: AnyObject, _ taskResult: ORKTaskResult) throws
     // for these operators the payload will be a list of other logic pairs, assert that the
     // class is as expected
     guard let payload_dict = payload as? NSDictionary else {
-        throw DisplayLogicError("Encountered invalid type of payload dict: \(payload.classForCoder)")
+        throw DisplayLogicError("Encountered invalid type of payload dict: \(String(describing: payload.classForCoder))")
     }
     // assert that these values are not nil (might have redundant checks here, don't care.)
     if payload_dict.allKeys.first == nil || payload_dict.allValues.first == nil {
-        throw DisplayLogicError("Encountered invalid contents of a payload dict: \(payload.classForCoder), key 1:\(payload_dict.allKeys.first), value 1:\(payload_dict.allValues.first)")
+        throw DisplayLogicError("Encountered invalid contents of a payload dict: \(String(describing: payload.classForCoder)), key 1:\(String(describing: payload_dict.allKeys.first)), value 1:\(String(describing: payload_dict.allValues.first))")
     }
     guard let first_key = payload_dict.allKeys.first as? String else {
-        throw DisplayLogicError("bad first key \(payload_dict.allKeys.first)")
+        throw DisplayLogicError("bad first key \(String(describing: payload_dict.allKeys.first))")
     }
     // guard let first_value = payload_dict.allValues.first as? NSArray else {
     //     fatalError("bad first value \(payload_dict.allValues.first)")
@@ -70,7 +70,7 @@ func dispatch_negation(_ payload: AnyObject, _ taskResult: ORKTaskResult) throws
         first_value = v
     }
     else {
-        throw DisplayLogicError("bad first value \(payload_dict.allValues.first)")
+        throw DisplayLogicError("bad first value \(String(describing: payload_dict.allValues.first))")
     }
     
     // paylaod is a list of length 1
@@ -88,23 +88,23 @@ func dispatch_and_or(_ operation: String, _ payload: AnyObject, _ taskResult: OR
     
     // its an array of any number of NSDictionaries
     guard let payload_list = payload as? NSArray else {
-        throw DisplayLogicError("Encountered invalid type 1 of payload dict: \(payload.classForCoder), \(payload)")
+        throw DisplayLogicError("Encountered invalid type 1 of payload dict: \(String(describing: payload.classForCoder)), \(payload)")
     }
     
     // validate the list of dicts and throw useful errors
     for dict in payload_list {
         if let dict = dict as? NSDictionary {
             if let _ = dict.allKeys.first as? String {} else {
-                throw DisplayLogicError("Encountered invalid type 2 in payload_list for and/or: \((dict.allKeys.first as AnyObject).classForCoder)")
+                throw DisplayLogicError("Encountered invalid type 2 in payload_list for and/or: \(String(describing: (dict.allKeys.first as AnyObject).classForCoder))")
             }
             if let _ = dict.allValues.first as? NSDictionary {
                 // this path executes when there is a NOT inside an AND
                 
             } else if let _ = dict.allValues.first as? NSArray {} else {
-                throw DisplayLogicError("Encountered invalid type 3 in payload_list for and/or: \((dict.allValues.first as AnyObject).classForCoder)")
+                throw DisplayLogicError("Encountered invalid type 3 in payload_list for and/or: \(String(describing: (dict.allValues.first as AnyObject).classForCoder))")
             }
         } else {
-            throw DisplayLogicError("Encountered invalid type 4 in payload_list for and/or: \((dict as AnyObject).classForCoder)")
+            throw DisplayLogicError("Encountered invalid type 4 in payload_list for and/or: \(String(describing: (dict as AnyObject).classForCoder))")
         }
     }
     
@@ -149,16 +149,16 @@ public func evaluateSingleLogicPair(_ operation: String, _ payload: AnyObject, _
     if ["==", "!=", "<", "<=", ">", ">="].contains(operation) {
         // payload in this case is a list of  two elements, a string (question id) and a numeric value
         guard let payload_list = payload as? [AnyObject] else {
-            throw DisplayLogicError("Encountered invalid type for payload list: \(payload.classForCoder)")
+            throw DisplayLogicError("Encountered invalid type for payload list: \(String(describing: payload.classForCoder))")
         }
         guard payload_list.count == 2 else {
             throw DisplayLogicError("Encountered invalid size of payload list: \(payload_list.count), \(payload_list)")
         }
         guard let target = payload_list[0] as? String else {
-            throw DisplayLogicError("Encountered invalid type for questiion id target: \(payload_list[0].classForCoder)")
+            throw DisplayLogicError("Encountered invalid type for questiion id target: \(String(describing: payload_list[0].classForCoder))")
         }
         guard let compare_me = payload_list[1] as? NSNumber else {
-            throw DisplayLogicError("Encountered invalid type for comparison value: \(payload_list[1].classForCoder)")
+            throw DisplayLogicError("Encountered invalid type for comparison value: \(String(describing: payload_list[1].classForCoder))")
         }
         return numeric_logic(operation, target, compare_me, taskResult)
     }

@@ -35,7 +35,7 @@ let log = XCGLogger(identifier: "advancedLogger", includeDefaultDestinations: fa
 // }
 
 /// Do not have the expertise to actually identify what the warning means
-extension String: LocalizedError {
+extension String: @retroactive LocalizedError {
     public var errorDescription: String? { return self }
 }
 

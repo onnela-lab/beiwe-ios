@@ -377,7 +377,7 @@ class AudioQuestionViewController: UIViewController, AVAudioRecorderDelegate, AV
     }
 
     func audioRecorderEncodeErrorDidOccur(_ recorder: AVAudioRecorder, error: Error?) {
-        log.error("Error received in audio recorded: \(error)")
+        log.error("Error received in audio recorded: \(String(describing: error))")
         self.enableIdleTimer()
         self.recorder?.deleteRecording()
         self.reset()

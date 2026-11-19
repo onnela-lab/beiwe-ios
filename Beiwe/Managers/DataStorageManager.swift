@@ -56,7 +56,7 @@ func iterate_file_path(_ path: String) -> [String] {
 func count_file_paths(_ path: String) -> Int {
     var count = 0
     if let enumerator = FileManager.default.enumerator(atPath: path) {
-        while let _filename = enumerator.nextObject() as? String {
+        while enumerator.nextObject() is String {
             count += 1
         }
     }
@@ -561,7 +561,7 @@ class DataStorage {
             attributes: [FileAttributeKey(rawValue: FileAttributeKey.protectionKey.rawValue): FileProtectionType.none]
         )
         
-        var message = if created { "Create new data file" } else { "Could not create new data file" }
+        let message = if created { "Create new data file" } else { "Could not create new data file" }
         if !created {
             // does not crash the app but it is a nasty problem
             self.io_error_report("file_creation_1", crash: false)

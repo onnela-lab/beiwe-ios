@@ -192,7 +192,7 @@ class StudyManager {
     /// Called from, AudioQuestionsViewController.saveButtonPressed, StudyManager.checkSurveys,
     ///  and inside TrackingSurveyPresenter when the survey is completed.
     func updateActiveSurveys(_ forceSave: Bool = false) {
-        guard let study = currentStudy else {
+        guard currentStudy != nil else {
             return
         }
         printTimer("updateActiveSurveys, forceSave: \(forceSave)")
@@ -264,7 +264,7 @@ class StudyManager {
         SurveyLock.lock(); defer { SurveyLock.unlock() }
         var surveyDataModified = false
         let allSurveyIds = self.getAllSurveyIds() // from the database
-        for (surveyId, activeSurvey) in study.activeSurveys {
+        for (surveyId, _) in study.activeSurveys {
             // if the survey no longer exists in the database, remove it
             if !allSurveyIds.contains(surveyId) {
                 // printTimer("remove_deleted_surveys - removing survey \(surveyId)")
@@ -346,7 +346,7 @@ class StudyManager {
             // run the full survey content comparison, update as appropriate.
             if activesurvey_survey != target_survey {
                 self.debug_print_activate_changed(target_survey)
-                var new_active_survey = ActiveSurvey(survey: target_survey)
+                let new_active_survey = ActiveSurvey(survey: target_survey)
                 // case: if content changes we want to retain the notification tracking
                 new_active_survey.mostRecentNotificationUUIDs = activesurvey.mostRecentNotificationUUIDs
                 study.activeSurveys[survey_id] = new_active_survey
@@ -539,7 +539,7 @@ class StudyManager {
     /// Must check if already exists because we create it under multiple conditions.
     /// Testing indicates no loss of reliability when paired with GPS to run in the background.
     func setupHeartbeatOnDispatchQueue() {
-        HEARTBEAT_QUEUE.async {
+        HEARTBEAT_QUEUE.async { [self] in
             if self.heartbeatTimer != nil { return } // already running
             
             // print("Scheduling dispatchqueue heartbeat...")
@@ -635,7 +635,7 @@ class StudyManager {
                 
                 // if received any surveys to this call
                 if !surveyIds.isEmpty {
-                    self.activate_surveys(
+                    _ = self.activate_surveys(
                         surveyIds: surveyIds,
                         sentTime: sentTime,
                         survey_ids_to_notification_uuids: survey_ids_to_notification_uuids

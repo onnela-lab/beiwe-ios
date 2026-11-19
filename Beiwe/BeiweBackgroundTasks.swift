@@ -89,7 +89,7 @@ func updateBackgroundTasksCount() {
     BGTaskScheduler.shared.getPendingTaskRequests { (taskRequests: [BGTaskRequest]) in
         printTimer("There are \(taskRequests.count) BGTaskRequests outstanding right now:")
         for request in taskRequests {
-            if let refresh_task_request = request as? BGAppRefreshTaskRequest {
+            if request is BGAppRefreshTaskRequest {
                 // print("background - \t BGAppRefreshTaskRequest - ", request.identifier, request.earliestBeginDate!)
                 info.append("BGAppRefreshTaskRequest \(request.identifier):\(request.earliestBeginDate!)")
             }
