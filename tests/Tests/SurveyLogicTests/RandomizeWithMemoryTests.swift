@@ -56,102 +56,106 @@ class RandomizeWithMemoryTests: XCTestCase {
 
     // MARK: pure selection
 
-    // exact draws with injected shuffles; kept as JSON so the Kotlin port can run the same table
-    func testSelectionFixtureCases() throws {
+    // pins exact draws so iOS and the Kotlin port (same JSON table) pick the same questions as Android
+    func testSelectionMatchesEveryFixtureCase() throws {
         let cases = try selectionCases()
-        XCTAssertFalse(cases.isEmpty)
+        AssertFalse(cases.isEmpty)
         for c in cases {
             var shuffles = c.shuffles
             let r = randomQuestionSelection(
                 questionIds: c.question_ids, memory: c.memory, count: c.count,
                 shuffle: { n in
                     let p = shuffles.removeFirst()
-                    XCTAssertEqual(p.count, n, c.name)
+                    AssertEqual(p.count, n, c.name)
                     return p
                 }
             )
-            XCTAssertEqual(r.indices, c.selected_indices, c.name)
-            XCTAssertEqual(r.indices.map { c.question_ids[$0] }, c.selected_ids, c.name)
-            XCTAssertEqual(r.memory, c.memory_after, c.name)
-            XCTAssertTrue(shuffles.isEmpty, "\(c.name): unused shuffles")
+            AssertEqual(r.indices, c.selected_indices, c.name)
+            AssertEqual(r.indices.map { c.question_ids[$0] }, c.selected_ids, c.name)
+            AssertEqual(r.memory, c.memory_after, c.name)
+            AssertTrue(shuffles.isEmpty, "\(c.name): unused shuffles")
         }
     }
 
-    // 10 questions, 3 per survey -> 3,3,3,1, every question once per round, then a fresh round
-    func testFullRoundsWithRealShuffle() {
+    // the promise researchers rely on: no question repeats until every question has been shown
+    func testRealShuffleShowsEveryQuestionOncePerRound() {
         let ids = (1 ... 10).map { "q\($0)" }
         for _ in 0 ..< 50 {
             var memory: [String] = []
             var round: [String] = []
-            for expected in [3, 3, 3, 1] {
+            for expected in [3, 3, 3, 1] {  // 10 questions, 3 per survey
                 let r = randomQuestionSelection(questionIds: ids, memory: memory, count: 3, shuffle: realShuffle)
-                XCTAssertEqual(r.indices.count, expected)
+                AssertEqual(r.indices.count, expected)
                 round += r.indices.map { ids[$0] }
                 memory = r.memory
             }
-            XCTAssertEqual(round.sorted(), ids.sorted())
+            AssertEqual(round.sorted(), ids.sorted())
             let next = randomQuestionSelection(questionIds: ids, memory: memory, count: 3, shuffle: realShuffle)
-            XCTAssertEqual(next.indices.count, 3)
-            XCTAssertEqual(next.memory, next.indices.map { ids[$0] })
+            AssertEqual(next.indices.count, 3)
+            AssertEqual(next.memory, next.indices.map { ids[$0] })
         }
     }
 
     // MARK: models: open, new survey, reset
 
-    // the bug: every new survey builds a new ActiveSurvey, which used to draw fresh each time
-    func testMemoryAcrossNewSurveys() {
+    // the BS7 bug: every new survey built a new ActiveSurvey that drew fresh, so questions repeated
+    func testNewSurveysDrawUnseenQuestionsUntilRoundEnds() {
         let ids = (1 ... 10).map { "q\($0)" }
         let survey = makeSurvey(ids: ids, randomize: true, memory: true, count: 3)
         let study = makeStudy()
         var seen: [String] = []
         for expected in [3, 3, 3, 1] {
             let active = ActiveSurvey(survey: survey)  // a new survey
-            XCTAssertNil(active.stepOrder)
+            AssertNil(active.stepOrder)
             let q = shown(survey, questionOrderOnOpen(activeSurvey: active, survey: survey, study: study))
-            XCTAssertEqual(q.count, expected)
-            XCTAssertTrue(Set(q).isDisjoint(with: seen))
+            AssertEqual(q.count, expected)
+            AssertTrue(Set(q).isDisjoint(with: seen))
             seen += q
-            XCTAssertEqual(study.surveyQuestionMemory[survey.surveyId!], seen)
+            AssertEqual(study.surveyQuestionMemory[survey.surveyId!], seen)
         }
-        XCTAssertEqual(seen.sorted(), ids.sorted())
+        AssertEqual(seen.sorted(), ids.sorted())
         let q = shown(survey, questionOrderOnOpen(activeSurvey: ActiveSurvey(survey: survey), survey: survey, study: study))
-        XCTAssertEqual(q.count, 3)
-        XCTAssertEqual(study.surveyQuestionMemory[survey.surveyId!], q)
+        AssertEqual(q.count, 3)
+        AssertEqual(study.surveyQuestionMemory[survey.surveyId!], q)
     }
 
-    func testNewSurveyWithoutOpenConsumesNothing() {
+    // like Android, questions count as seen only when opened; missed surveys must not use them up
+    func testUnopenedNewSurveysLeaveMemoryEmpty() {
         let survey = makeSurvey(ids: ["a", "b", "c"], randomize: true, memory: true, count: 1)
         let study = makeStudy()
         for _ in 0 ..< 5 {
             study.activeSurveys[survey.surveyId!] = ActiveSurvey(survey: survey)
         }
-        XCTAssertTrue(study.surveyQuestionMemory.isEmpty)
+        AssertTrue(study.surveyQuestionMemory.isEmpty)
     }
 
-    func testReopenKeepsOrderAndMemory() {
+    // a partly answered survey must resume with the same questions, not draw again
+    func testReopeningKeepsQuestionOrderAndMemory() {
         let survey = makeSurvey(ids: (1 ... 6).map { "q\($0)" }, randomize: true, memory: true, count: 2)
         let study = makeStudy()
         let active = ActiveSurvey(survey: survey)
         let first = questionOrderOnOpen(activeSurvey: active, survey: survey, study: study)
         let memory = study.surveyQuestionMemory
-        XCTAssertEqual(active.stepOrder, first)
+        AssertEqual(active.stepOrder, first)
         for _ in 0 ..< 3 {
-            XCTAssertEqual(questionOrderOnOpen(activeSurvey: active, survey: survey, study: study), first)
+            AssertEqual(questionOrderOnOpen(activeSurvey: active, survey: survey, study: study), first)
         }
-        XCTAssertEqual(study.surveyQuestionMemory, memory)
+        AssertEqual(study.surveyQuestionMemory, memory)
     }
 
-    func testMemoryCountNilOrZeroShowsAllUnseen() {
+    // matches Android: with memory, a nil or 0 question count means every unseen question
+    func testNoQuestionCountShowsAllUnseenQuestions() {
         for count in [nil, 0] as [Int?] {
             let survey = makeSurvey(ids: ["a", "b", "c", "d"], randomize: true, memory: true, count: count)
             let study = makeStudy()
             study.surveyQuestionMemory[survey.surveyId!] = ["b"]
             let q = shown(survey, questionOrderOnOpen(activeSurvey: ActiveSurvey(survey: survey), survey: survey, study: study))
-            XCTAssertEqual(q.sorted(), ["a", "c", "d"])
+            AssertEqual(q.sorted(), ["a", "c", "d"])
         }
     }
 
-    func testAlwaysAvailableResetDrawsUnseenOnNextOpen() {
+    // always-available surveys reuse one ActiveSurvey via reset, which must clear the order so memory applies
+    func testCompletedAlwaysAvailableSurveyDrawsUnseenOnNextOpen() {
         var survey = makeSurvey(ids: ["a", "b", "c", "d"], randomize: true, memory: true, count: 2)
         survey.alwaysAvailable = true
         let study = makeStudy()
@@ -159,75 +163,80 @@ class RandomizeWithMemoryTests: XCTestCase {
         let first = shown(survey, questionOrderOnOpen(activeSurvey: active, survey: survey, study: study))
         active.isComplete = true
         active.reset(survey)  // clear_out_completed_surveys
-        XCTAssertNil(active.stepOrder)
+        AssertNil(active.stepOrder)
         let second = shown(survey, questionOrderOnOpen(activeSurvey: active, survey: survey, study: study))
-        XCTAssertEqual((first + second).sorted(), ["a", "b", "c", "d"])
+        AssertEqual((first + second).sorted(), ["a", "b", "c", "d"])
     }
 
-    func testSurveyEditedBetweenSurveysUsesIds() {
+    // memory holds question ids, so researcher edits (delete, add, reorder) don't confuse which were seen
+    func testEditedSurveySkipsSeenQuestionsById() {
         let study = makeStudy()
         let v1 = makeSurvey(ids: ["a", "b", "c", "d"], randomize: true, memory: true, count: 2)
         study.surveyQuestionMemory[v1.surveyId!] = ["a", "b"]
         // c deleted, e added, order changed
         let v2 = makeSurvey(ids: ["e", "d", "a", "b"], randomize: true, memory: true, count: 2)
         let q = shown(v2, questionOrderOnOpen(activeSurvey: ActiveSurvey(survey: v2), survey: v2, study: study))
-        XCTAssertEqual(q.sorted(), ["d", "e"])
-        XCTAssertEqual(study.surveyQuestionMemory[v2.surveyId!]!.sorted(), ["a", "b", "d", "e"])
+        AssertEqual(q.sorted(), ["d", "e"])
+        AssertEqual(study.surveyQuestionMemory[v2.surveyId!]!.sorted(), ["a", "b", "d", "e"])
     }
 
     // MARK: unchanged paths
 
-    func testRandomizeWithoutMemoryUnchanged() {
+    // the BS7 fix must not change surveys that randomize without memory
+    func testRandomizeWithoutMemoryShowsFirstNOfFullShuffle() {
         let survey = makeSurvey(ids: (1 ... 6).map { "q\($0)" }, randomize: true, memory: false, count: 2)
         let study = makeStudy()
         let active = ActiveSurvey(survey: survey)
         let stored = active.stepOrder!
-        XCTAssertEqual(stored.sorted(), Array(0 ..< 6))  // full shuffle when the new survey arrives, as before
-        XCTAssertEqual(questionOrderOnOpen(activeSurvey: active, survey: survey, study: study), stored)
-        XCTAssertEqual(displayedQuestionCount(survey: survey, stepOrder: stored), 2)
-        XCTAssertTrue(study.surveyQuestionMemory.isEmpty)
+        AssertEqual(stored.sorted(), Array(0 ..< 6))  // full shuffle when the new survey arrives, as before
+        AssertEqual(questionOrderOnOpen(activeSurvey: active, survey: survey, study: study), stored)
+        AssertEqual(displayedQuestionCount(survey: survey, stepOrder: stored), 2)
+        AssertTrue(study.surveyQuestionMemory.isEmpty)
         // count nil -> all; 0 -> none (pre-existing iOS behavior, Android shows all)
-        XCTAssertEqual(displayedQuestionCount(survey: makeSurvey(ids: ["a", "b"], randomize: true, memory: false, count: nil), stepOrder: [1, 0]), 2)
-        XCTAssertEqual(displayedQuestionCount(survey: makeSurvey(ids: ["a", "b"], randomize: true, memory: false, count: 0), stepOrder: [1, 0]), 0)
+        AssertEqual(displayedQuestionCount(survey: makeSurvey(ids: ["a", "b"], randomize: true, memory: false, count: nil), stepOrder: [1, 0]), 2)
+        AssertEqual(displayedQuestionCount(survey: makeSurvey(ids: ["a", "b"], randomize: true, memory: false, count: 0), stepOrder: [1, 0]), 0)
     }
 
-    func testNotRandomizedUnchanged() {
+    // the BS7 fix must not change surveys that don't randomize, even with the memory flag set
+    func testNotRandomizedShowsAllQuestionsInOrder() {
         for memory in [false, true] {  // randomize_with_memory is ignored without randomize
             let survey = makeSurvey(ids: ["a", "b", "c"], randomize: false, memory: memory, count: 1)
             let study = makeStudy()
             let active = ActiveSurvey(survey: survey)
-            XCTAssertEqual(active.stepOrder, [0, 1, 2])
+            AssertEqual(active.stepOrder, [0, 1, 2])
             let order = questionOrderOnOpen(activeSurvey: active, survey: survey, study: study)
-            XCTAssertEqual(shown(survey, order), ["a", "b", "c"])
-            XCTAssertTrue(study.surveyQuestionMemory.isEmpty)
+            AssertEqual(shown(survey, order), ["a", "b", "c"])
+            AssertTrue(study.surveyQuestionMemory.isEmpty)
         }
     }
 
-    // stored by the pre-fix app: a full shuffle on the ActiveSurvey; show its first N, record nothing
-    func testLegacyStoredFullOrderStillShowsN() {
+    // an ActiveSurvey saved before BS7 holds a full shuffle and survives an app update; it must still show only N
+    func testPreFixStoredOrderShowsOnlyFirstN() {
         let survey = makeSurvey(ids: ["a", "b", "c", "d"], randomize: true, memory: true, count: 2)
         let study = makeStudy()
         let active = Mapper<ActiveSurvey>().map(JSON: ["stepOrder": [3, 1, 0, 2], "survey": survey.toJSON()])!
-        XCTAssertEqual(shown(survey, questionOrderOnOpen(activeSurvey: active, survey: survey, study: study)), ["d", "b"])
-        XCTAssertTrue(study.surveyQuestionMemory.isEmpty)
+        AssertEqual(shown(survey, questionOrderOnOpen(activeSurvey: active, survey: survey, study: study)), ["d", "b"])
+        AssertTrue(study.surveyQuestionMemory.isEmpty)
     }
 
     // MARK: persistence
 
-    func testMemoryPersistsWithStudy() {
+    // memory must survive app restarts, and Study docs saved before the field existed must still load
+    func testMemorySavesAndLoadsWithStudy() {
         let study = makeStudy()
         study.surveyQuestionMemory = ["s1": ["q2", "q1"], "s2": []]
         let json = study.toJSON()
-        XCTAssertEqual(json["survey_question_memory"] as? [String: [String]], ["s1": ["q2", "q1"], "s2": []])
+        AssertEqual(json["survey_question_memory"] as? [String: [String]], ["s1": ["q2", "q1"], "s2": []])
         let back = Mapper<Study>().map(JSON: json)!
-        XCTAssertEqual(back.surveyQuestionMemory, study.surveyQuestionMemory)
-        XCTAssertEqual(Mapper<Study>().map(JSON: [:])!.surveyQuestionMemory, [:])  // docs from before the field
+        AssertEqual(back.surveyQuestionMemory, study.surveyQuestionMemory)
+        AssertEqual(Mapper<Study>().map(JSON: [:])!.surveyQuestionMemory, [:])
     }
 
-    func testNilStepOrderRoundTrips() {
+    // a saved, unopened memory survey must still draw on open after an app restart
+    func testUnopenedActiveSurveySavesAndLoadsWithNoOrder() {
         let survey = makeSurvey(ids: ["a", "b"], randomize: true, memory: true, count: 1)
         let json = ActiveSurvey(survey: survey).toJSON()
-        XCTAssertNil(json["stepOrder"])
-        XCTAssertNil(Mapper<ActiveSurvey>().map(JSON: json)!.stepOrder)
+        AssertNil(json["stepOrder"])
+        AssertNil(Mapper<ActiveSurvey>().map(JSON: json)!.stepOrder)
     }
 }
