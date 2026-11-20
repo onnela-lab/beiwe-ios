@@ -62,13 +62,11 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
         )
         self.surveyTimingsFile.sanitize = true // replace commas with semicolons
         
-        // if for some reason step order does not exist, we generate an order of 0..<(number of questions),
-        // and also set the active survey's step order.
-        let stepOrder = activeSurvey.stepOrder ?? Array(0..<survey.questions.count)
+        // stored order if any (resume), else drawn now; randomize_with_memory records the draw on the study
+        let stepOrder = questionOrderOnOpen(
+            activeSurvey: activeSurvey, survey: survey, study: StudyManager.sharedInstance.currentStudy
+        )
         self.stepOrder = stepOrder
-        if activeSurvey.stepOrder == nil {
-            SurveyLock.with { activeSurvey.stepOrder = stepOrder }  // the heartbeat save can be serializing this object
-        }
         
         // make a question id lookup dict of question types, we need it for question logic
         let questions: [GenericSurveyQuestion] = survey.questions
@@ -77,7 +75,7 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
         }
         
         // question count may be less than number of questions
-        let numQuestions = survey.randomize ? min(questions.count, survey.numberOfRandomQuestions ?? 999) : questions.count
+        let numQuestions = displayedQuestionCount(survey: survey, stepOrder: stepOrder)
         
         super.init() /// cannot call self.method until we init....
         
@@ -415,7 +413,7 @@ class TrackingSurveyPresenter: NSObject, ORKTaskViewControllerDelegate {
         dataFile.sanitize = true // replace commas with semicolons
         
         // no questions
-        let numQuestions = survey.randomize ? min(survey.questions.count, survey.numberOfRandomQuestions ?? 999) : survey.questions.count
+        let numQuestions = displayedQuestionCount(survey: survey, stepOrder: self.stepOrder)
         if numQuestions == 0 {
             return
         }
