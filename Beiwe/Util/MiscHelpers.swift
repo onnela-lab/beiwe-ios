@@ -80,7 +80,9 @@ let transformJsonStringInt = TransformOf<Int, Any>(fromJSON: { (value: Any?) -> 
     }
     if let value = value as? String {
         if let i = Int(value) { return i }
-        return Double(value.trimmingCharacters(in: .whitespaces)).flatMap(truncated)
+        // quote characters left by double-encoded survey content are stripped too (Android rejects these)
+        let quotesAndWhitespace = CharacterSet.whitespaces.union(CharacterSet(charactersIn: "\"'"))
+        return Double(value.trimmingCharacters(in: quotesAndWhitespace)).flatMap(truncated)
     }
     return nil
 }, toJSON: { (value: Int?) -> Int? in
