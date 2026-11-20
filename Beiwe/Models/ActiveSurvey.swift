@@ -48,7 +48,7 @@ class ActiveSurvey: Mappable {
         self.bwAnswers = [:]
         self.isComplete = false
         
-        // with memory the questions are drawn when the survey is opened (questionOrderOnOpen), not on push
+        // with memory the questions are drawn when the survey is opened (questionOrderOnOpen), not when a new survey arrives
         if survey.randomize && survey.randomizeWithMemory {
             self.stepOrder = nil
             return
@@ -84,7 +84,8 @@ func randomQuestionSelection(questionIds: [String], memory: [String], count: Int
 }
 
 /// Question order for a survey being opened. A stored order is kept so a partly answered survey resumes; with
-/// memory, a new draw is recorded on the study at open (like Android's setUpQuestions), so a push alone uses nothing.
+/// memory, a new draw is recorded on the study at open (like Android's setUpQuestions), so a new survey that is never
+/// opened uses nothing.
 func questionOrderOnOpen(activeSurvey: ActiveSurvey, survey: Survey, study: Study?,
                          shuffle: (Int) -> [Int] = { Array(0 ..< $0).shuffled() }) -> [Int] {
     return SurveyLock.with {

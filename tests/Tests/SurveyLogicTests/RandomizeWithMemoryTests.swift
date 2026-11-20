@@ -2,30 +2,63 @@ import XCTest
 import ObjectMapper
 @testable import SurveyQuestionDisplayLogic
 
+// MARK: helpers
+
+private func question(_ id: String) -> GenericSurveyQuestion {
+    return Mapper<GenericSurveyQuestion>().map(JSON: ["question_id": id, "question_type": "info_text_box"])!
+}
+
+private func makeSurvey(ids: [String], randomize: Bool, memory: Bool, count: Int?) -> Survey {
+    var s = Mapper<Survey>().mapArray(JSONObject: Fixtures.surveyDownloadPayload)![0]
+    s.questions = ids.map(question)
+    s.randomize = randomize
+    s.randomizeWithMemory = memory
+    s.numberOfRandomQuestions = count
+    return s
+}
+
+private func makeStudy() -> Study {
+    return Mapper<Study>().map(JSON: [:])!
+}
+
+/// question ids the participant sees for this order
+private func shown(_ survey: Survey, _ order: [Int]) -> [String] {
+    return order.prefix(displayedQuestionCount(survey: survey, stepOrder: order)).map { survey.questions[$0].questionId }
+}
+
+private func realShuffle(_ n: Int) -> [Int] {
+    return Array(0 ..< n).shuffled()
+}
+
+/// one row of Fixtures.randomizeWithMemory
+private struct SelectionCase: Decodable {
+    let name: String
+    let question_ids: [String]
+    let memory: [String]
+    let count: Int?
+    let shuffles: [[Int]]
+    let selected_indices: [Int]
+    let selected_ids: [String]
+    let memory_after: [String]
+}
+
+private func selectionCases() throws -> [SelectionCase] {
+    struct File: Decodable {
+        let cases: [SelectionCase]
+    }
+    return try JSONDecoder().decode(File.self, from: Fixtures.randomizeWithMemory).cases
+}
+
 /// BS7: "randomize without replacement" must match Android: memory is question ids per survey id on the study,
-/// drawn when the survey is opened, so it survives pushes (new ActiveSurvey each), restarts and survey edits.
+/// drawn when the survey is opened, so it survives new surveys (each push notification builds a new ActiveSurvey),
+/// restarts and survey edits.
 class RandomizeWithMemoryTests: XCTestCase {
 
-    // MARK: pure selection, shared fixture
+    // MARK: pure selection
 
-    private struct Case: Decodable {
-        let name: String
-        let question_ids: [String]
-        let memory: [String]
-        let count: Int?
-        let shuffles: [[Int]]
-        let selected_indices: [Int]
-        let selected_ids: [String]
-        let memory_after: [String]
-    }
-
-    private struct Cases: Decodable {
-        let cases: [Case]
-    }
-
-    func testFixtureCases() throws {
-        let url = try XCTUnwrap(Bundle.module.url(forResource: "randomize_with_memory", withExtension: "json", subdirectory: "Fixtures"))
-        let cases = try JSONDecoder().decode(Cases.self, from: Data(contentsOf: url)).cases
+    // exact draws with injected shuffles; kept as JSON so the Kotlin port can run the same table
+    func testSelectionFixtureCases() throws {
+        let cases = try selectionCases()
         XCTAssertFalse(cases.isEmpty)
         for c in cases {
             var shuffles = c.shuffles
@@ -51,49 +84,28 @@ class RandomizeWithMemoryTests: XCTestCase {
             var memory: [String] = []
             var round: [String] = []
             for expected in [3, 3, 3, 1] {
-                let r = randomQuestionSelection(questionIds: ids, memory: memory, count: 3, shuffle: { Array(0 ..< $0).shuffled() })
+                let r = randomQuestionSelection(questionIds: ids, memory: memory, count: 3, shuffle: realShuffle)
                 XCTAssertEqual(r.indices.count, expected)
                 round += r.indices.map { ids[$0] }
                 memory = r.memory
             }
             XCTAssertEqual(round.sorted(), ids.sorted())
-            let next = randomQuestionSelection(questionIds: ids, memory: memory, count: 3, shuffle: { Array(0 ..< $0).shuffled() })
+            let next = randomQuestionSelection(questionIds: ids, memory: memory, count: 3, shuffle: realShuffle)
             XCTAssertEqual(next.indices.count, 3)
             XCTAssertEqual(next.memory, next.indices.map { ids[$0] })
         }
     }
 
-    // MARK: models: open, push, reset
+    // MARK: models: open, new survey, reset
 
-    private func question(_ id: String) -> GenericSurveyQuestion {
-        return Mapper<GenericSurveyQuestion>().map(JSON: ["question_id": id, "question_type": "info_text_box"])!
-    }
-
-    private func makeSurvey(ids: [String], randomize: Bool, memory: Bool, count: Int?) -> Survey {
-        var s = Mapper<Survey>().mapArray(JSONObject: loadFixture("survey_download_payload"))![0]
-        s.questions = ids.map(question)
-        s.randomize = randomize
-        s.randomizeWithMemory = memory
-        s.numberOfRandomQuestions = count
-        return s
-    }
-
-    private func makeStudy() -> Study {
-        return Mapper<Study>().map(JSON: [:])!
-    }
-
-    private func shown(_ survey: Survey, _ order: [Int]) -> [String] {
-        return order.prefix(displayedQuestionCount(survey: survey, stepOrder: order)).map { survey.questions[$0].questionId }
-    }
-
-    // the bug: every push builds a new ActiveSurvey, which used to draw fresh each time
-    func testMemoryAcrossPushes() {
+    // the bug: every new survey builds a new ActiveSurvey, which used to draw fresh each time
+    func testMemoryAcrossNewSurveys() {
         let ids = (1 ... 10).map { "q\($0)" }
         let survey = makeSurvey(ids: ids, randomize: true, memory: true, count: 3)
         let study = makeStudy()
         var seen: [String] = []
         for expected in [3, 3, 3, 1] {
-            let active = ActiveSurvey(survey: survey)  // a push
+            let active = ActiveSurvey(survey: survey)  // a new survey
             XCTAssertNil(active.stepOrder)
             let q = shown(survey, questionOrderOnOpen(activeSurvey: active, survey: survey, study: study))
             XCTAssertEqual(q.count, expected)
@@ -107,7 +119,7 @@ class RandomizeWithMemoryTests: XCTestCase {
         XCTAssertEqual(study.surveyQuestionMemory[survey.surveyId!], q)
     }
 
-    func testPushWithoutOpenConsumesNothing() {
+    func testNewSurveyWithoutOpenConsumesNothing() {
         let survey = makeSurvey(ids: ["a", "b", "c"], randomize: true, memory: true, count: 1)
         let study = makeStudy()
         for _ in 0 ..< 5 {
@@ -170,7 +182,7 @@ class RandomizeWithMemoryTests: XCTestCase {
         let study = makeStudy()
         let active = ActiveSurvey(survey: survey)
         let stored = active.stepOrder!
-        XCTAssertEqual(stored.sorted(), Array(0 ..< 6))  // full shuffle at push, as before
+        XCTAssertEqual(stored.sorted(), Array(0 ..< 6))  // full shuffle when the new survey arrives, as before
         XCTAssertEqual(questionOrderOnOpen(activeSurvey: active, survey: survey, study: study), stored)
         XCTAssertEqual(displayedQuestionCount(survey: survey, stepOrder: stored), 2)
         XCTAssertTrue(study.surveyQuestionMemory.isEmpty)
