@@ -244,7 +244,7 @@ class RegisterViewController: FormViewController {
                                 if statusCode >= 200 && statusCode < 300 {
                                     // body response also "throws errors" (ui elements)
                                     let body_response = BodyResponse(body: dataResponse.result.value)
-                                    if let body_string = body_response.body {
+                                    if body_response.body != nil {
                                         self.registrationCompletionHandler(
                                             body_response,
                                             new_password: newPassword,
@@ -254,6 +254,10 @@ class RegisterViewController: FormViewController {
                                             ra_phone: raPhone,
                                             server: server
                                         )
+                                    } else {
+                                        // empty 2xx body would leave the spinner up forever
+                                        error_message = "registration request, 2xx but empty body"
+                                        self.display_errors(0, url: server)
                                     }
                                 } else {
                                     error_message = "registration request, but statuscode: \(statusCode), value/body: \(String(describing: dataResponse.result.value))"
@@ -334,8 +338,12 @@ class RegisterViewController: FormViewController {
         // bodyResponse.body is confirmed not nil inside the closure on the registration request.
         do {
             // the ios plist default values may need to be injected
-            var converted_original_json: [String: Any] =
-                try JSONSerialization.jsonObject(with: Data(bodyResponse.body!.utf8)) as! [String: Any]
+            guard let body = bodyResponse.body,
+                  var converted_original_json = try JSONSerialization.jsonObject(with: Data(body.utf8)) as? [String: Any] else {
+                // valid json that is not an object (list, number...) means wrong url
+                log.error("registration response body is not a json object")
+                return nil
+            }
             if converted_original_json["ios_plist"] is NSNull || converted_original_json["ios_plist"] == nil {
                 converted_original_json["ios_plist"] = [
                     "CLIENT_ID": "",
