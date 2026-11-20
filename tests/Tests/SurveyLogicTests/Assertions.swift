@@ -33,3 +33,8 @@ func AssertNotNil(_ expression: @autoclosure () throws -> Any?, _ message: @auto
                   file: StaticString = #filePath, line: UInt = #line) {
     XCTAssertNotNil(try expression(), message(), file: file, line: line)
 }
+
+func AssertThrowsError<T>(_ expression: @autoclosure () throws -> T, _ message: @autoclosure () -> String = "",
+                          file: StaticString = #filePath, line: UInt = #line) {
+    XCTAssertThrowsError(try expression(), message(), file: file, line: line)
+}
