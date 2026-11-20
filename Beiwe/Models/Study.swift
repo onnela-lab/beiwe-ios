@@ -45,6 +45,8 @@ class Study: ReclineObject {
     // Survey app state
     var surveys: [Survey] = []
     var activeSurveys: [String: ActiveSurvey] = [:]
+    // randomize_with_memory: survey id -> question ids already shown this round (Android "<surveyId>-questionIds")
+    var surveyQuestionMemory: [String: [String]] = [:]
 
     init(patientPhone: String, patientId: String, studySettings: StudySettings, apiUrl: String?) {
         super.init()
@@ -73,6 +75,7 @@ class Study: ReclineObject {
         self.nextUploadCheck <- (map["nextUploadCheck"], TransformOf<Int64, NSNumber>(fromJSON: { $0?.int64Value }, toJSON: { $0.map { NSNumber(value: $0) } }))
         self.surveys <- map["surveys"]
         self.activeSurveys <- map["active_surveys"]
+        self.surveyQuestionMemory <- map["survey_question_memory"]
         self.registerDate <- (map["registerDate"], TransformOf<Int64, NSNumber>(fromJSON: { $0?.int64Value }, toJSON: { $0.map { NSNumber(value: $0) } }))
         self.submittedAudioSurveys <- map["submittedAudioSurveys"]
         self.submittedTrackingSurveys <- map["submittedTrackingSurveys"]

@@ -1,0 +1,33 @@
+{
+  "_doc": "BS7 randomize_with_memory selection (Android JSONUtils.shuffleJSONArrayWithMemory). Each shuffle call returns the next permutation of 0..n-1 from shuffles; walk it, take question ids not in memory until count (null/<=0 = all unseen); none taken -> clear memory and draw again.",
+  "cases": [
+    {"name": "n_of_m_unseen_first_survey", "question_ids": ["q1", "q2", "q3", "q4", "q5"], "memory": [], "count": 2,
+     "shuffles": [[3, 0, 4, 1, 2]], "selected_indices": [3, 0], "selected_ids": ["q4", "q1"], "memory_after": ["q4", "q1"]},
+    {"name": "memory_grows_seen_skipped", "question_ids": ["q1", "q2", "q3", "q4", "q5"], "memory": ["q4", "q1"], "count": 2,
+     "shuffles": [[0, 1, 2, 3, 4]], "selected_indices": [1, 2], "selected_ids": ["q2", "q3"], "memory_after": ["q4", "q1", "q2", "q3"]},
+    {"name": "short_last_round", "question_ids": ["q1", "q2", "q3", "q4", "q5"], "memory": ["q4", "q1", "q2", "q3"], "count": 2,
+     "shuffles": [[4, 3, 2, 1, 0]], "selected_indices": [4], "selected_ids": ["q5"], "memory_after": ["q4", "q1", "q2", "q3", "q5"]},
+    {"name": "clear_and_restart_when_none_left", "question_ids": ["q1", "q2", "q3", "q4", "q5"], "memory": ["q4", "q1", "q2", "q3", "q5"], "count": 2,
+     "shuffles": [[0, 1, 2, 3, 4], [2, 0, 1, 3, 4]], "selected_indices": [2, 0], "selected_ids": ["q3", "q1"], "memory_after": ["q3", "q1"]},
+    {"name": "count_null_all_unseen", "question_ids": ["q1", "q2", "q3", "q4", "q5"], "memory": ["q2"], "count": null,
+     "shuffles": [[4, 3, 2, 1, 0]], "selected_indices": [4, 3, 2, 0], "selected_ids": ["q5", "q4", "q3", "q1"], "memory_after": ["q2", "q5", "q4", "q3", "q1"]},
+    {"name": "count_zero_all_unseen", "question_ids": ["q1", "q2", "q3", "q4", "q5"], "memory": ["q2"], "count": 0,
+     "shuffles": [[4, 3, 2, 1, 0]], "selected_indices": [4, 3, 2, 0], "selected_ids": ["q5", "q4", "q3", "q1"], "memory_after": ["q2", "q5", "q4", "q3", "q1"]},
+    {"name": "count_negative_all_unseen", "question_ids": ["q1", "q2", "q3"], "memory": [], "count": -3,
+     "shuffles": [[2, 0, 1]], "selected_indices": [2, 0, 1], "selected_ids": ["q3", "q1", "q2"], "memory_after": ["q3", "q1", "q2"]},
+    {"name": "count_above_question_count", "question_ids": ["q1", "q2", "q3"], "memory": [], "count": 9,
+     "shuffles": [[1, 2, 0]], "selected_indices": [1, 2, 0], "selected_ids": ["q2", "q3", "q1"], "memory_after": ["q2", "q3", "q1"]},
+    {"name": "question_deleted_between_surveys", "question_ids": ["q1", "q2", "q4", "q5"], "memory": ["q1", "q2", "q3"], "count": 2,
+     "shuffles": [[0, 1, 2, 3]], "selected_indices": [2, 3], "selected_ids": ["q4", "q5"], "memory_after": ["q1", "q2", "q3", "q4", "q5"]},
+    {"name": "deleted_id_in_memory_round_still_ends", "question_ids": ["q1", "q2", "q4", "q5"], "memory": ["q1", "q2", "q3", "q4", "q5"], "count": 2,
+     "shuffles": [[0, 1, 2, 3], [3, 1, 0, 2]], "selected_indices": [3, 1], "selected_ids": ["q5", "q2"], "memory_after": ["q5", "q2"]},
+    {"name": "question_added_between_surveys", "question_ids": ["q1", "q2", "q3", "q_new"], "memory": ["q1", "q2", "q3"], "count": 2,
+     "shuffles": [[0, 1, 2, 3]], "selected_indices": [3], "selected_ids": ["q_new"], "memory_after": ["q1", "q2", "q3", "q_new"]},
+    {"name": "questions_reordered_ids_not_indices", "question_ids": ["q3", "q1", "q2"], "memory": ["q1"], "count": 1,
+     "shuffles": [[1, 0, 2]], "selected_indices": [0], "selected_ids": ["q3"], "memory_after": ["q1", "q3"]},
+    {"name": "no_questions", "question_ids": [], "memory": ["q1"], "count": 2,
+     "shuffles": [[]], "selected_indices": [], "selected_ids": [], "memory_after": ["q1"]},
+    {"name": "duplicate_question_id_first_wins", "question_ids": ["q1", "q1", "q2"], "memory": [], "count": null,
+     "shuffles": [[1, 0, 2]], "selected_indices": [1, 2], "selected_ids": ["q1", "q2"], "memory_after": ["q1", "q2"]}
+  ]
+}
