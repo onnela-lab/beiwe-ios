@@ -180,7 +180,7 @@ class RandomizeWithMemoryTests: XCTestCase {
         AssertEqual(study.surveyQuestionMemory[v2.surveyId!]!.sorted(), ["a", "b", "d", "e"])
     }
 
-    // MARK: unchanged paths
+    // MARK: without memory, not randomized
 
     // the BS7 fix must not change surveys that randomize without memory
     func testRandomizeWithoutMemoryShowsFirstNOfFullShuffle() {
@@ -192,12 +192,20 @@ class RandomizeWithMemoryTests: XCTestCase {
         AssertEqual(questionOrderOnOpen(activeSurvey: active, survey: survey, study: study), stored)
         AssertEqual(displayedQuestionCount(survey: survey, stepOrder: stored), 2)
         AssertTrue(study.surveyQuestionMemory.isEmpty)
-        // count nil or 0 -> all (Android rule); 9 of 5 -> 5
+    }
+
+    // BS18: iOS showed an empty survey for count 0; Android and the backend treat 0 (or no count) as all questions
+    func testRandomizeWithoutMemoryNoQuestionCountShowsAllQuestions() {
         for count in [nil, 0] as [Int?] {
-            AssertEqual(displayedQuestionCount(survey: makeSurvey(ids: ["a", "b"], randomize: true, memory: false, count: count), stepOrder: [1, 0]), 2)
+            let survey = makeSurvey(ids: ["a", "b"], randomize: true, memory: false, count: count)
+            AssertEqual(displayedQuestionCount(survey: survey, stepOrder: [1, 0]), 2, "count \(String(describing: count))")
         }
-        let five = makeSurvey(ids: (1 ... 5).map { "q\($0)" }, randomize: true, memory: false, count: 9)
-        AssertEqual(displayedQuestionCount(survey: five, stepOrder: [4, 3, 2, 1, 0]), 5)
+    }
+
+    // a count above the number of questions must not index past the end of the survey
+    func testRandomizeWithoutMemoryCountAboveTotalShowsEachQuestionOnce() {
+        let survey = makeSurvey(ids: (1 ... 5).map { "q\($0)" }, randomize: true, memory: false, count: 9)
+        AssertEqual(displayedQuestionCount(survey: survey, stepOrder: [4, 3, 2, 1, 0]), 5)
     }
 
     // the BS7 fix must not change surveys that don't randomize, even with the memory flag set
