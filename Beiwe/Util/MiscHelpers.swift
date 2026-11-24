@@ -190,10 +190,21 @@ func ensureGpsFuzzOffsets(lat: Double, lng: Double, fuzzOn: Bool, random: GpsFuz
     return GpsFuzzOffsets(lat: newLat, lng: newLng, generated: newLat != lat || newLng != lng)
 }
 
-/// Latitude is shifted as-is (can leave +-90). The longitude range for highly negative numbers (up to -360.0) creates
-/// out-of-range output, the fix is to add multiple of 360 + 180 so that the truncating remainder is always a positive
-/// value, and then at the end account for the negative range by subtracting 180. (1260 = 360*3 + 180)
+/// Output is always a valid coordinate. Latitude past a pole is reflected (180 - lat) and the longitude turned half a
+/// circle, as a point going over the pole comes down on the far side; clamping would pile points on the pole line.
+/// One reflection is enough as |latOffset| <= 1. The longitude wrap adds multiples of 360 + 180 so the truncating
+/// remainder is never negative (offsets reach -180, input -180: lng + off >= -360), then subtracts 180 -> [-180, 180).
+/// (1260 = 360*3 + 180)
 func applyGpsFuzz(lat: Double, lng: Double, latOffset: Double, lngOffset: Double) -> (lat: Double, lng: Double) {
-    return (lat + latOffset, ((lng + lngOffset + 1260.0).truncatingRemainder(dividingBy: 360.0)) - 180.0)
+    var newLat = lat + latOffset
+    var newLng = lng + lngOffset
+    if newLat > 90.0 {
+        newLat = 180.0 - newLat
+        newLng += 180.0
+    } else if newLat < -90.0 {
+        newLat = -180.0 - newLat
+        newLng += 180.0
+    }
+    return (newLat, (newLng + 1260.0).truncatingRemainder(dividingBy: 360.0) - 180.0)
 }
 // END gpsFuzz

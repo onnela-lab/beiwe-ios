@@ -18,6 +18,12 @@ func AssertEqual<T: Equatable>(_ a: @autoclosure () throws -> T, _ b: @autoclosu
     XCTAssertEqual(try a(), try b(), message(), file: file, line: line)
 }
 
+func AssertEqual<T: FloatingPoint>(_ a: @autoclosure () throws -> T, _ b: @autoclosure () throws -> T,
+                                   accuracy: T, _ message: @autoclosure () -> String = "",
+                                   file: StaticString = #filePath, line: UInt = #line) {
+    XCTAssertEqual(try a(), try b(), accuracy: accuracy, message(), file: file, line: line)
+}
+
 func AssertNotEqual<T: Equatable>(_ a: @autoclosure () throws -> T, _ b: @autoclosure () throws -> T,
                                   _ message: @autoclosure () -> String = "",
                                   file: StaticString = #filePath, line: UInt = #line) {
