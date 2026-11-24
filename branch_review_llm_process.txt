@@ -52,7 +52,10 @@ Commands
 Progress (update after each merge)
 - Merged into upgrades: bs7, bs18, bs22 (no tests; merged as is), bs23, bs24, bs26 (no unit tests; UI test on
   claude/ui-tests), bd2 (GPS fuzz: latitude reflected over a pole; no UI test, data path only).
-- Remaining: bs12, sentry-file-warnings, cleanups, ui-tests.
+- Already in upgrades, not merged (patch landed separately): bs12 (= 0345e28), sentry-file-warnings (= 48a3cdf).
+- Cleanups merged into upgrades (90a29d2): compiler warnings, deprecated APIs, unused Study.getSurvey and
+  DataStorageErrors; no behavior change, no tests. Held-back comment-deleting cleanups (CL1) not part of it.
+- Remaining: ui-tests.
 - UI tests for bs18, bs22, bs23, bs24, bs26: built on claude/ui-tests (84a3a0a); the bs26 one passes once
   claude/ui-tests takes in upgrades (bs26 merged at 5d2935c). bs7: none (maintainer decision).
 - Older test files still use XCTAssert... and loadFixture("..."); reworked only as they are reviewed.
