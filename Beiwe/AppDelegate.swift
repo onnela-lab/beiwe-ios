@@ -59,6 +59,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     ) -> Bool {
         self.lastAppStart = Date()
         
+        // Test launches (dn8) pass BEIWE_KEEP_SCREEN_ON so the device does not lock mid-run. No DEBUG compilation
+        // condition is set for Debug2, so gate on -Onone (debug assertions), which Release2 never is.
+        if _isDebugAssertConfiguration(), ProcessInfo.processInfo.environment["BEIWE_KEEP_SCREEN_ON"] == "1" {
+            UIApplication.shared.isIdleTimerDisabled = true
+        }
+        
         // runs operations that are part of ui setup, AppEventLog? - well that's a bug.
         self.initialSetup()
         self.initialize_database()

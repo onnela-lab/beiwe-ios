@@ -71,8 +71,18 @@ let transformJsonStringInt = TransformOf<Int, Any>(fromJSON: { (value: Any?) -> 
     if let value = value as? Int {
         return value
     }
+    // Android getInt truncates ("1.5" and 1.5 -> 1)
+    func truncated(_ d: Double) -> Int? {
+        d.isFinite && abs(d) < 1e15 ? Int(d) : nil
+    }
+    if let value = value as? Double {
+        return truncated(value)
+    }
     if let value = value as? String {
-        return Int(value)
+        if let i = Int(value) { return i }
+        // quote characters left by double-encoded survey content are stripped too (Android rejects these)
+        let quotesAndWhitespace = CharacterSet.whitespaces.union(CharacterSet(charactersIn: "\"'"))
+        return Double(value.trimmingCharacters(in: quotesAndWhitespace)).flatMap(truncated)
     }
     return nil
 }, toJSON: { (value: Int?) -> Int? in
@@ -141,3 +151,60 @@ func confirmAndCallClinician(_ presenter: UIViewController, callAssistant: Bool 
         }
     }
 }
+
+// BEGIN gpsFuzz (copied into tests/, keep Foundation-only)
+/// Random source is injectable so tests can seed it.
+typealias GpsFuzzRandom = (ClosedRange<Double>) -> Double
+let systemGpsFuzzRandom: GpsFuzzRandom = { Double.random(in: $0) }
+
+/// Random offset in -1...1, never in -0.2...0.2 (a near-zero offset would barely hide anything).
+func generateGpsLatitudeOffset(random: GpsFuzzRandom = systemGpsFuzzRandom) -> Double {
+    var ran = random(-1 ... 1)
+    while ran <= 0.2 && ran >= -0.2 {
+        ran = random(-1 ... 1)
+    }
+    return ran
+}
+
+/// Random offset in -180...180, never in -10...10.
+func generateGpsLongitudeOffset(random: GpsFuzzRandom = systemGpsFuzzRandom) -> Double {
+    var ran = random(-180 ... 180)
+    while ran <= 10 && ran >= -10 {
+        ran = random(-180 ... 180)
+    }
+    return ran
+}
+
+/// Generated offsets are never 0, so 0.0 means "unset". Fills unset offsets when fuzzing is on (matches Android's lazy
+/// generation); set offsets are kept, including across fuzzing being turned off and on again.
+struct GpsFuzzOffsets {
+    var lat: Double
+    var lng: Double
+    var generated: Bool
+}
+
+func ensureGpsFuzzOffsets(lat: Double, lng: Double, fuzzOn: Bool, random: GpsFuzzRandom = systemGpsFuzzRandom) -> GpsFuzzOffsets {
+    guard fuzzOn else { return GpsFuzzOffsets(lat: lat, lng: lng, generated: false) }
+    let newLat = lat == 0.0 ? generateGpsLatitudeOffset(random: random) : lat
+    let newLng = lng == 0.0 ? generateGpsLongitudeOffset(random: random) : lng
+    return GpsFuzzOffsets(lat: newLat, lng: newLng, generated: newLat != lat || newLng != lng)
+}
+
+/// Output is always a valid coordinate. Latitude past a pole is reflected (180 - lat) and the longitude turned half a
+/// circle, as a point going over the pole comes down on the far side; clamping would pile points on the pole line.
+/// One reflection is enough as |latOffset| <= 1. The longitude wrap adds multiples of 360 + 180 so the truncating
+/// remainder is never negative (offsets reach -180, input -180: lng + off >= -360), then subtracts 180 -> [-180, 180).
+/// (1260 = 360*3 + 180)
+func applyGpsFuzz(lat: Double, lng: Double, latOffset: Double, lngOffset: Double) -> (lat: Double, lng: Double) {
+    var newLat = lat + latOffset
+    var newLng = lng + lngOffset
+    if newLat > 90.0 {
+        newLat = 180.0 - newLat
+        newLng += 180.0
+    } else if newLat < -90.0 {
+        newLat = -180.0 - newLat
+        newLng += 180.0
+    }
+    return (newLat, (newLng + 1260.0).truncatingRemainder(dividingBy: 360.0) - 180.0)
+}
+// END gpsFuzz

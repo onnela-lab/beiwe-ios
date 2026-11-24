@@ -10,6 +10,11 @@ private func loadSettings() -> StudySettings {
     Mapper<StudySettings>().map(JSON: loadFixture("device_settings_payload") as! [String: Any])!
 }
 
+/// a slider bound (`min`/`max`) as the survey model parses it
+private func transformedInt(_ value: Any?) -> Int? {
+    transformJsonStringInt.transformFromJSON(value)
+}
+
 // MARK: - Survey payload (shape: llm/contracts-surveys.md)
 
 class SurveyPayloadTests: UnbufferedTestCase {
@@ -236,5 +241,41 @@ class StudyRoundTripTests: UnbufferedTestCase {
         _ = Mapper<Study>().map(JSON: json, toObject: study)
         XCTAssertEqual(study.customApiUrl, "https://example.invalid")
         XCTAssertEqual(study.nextSurveyCheck, 111)
+    }
+}
+
+/// Android getInt truncates decimals and coerces numeric strings; slider bounds depend on it.
+class JsonStringIntTransformTests: UnbufferedTestCase {
+
+    // BS24: a slider with bounds "1.5" to "5.5" showed 1 to 10; Android's getInt truncates them to 1 to 5
+    func testDecimalBoundsTruncateTowardZero() {
+        AssertEqual(transformedInt("1.5"), 1)
+        AssertEqual(transformedInt("5.5"), 5)
+        AssertEqual(transformedInt(5.5), 5)
+        AssertEqual(transformedInt(-1.5), -1)
+    }
+
+    // whole-number bounds, sent as numbers or strings, must still parse after the decimal handling was added
+    func testWholeNumberBoundsParse() {
+        AssertEqual(transformedInt(5), 5)
+        AssertEqual(transformedInt("5"), 5)
+    }
+
+    // double-encoded survey content can leave quote characters in a bound; stripped like display-logic values (BS23)
+    func testQuotedBoundsParseLikeUnquoted() {
+        AssertEqual(transformedInt("\"5\""), 5)
+        AssertEqual(transformedInt("'5'"), 5)
+        AssertEqual(transformedInt(" \" 1.5 \" "), 1)
+        AssertNil(transformedInt("\"abc\""))
+        AssertNil(transformedInt("\"\""))
+    }
+
+    // "nan" and "1e400" parse as Double but would crash Int(); they and other junk must be nil (slider default range)
+    func testUnparseableBoundsAreNil() {
+        AssertNil(transformedInt(""))
+        AssertNil(transformedInt("abc"))
+        AssertNil(transformedInt("nan"))
+        AssertNil(transformedInt("1e400"))
+        AssertNil(transformedInt(nil))
     }
 }

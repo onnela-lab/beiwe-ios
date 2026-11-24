@@ -1,0 +1,58 @@
+Branch review process (LLM agent + maintainer)
+==============================================
+
+Fix branches (claude/<id>, e.g. claude/bs23) are reviewed one at a time with the maintainer and merged into
+`upgrades`. The agent does the git work and reworks each branch's tests; the maintainer reviews and decides.
+
+Order
+- Next = next item in human_text/open_questions.md (local, untracked) whose status names a claude/<id> branch.
+- Remaining claude/* branches: `git branch --no-merged upgrades | grep claude/`.
+
+Per branch
+1. Check out claude/<id> in the main checkout (not a separate worktree).
+   - Branch held by a worktree under build/worktrees/: `git -C build/worktrees/<id> checkout --detach` frees it.
+     Never remove or clean worktrees.
+   - Local uncommitted files (Beiwe/Private/Private.swift, Beiwe/Localizable.xcstrings, untracked files) ride
+     along; check `git diff --stat upgrades claude/<id> -- <those files>` is empty first. Never commit them.
+2. Merge upgrades into the branch: `git merge --no-edit upgrades`. Merge, not rebase: branches are already
+   pushed and force-push is not allowed.
+   - Conflicts: keep the branch's fix behavior, written in the current test style. Run `ut`, commit the merge.
+3. Rework the branch's tests to beiwe-app-test-rules.md (TR1..). Leave the rework UNCOMMITTED for review.
+   - Scope: tests the branch adds or changes. Other tests in a touched file only if the maintainer asks.
+   - Rules apply to test code and test comments only. App code changes only when the maintainer directs a
+     behavior change.
+   - Every bug fix needs a UI test (BeiweUITests, claude/ui-tests) when the bug shows in the UI, on top of any
+     unit tests. Name the missing UI test in the report; it is added on claude/ui-tests, not on the fix branch.
+   - Branch with no unit tests: say so; offer options (extract a unit-testable function / UI test only) with a
+     recommendation.
+4. Report to the maintainer:
+   - clickable file link(s) to the changed test file(s)
+   - table: old test name -> new name, why-comment
+   - `ut` result (pass/fail/skipped counts); `xb` result if app code changed
+   - anything left in old style, any open choice (question id, options, recommendation)
+5. Maintainer reviews: answers questions, may direct changes. Apply them, still uncommitted.
+6. On "merge it in" / "commit":
+   - commit on claude/<id>; message `[<id>] [upgrades] <what>` + Co-Authored-By trailer
+   - `git checkout upgrades && git merge --no-edit claude/<id>`; `ut`; `xb` when app code changed
+   - `git push origin claude/<id>`
+   - upgrades push: agent pushes are limited to claude/* branches; the maintainer runs `git push origin upgrades`
+7. Move to the next branch; repeat from 1. Commit nothing new until told.
+
+Test rules
+- beiwe-app-test-rules.md (repo root) is the rule list. When something the maintainer says adds to or changes a
+  rule, edit the file and show the changed rule text in the reply.
+- New assertion aliases go in tests/Tests/SurveyLogicTests/Assertions.swift when a test needs one (TR5).
+- New fixtures get a named member on `Fixtures` in tests/Tests/SurveyLogicTests/Fixtures.swift (TR1).
+
+Commands
+- `ut` unit tests (verdict line), `xb` Beiwe2 simulator build, `g` repo grep, `rl FILE A B` line range
+  (helpers from llm/sh/profile.sh, local).
+- Plain equivalent of `ut`: ./run_tests.sh (copies app sources into tests/ first).
+
+Progress (update after each merge)
+- Merged into upgrades: bs7, bs18, bs22 (no tests; merged as is), bs23, bs24, bs26 (no unit tests; UI test on
+  claude/ui-tests), bd2 (GPS fuzz: latitude reflected over a pole; no UI test, data path only).
+- Remaining: bs12, sentry-file-warnings, cleanups, ui-tests.
+- UI tests for bs18, bs22, bs23, bs24, bs26: built on claude/ui-tests (84a3a0a); the bs26 one passes once
+  claude/ui-tests takes in upgrades (bs26 merged at 5d2935c). bs7: none (maintainer decision).
+- Older test files still use XCTAssert... and loadFixture("..."); reworked only as they are reviewed.

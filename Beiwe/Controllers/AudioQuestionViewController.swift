@@ -32,7 +32,11 @@ class AudioQuestionViewController: UIViewController, AVAudioRecorderDelegate, AV
         super.viewDidLoad()
         
         // Do any additional setup after loading the view.
-        self.promptLabel.text = self.activeSurvey.survey?.questions[0].prompt ?? ""
+        // empty questions (backend default content '[]') or no prompt -> Android's default text; no clinician button on iOS
+        self.promptLabel.text = self.activeSurvey.survey?.questions.first?.prompt ?? NSLocalizedString(
+            "audio_survey_default_prompt",
+            value: "We would like to know how your day is going.  When you are ready, please press \"Record\" and speak for about 2 minutes.  Press \"Stop\" when you are finished. The recording will stop automatically after 4 minutes. Remember, researchers will not review and analyze your data until the end of the study.",
+            comment: "Shown on an audio survey whose server content has no prompt")
         
         // sets the ui element for the back button, which says "Study", to "cancel".
         // Used to set to trash can, that is not accessible to a screen reader.
