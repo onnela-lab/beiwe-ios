@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "IDZSwiftCommonCrypto",
+        "repositoryURL": "https://github.com/iosdevzone/IDZSwiftCommonCrypto.git",
+        "state": {
+          "branch": null,
+          "revision": "47f9747d12137cd59d783ab376e3ccab7206319b",
+          "version": "0.16.1"
+        }
+      },
+      {
         "package": "ObjectMapper",
         "repositoryURL": "https://github.com/tristanhimmelman/ObjectMapper.git",
         "state": {

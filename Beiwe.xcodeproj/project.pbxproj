@@ -30,6 +30,7 @@
 		833765701DEE04D500E1B883 /* ORKStepNavigationRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8337656F1DEE04D500E1B883 /* ORKStepNavigationRule.swift */; };
 		8340ABF51CC7115400D0382F /* ChangePasswordRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8340ABF41CC7115400D0382F /* ChangePasswordRequest.swift */; };
 		8379B45C1CA4F02C00D4C605 /* Crypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8379B45B1CA4F02C00D4C605 /* Crypto.swift */; };
+		E1C0DE01000000000000A002 /* Encryption.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C0DE01000000000000A001 /* Encryption.swift */; };
 		83914CAD1D00DA1100B01C82 /* ForgotPasswordHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83914CAC1D00DA1100B01C82 /* ForgotPasswordHeaderView.swift */; };
 		83914CAF1D00DA4600B01C82 /* ForgotPasswordHeaderView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 83914CAE1D00DA4600B01C82 /* ForgotPasswordHeaderView.xib */; };
 		83914CB11D01462800B01C82 /* XCGLogger+Crashlytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83914CB01D01462800B01C82 /* XCGLogger+Crashlytics.swift */; };
@@ -123,6 +124,7 @@
 		8337656F1DEE04D500E1B883 /* ORKStepNavigationRule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ORKStepNavigationRule.swift; sourceTree = "<group>"; };
 		8340ABF41CC7115400D0382F /* ChangePasswordRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangePasswordRequest.swift; sourceTree = "<group>"; };
 		8379B45B1CA4F02C00D4C605 /* Crypto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Crypto.swift; sourceTree = "<group>"; };
+		E1C0DE01000000000000A001 /* Encryption.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Encryption.swift; sourceTree = "<group>"; };
 		83914CAC1D00DA1100B01C82 /* ForgotPasswordHeaderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ForgotPasswordHeaderView.swift; sourceTree = "<group>"; };
 		83914CAE1D00DA4600B01C82 /* ForgotPasswordHeaderView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ForgotPasswordHeaderView.xib; sourceTree = "<group>"; };
 		83914CB01D01462800B01C82 /* XCGLogger+Crashlytics.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "XCGLogger+Crashlytics.swift"; sourceTree = "<group>"; };
@@ -346,6 +348,7 @@
 				83E3DE721CA37F7600EB5349 /* MiscHelpers.swift */,
 				AA1FCADD2B854A31004BE0AF /* SentryUtils.swift */,
 				8379B45B1CA4F02C00D4C605 /* Crypto.swift */,
+				E1C0DE01000000000000A001 /* Encryption.swift */,
 				832FFC231CC863F400F2E1EF /* AppColors.swift */,
 			);
 			path = Util;
@@ -756,6 +759,7 @@
 				83E3DE8C1CA4600500EB5349 /* RegisterStudyRequest.swift in Sources */,
 				83AF04171CAB777200A37225 /* DataStorageManager.swift in Sources */,
 				8379B45C1CA4F02C00D4C605 /* Crypto.swift in Sources */,
+				E1C0DE01000000000000A002 /* Encryption.swift in Sources */,
 				83914CB11D01462800B01C82 /* XCGLogger+Crashlytics.swift in Sources */,
 				83AF20DC1CA3537200D3DF02 /* Constants.swift in Sources */,
 				83F6C96A1CA0F6D900B85914 /* PersistentAppUUID.swift in Sources */,

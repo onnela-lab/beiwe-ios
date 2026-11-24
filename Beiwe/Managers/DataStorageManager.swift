@@ -407,20 +407,9 @@ class DataStorage {
     
     /// Returns the entire raw string of the first line of a file containing an RSA-encoded decryption key.
     private func get_rsa_line() -> Data {
-        // for dumb Python 2 legacy reasons we needed to  base64-encode the aes key, and
-        // only then encrypt it... and then base64 encode that again.
-        let encryption_key_line_as_string = Crypto.sharedInstance.rsaEncryptToBase64URL(
-            self.get_that_aeskey(),
-            publicKey: StudyManager.sharedInstance.getSecKey()
-        ) + "\n"
-        
-        return encryption_key_line_as_string.data(using: String.Encoding.utf8)!
+        return Encryption.get_rsa_line(self.aesKey, publicKey: StudyManager.sharedInstance.getSecKey())
     }
-    
-    func get_that_aeskey() -> String {
-        return Crypto.sharedInstance.base64ToBase64URL(self.aesKey.base64EncodedString())
-    }
-    
+
     /// Unless self's "type" (data stream) is the ios log, write a message to the ios log.
     private func conditionalApplog(event: String, msg: String = "", d1: String = "", d2: String = "", d3: String = "", d4: String = "") {
         if self.type != "ios_log" {
@@ -607,15 +596,7 @@ class DataStorage {
     
     /// outer write operation, handles encrypting data and passes it off to the write_raw_to_end_of_file
     private func encrypted_write(_ line: String) {
-        let iv: Data = Crypto.sharedInstance.randomBytes(16)
-        let encrypted = Crypto.sharedInstance.aesEncrypt(iv, key: self.aesKey, plainText: line)
-        let base64_data = (
-            Crypto.sharedInstance.base64ToBase64URL(iv.base64EncodedString(options: []))
-                + ":"
-                + Crypto.sharedInstance.base64ToBase64URL(encrypted.base64EncodedString(options: []))
-                + "\n"
-        ).data(using: String.Encoding.utf8)!
-        self.write_raw_to_end_of_file(base64_data)
+        self.write_raw_to_end_of_file(Encryption.encrypted_line(line, aesKey: self.aesKey))
     }
 
     /// Writes a line of data to the end of the current file, has locks to handle single-line-level write contention.
@@ -678,16 +659,7 @@ class EncryptedStorage {
         // encryption setup
         self.aesKey = Crypto.sharedInstance.newAesKey(Constants.KEYLENGTH)
         self.iv = Crypto.sharedInstance.randomBytes(16)
-        
-        let data_for_key = (aesKey as NSData).bytes.bindMemory(to: UInt8.self, capacity: self.aesKey.count)
-        let data_for_iv = (iv as NSData).bytes.bindMemory(to: UInt8.self, capacity: self.iv.count)
-        self.stream_cryptor = StreamCryptor(
-            operation: .encrypt,
-            algorithm: .aes,
-            options: .PKCS7Padding,
-            key: Array(UnsafeBufferPointer(start: data_for_key, count: self.aesKey.count)),
-            iv: Array(UnsafeBufferPointer(start: data_for_iv, count: self.iv.count))
-        )
+        self.stream_cryptor = Encryption.audio_stream_cryptor(aesKey: self.aesKey, iv: self.iv)
     }
 
     func open() {
@@ -726,23 +698,14 @@ class EncryptedStorage {
         }
         self.file_handle = try! FileHandle(forWritingTo: self.filename)
         
-        // for dumb Python 2 legacy reasons we needed to  base64-encode the aes key, and
-        // only then encrypt it... and then base64 encode that again.
-        let encryption_key_line_as_string = Crypto.sharedInstance.rsaEncryptToBase64URL(
-            self.get_that_aeskey(),
-            publicKey: StudyManager.sharedInstance.getSecKey()
-        ) + "\n"
-        
+        let encryption_key_line = Encryption.get_rsa_line(self.aesKey, publicKey: StudyManager.sharedInstance.getSecKey())
+
         // write the rsa line and iv immediately
-        let ivHeader = Crypto.sharedInstance.base64ToBase64URL(self.iv.base64EncodedString()) + ":"
-        self.file_handle?.write(encryption_key_line_as_string.data(using: String.Encoding.utf8)!)
-        self.file_handle?.write(ivHeader.data(using: String.Encoding.utf8)!)
+        let ivHeader = Encryption.audio_iv_header(self.iv)
+        self.file_handle?.write(encryption_key_line)
+        self.file_handle?.write(ivHeader)
     }
 
-    private func get_that_aeskey() -> String {
-        return Crypto.sharedInstance.base64ToBase64URL(self.aesKey.base64EncodedString())
-    }
-    
     private func close_actual() {
         self.file_handle?.closeFile()
         self.file_handle = nil
@@ -762,49 +725,12 @@ class EncryptedStorage {
     private func write_actual(_ data: NSData?, writeLen: Int) -> Int {
         // core write function, as much as anything here can be said to "write"
         // log.info("write_actual called on \(self.eventualFilename)...")
-        let new_data: NSMutableData = NSMutableData()
-
-        // setup to write - this case should be impossible
-        if data != nil && writeLen != 0 {
-            // log.info("write_actual case 1")
-            // Need to encrypt data
-            let encryptLen = self.stream_cryptor.getOutputLength(inputByteCount: writeLen)
-            let bufferOut = UnsafeMutableRawPointer.allocate(byteCount: encryptLen, alignment: 1)
-            var byteCount: Int = 0
-            let bufferIn = UnsafeMutableRawPointer(mutating: data!.bytes)
-            self.stream_cryptor.update(
-                bufferIn: bufferIn,
-                byteCountIn: writeLen,
-                bufferOut: bufferOut,
-                byteCapacityOut: encryptLen,
-                byteCountOut: &byteCount
-            )
-            new_data.append(NSData(bytesNoCopy: bufferOut, length: byteCount) as Data)
-        }
-
-        // again, this case should be impossible
-        let encryptLen = self.stream_cryptor.getOutputLength(inputByteCount: 0, isFinal: true)
-        if encryptLen > 0 {
-            // log.info("write_actual case 2")
-            // mostly setup of these obscure pointers to an array of data (there must be a better way to do this...)
-            let bufferOut = UnsafeMutableRawPointer.allocate(byteCount: encryptLen, alignment: 1)
-            var byteCount: Int = 0
-            self.stream_cryptor.final(bufferOut: bufferOut, byteCapacityOut: encryptLen, byteCountOut: &byteCount)
-            // setup to write an array of appropriate length
-            let finalData = NSData(bytesNoCopy: bufferOut, length: byteCount)
-            var array = [UInt8](repeating: 0, count: finalData.length / MemoryLayout<UInt8>.size)
-            // copy bytes into array (its an array of bytes, length is just length), append to new_data
-            finalData.getBytes(&array, length: finalData.length)
-            new_data.append(finalData as Data)
-        }
+        let new_data = Encryption.audio_encrypt(self.stream_cryptor, data, writeLen: writeLen)
 
         // this was formerly the _write function
         if new_data.length != 0 {
             // log.info("write_actual case 3")
-            let dataToWriteBuffer = UnsafeMutableRawPointer(mutating: new_data.bytes)
-            let dataToWrite = NSData(bytesNoCopy: dataToWriteBuffer, length: new_data.length, freeWhenDone: false)
-            let encodedData: String = Crypto.sharedInstance.base64ToBase64URL(dataToWrite.base64EncodedString(options: []))
-            self.file_handle?.write(encodedData.data(using: String.Encoding.utf8)!)
+            self.file_handle?.write(Encryption.audio_encoded(new_data))
         }
         // log.info("write_actual finished")
         return new_data.length

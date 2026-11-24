@@ -18,4 +18,6 @@ enum Fixtures {
     static var surveyDownloadPayload: Any { loadFixture("survey_download_payload") }
     /// BS7 selection table, decoded by RandomizeWithMemoryTests
     static var randomizeWithMemory: Data { fixtureData("randomize_with_memory") }
+    /// test-only RSA key + encryption vectors from tests/scripts/make_encryption_vectors.py, decoded by EncryptionTests
+    static var encryptionVectors: Data { fixtureData("encryption_vectors") }
 }

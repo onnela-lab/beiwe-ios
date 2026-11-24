@@ -1148,7 +1148,7 @@ class StudyManager {
         if let patientId = currentStudy.patientId {
             ApiManager.sharedInstance.patientId = patientId
             if let clientPublicKey = currentStudy.studySettings?.clientPublicKey {
-                let publicKey = try! PublicKey(base64Encoded: clientPublicKey)
+                let publicKey = Encryption.publicKey(base64Encoded: clientPublicKey)
                 self.keyRef = publicKey.reference
                 self.publicKey = publicKey
             } else {

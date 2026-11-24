@@ -16,6 +16,11 @@ cp Beiwe/Models/*.swift tests/Sources/SurveyQuestionDisplayLogic/Models/
 { echo "import Foundation"; echo "import ObjectMapper"; sed -n "/^\\/\\/ BEGIN modelTransforms/,/^\\/\\/ END modelTransforms/p" Beiwe/Util/MiscHelpers.swift; } > tests/Sources/SurveyQuestionDisplayLogic/Models/ModelTransforms.swift
 { echo "import Foundation"; cat Beiwe/Models/GenericSurveyQuestion.swift; } > tests/Sources/SurveyQuestionDisplayLogic/Models/GenericSurveyQuestion.swift  # needs Foundation under SwiftPM
 
+mkdir -p tests/Sources/AppEncryption tests/Sources/SwiftyRSA/Pod
+cp Beiwe/Util/Crypto.swift Beiwe/Util/Encryption.swift tests/Sources/AppEncryption/
+[ -d Pods/SwiftyRSA/Source ] || { echo "Pods/SwiftyRSA missing: run pod install (README) first"; exit 1; }
+cp -f Pods/SwiftyRSA/Source/*.swift tests/Sources/SwiftyRSA/Pod/  # -f: Pods files are read-only
+
 cd tests
 if [ "${1-}" = "--tsan" ]; then
     swift test --sanitize=thread  # BS12: proves survey state isn't raced; BS12_RACE_DEMO=1 adds the unlocked demo
